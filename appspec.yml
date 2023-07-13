@@ -1,0 +1,16 @@
+version: 0.0
+
+os: linux
+
+files:
+  - source: ./
+    destination: /home/ubuntu/getlucky-node
+
+hooks:
+  AfterInstall:
+    - location: cicd/scripts/afterInstall.sh
+      runas: root
+
+  BeforeInstall:
+    - location: cicd/scripts/beforeInstall.sh
+      runas: root
