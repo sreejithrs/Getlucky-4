@@ -1,0 +1,109 @@
+# This is a sample build configuration for all languages.
+# Check our guides at https://confluence.atlassian.com/x/5Q4SMw for more examples.
+# Only use spaces to indent your .yml configuration.
+# -----
+# You can specify a custom docker image from Docker Hub as your build environment.
+# image: docker-image:tag
+        
+image: node:16.14.0
+
+clone:
+  depth: full    # SonarCloud scanner needs the full history to assign issues properly
+
+definitions:
+  services:
+      mongo:
+        image: mongo
+        memory: 512
+      docker:
+        memory: 2048  # reduce memory for docker-in-docker from 1GB to 2048MB
+  steps:
+    - step: &Test-build
+        name: Build
+        caches:
+          - node
+        services:
+          - mongo
+        script:
+          - chmod +x ./cicd/scripts/initialScript.sh
+          - ./cicd/scripts/initialScript.sh
+          - apt-get update
+          - apt-get install -y zip
+          - zip -r latest .
+        artifacts:
+                  
+          - latest.zip
+    - step: &Deploy-step
+        name: Upload to S3
+        script:
+          # Test upload
+          - pipe: atlassian/aws-code-deploy:1.1.1
+            variables:
+              AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY}
+              AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_KEY}
+              AWS_DEFAULT_REGION: ${AWS_REGION}
+              COMMAND: "upload"
+              APPLICATION_NAME: ${APPLICATION_NAME}
+              ZIP_FILE: "latest.zip"
+              S3_BUCKET: ${S3_BUCKET}
+              VERSION_LABEL: "Goffy-0.0.1"
+    - step: &Push-to-server
+        name: Deploy with CodeDeploy
+        script:
+          # Test deploy
+          - pipe: atlassian/aws-code-deploy:1.1.1
+            variables:
+              AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY}
+              AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_KEY}
+              AWS_DEFAULT_REGION: ${AWS_REGION}
+              COMMAND: "deploy"
+              APPLICATION_NAME: ${APPLICATION_NAME}
+              DEPLOYMENT_GROUP: ${DEPLOYMENT_GROUP}
+              IGNORE_APPLICATION_STOP_FAILURES: "true"
+              FILE_EXISTS_BEHAVIOR: "OVERWRITE"
+              WAIT: "true"
+              VERSION_LABEL: "Goffy-0.0.1"
+
+
+pipelines:
+  default:
+    - step:
+        <<: *Test-build
+        deployment: development-build
+
+  # branches:
+  #   master:
+  #     - step:
+  #         <<: *Test-build
+  #         deployment: development-build
+  #     - step:
+  #         <<: *Deploy-step
+  #         deployment: development-upload-s3
+  #     - step:
+  #         <<: *Push-to-server
+  #         deployment: development-codedeploy
+
+  #   staging:
+  #     - step:
+  #         <<: *Test-build
+  #         deployment: staging-build
+  #     - step:
+  #         <<: *Deploy-step
+  #         deployment: staging-upload-s3
+  #     - step:
+  #         <<: *Push-to-server
+  #         deployment: staging-codedeploy
+
+  #   release/*:
+  #     - step:
+  #         <<: *Test-build
+  #         deployment: production-build
+  #     - step:
+  #         <<: *Deploy-step
+  #         deployment: production-upload-s3
+  #     - step:
+  #         <<: *Push-to-server
+  #         deployment: production-codedeploy
+  #     - step:
+  #         <<: *email-sending
+  #         deployment: production-email-sending

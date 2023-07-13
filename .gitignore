@@ -6,6 +6,13 @@
 # Node artifact files
 node_modules/
 dist/
+logs
+.env
+.env.dev
+.env.staging
+.env.production
+package-lock.json
+yarn.lock
 
 # Compiled Java class files
 *.class
@@ -15,6 +22,7 @@ dist/
 
 # Log files
 *.log
+*.logs
 
 # Package files
 *.jar
@@ -47,4 +55,5 @@ Thumbs.db
 *.flv
 *.mov
 *.wmv
+
 
