@@ -3,7 +3,7 @@ const passport = require('passport');
 
 // helpers
 const { Router } = require('express');
-const authRoutes = require('../../v1/app/controllers/auth/auth.routes');
+const authRoutes = require('../../v1/web/controllers/auth/auth.routes');
 const { userAllowed } = require('../../middlewares/checkAccessControl');
 
 const requireAuth = passport.authenticate('accessTokenAuth', { session: false });
