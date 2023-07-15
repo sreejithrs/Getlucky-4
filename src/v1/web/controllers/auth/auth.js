@@ -59,7 +59,7 @@ module.exports = {
         req.__(localeKeys.user.USER_REGISTERED_SUCCESSFULLY),
         StatusCode.CREATED,
         {
-          userData: _.pick(userDetails, ['_id', 'email', 'isProfileCompleted', 'isVerified', 'isSubscribed']),
+          userData: _.pick(userDetails, ['_id', 'email', 'isProfileCompleted', 'isVerified']),
         },
       );
     } catch (error) {
@@ -72,7 +72,8 @@ module.exports = {
 
   login: async (req, _res, next) => {
     const { body } = req;
-    const { email, password, deviceToken } = body;
+    const { email, password } = body;
+    console.log('haii')
 
     try {
       const { error } = validateSignIn(body);
@@ -86,7 +87,6 @@ module.exports = {
       const comparePassword = await userExist.comparePasswordAwait(password);
       if (!comparePassword) return respondFailure(_res, req.__(localeKeys.auth.WRONG_PASSWORD), StatusCode.UNAUTHORIZED);
 
-      await commonService.updateOneByFields(User, { email: String(email) }, { $set: { deviceToken } });
       const { accessToken, refreshToken } = getAuthTokens(userExist._id);
 
       return respondSuccess(
@@ -96,7 +96,7 @@ module.exports = {
         {
           accessToken,
           refreshToken,
-          userData: _.pick(userExist, ['_id', 'email', 'isProfileCompleted', 'isVerified', 'isSubscribed']),
+          userData: _.pick(userExist, ['_id', 'email', 'isProfileCompleted', 'isVerified']),
         },
       );
     } catch (error) {
@@ -133,7 +133,7 @@ module.exports = {
 
   verifyAccount: async (req, res, next) => {
     const { body } = req;
-    const { email, verificationCode, deviceToken } = body;
+    const { email, verificationCode } = body;
 
     try {
       const { error } = validateVerificationCode(body);
@@ -144,14 +144,14 @@ module.exports = {
         return respondFailure(res, req.__(localeKeys.auth.WRONG_OTP), StatusCode.UNAUTHORIZED);
       }
 
-      await commonService.updateOneByFields(User, { _id: userDetails._id }, { $set: { verificationCode: null, isVerified: true, deviceToken } });
+      await commonService.updateOneByFields(User, { _id: userDetails._id }, { $set: { verificationCode: null, isVerified: true } });
       const userData = await commonService.findOneByFields(User, { email });
 
       const { accessToken, refreshToken } = getAuthTokens(userDetails._id);
       return respondSuccess(res, req.__(localeKeys.auth.USER_VERIFIED_SUCCESSFULLY), StatusCode.OK, {
         accessToken,
         refreshToken,
-        userData: _.pick(userData, ['_id', 'email', 'isVerified', 'isSubscribed']),
+        userData: _.pick(userData, ['_id', 'email', 'isVerified']),
       });
     } catch (error) {
       return next(respondError(
@@ -204,7 +204,7 @@ module.exports = {
       return respondSuccess(res, req.__(localeKeys.auth.CHANGE_PASSWORD_SUCCESSFUL), StatusCode.OK, {
         accessToken,
         refreshToken,
-        userData: _.pick(userData, ['_id', 'email', 'isVerified', 'isSubscribed']),
+        userData: _.pick(userData, ['_id', 'email', 'isVerified']),
       });
     } catch (error) {
       return next(respondError(
