@@ -10,7 +10,6 @@ module.exports = {
   validateSignIn: (input) => {
     const schema = Joi.object().keys({
       ...accountDetails,
-      deviceToken: Joi.string().required(),
     });
     return schema.validate(input);
   },
@@ -18,10 +17,6 @@ module.exports = {
   validateRegister: (input) => {
     const schema = Joi.object().keys({
       name: Joi.string().required(),
-      weight: Joi.number().required(),
-      height: Joi.number().required(),
-      weightType: Joi.string().valid('Kg', 'Pound').required(),
-      heightType: Joi.string().valid('Cm', 'Mil').required(),
       ...accountDetails,
     });
     return schema.validate(input);
@@ -38,7 +33,6 @@ module.exports = {
     const schema = Joi.object().keys({
       email: Joi.string().email({ minDomainSegments: 2 }).required(),
       verificationCode: Joi.number().required(),
-      deviceToken: Joi.string().required(),
     });
     return schema.validate(input);
   },
