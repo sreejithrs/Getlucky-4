@@ -9,6 +9,6 @@ router.use(requireApiKey);
 require('../helpers/passport');
 
 router.use('/admin', adminv1);
-router.use('/', userV1);
+router.use('/web', userV1);
 
 module.exports = router;
