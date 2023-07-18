@@ -17,6 +17,7 @@ const commonService = require('../../../services/common.service');
 const constValues = require('../../../../helpers/constants');
 const localeKeys = require('../../../../locales/keys.json');
 const StatusCode = require('../../../../helpers/statusCodes.json');
+const { sendSMS } = require('../../../../helpers/notification');
 
 module.exports = {
 
@@ -34,32 +35,28 @@ module.exports = {
 
   register: async (req, _res, next) => {
     const { body } = req;
-    const { email } = body;
+    const { email, phoneNumber } = body;
 
     try {
       const { error } = validateRegister(body);
       if (error) return next(respondError(getMessageFromValidationError(error)));
 
       const userExist = await commonService.findOneByFields(User, { email });
-      if (userExist && userExist.isProfileCompleted) return respondFailure(_res, req.__(localeKeys.auth.EMAIL_ALREADY_EXISTS), StatusCode.CONFLICT);
+      if (userExist) return respondFailure(_res, req.__(localeKeys.auth.EMAIL_ALREADY_EXISTS), StatusCode.CONFLICT);
 
-      body.isProfileCompleted = constValues.status.ACTIVE;
-      if (userExist && userExist.socialID !== null) {
-        delete body.email;
-        delete body.password;
-        await commonService.updateOneByFields(User, { email: String(email) }, { $set: { ...body } });
-      } else {
-        body.userType = constValues.userType.USER;
-        await commonService.save(User, { ...body });
-      }
+      const verificationCode = 12345;
+      body.verificationCode = verificationCode;
+      body.userType = constValues.userType.USER;
+      await commonService.save(User, body);
 
+      process.nextTick(() => sendSMS(verificationCode, phoneNumber));
       const userDetails = await commonService.findOneByFields(User, { email });
       return respondSuccess(
         _res,
         req.__(localeKeys.user.USER_REGISTERED_SUCCESSFULLY),
         StatusCode.CREATED,
         {
-          userData: _.pick(userDetails, ['_id', 'email', 'isProfileCompleted', 'isVerified']),
+          userData: _.pick(userDetails, ['_id', 'email', 'isVerified']),
         },
       );
     } catch (error) {
@@ -73,7 +70,6 @@ module.exports = {
   login: async (req, _res, next) => {
     const { body } = req;
     const { email, password } = body;
-    console.log('haii')
 
     try {
       const { error } = validateSignIn(body);
@@ -84,7 +80,7 @@ module.exports = {
       if (!userExist.status) return respondFailure(_res, req.__(localeKeys.auth.USER_DEACTIVE), StatusCode.CONFLICT);
       if (userExist.socialId) return respondFailure(_res, req.__(localeKeys.auth.ONLY_SOCIAL_LOGIN_ALLOWED), StatusCode.UNAUTHORIZED);
 
-      const comparePassword = await userExist.comparePasswordAwait(password);
+      const comparePassword = await userExist.comparePassword(password);
       if (!comparePassword) return respondFailure(_res, req.__(localeKeys.auth.WRONG_PASSWORD), StatusCode.UNAUTHORIZED);
 
       const { accessToken, refreshToken } = getAuthTokens(userExist._id);
@@ -214,7 +210,7 @@ module.exports = {
     }
   },
 
-  tokenRefresh: async(req, res) => {
+  tokenRefresh: async (req, res) => {
     const { id } = req.user;
     const { accessToken } = getAuthTokens(id, true);
     return respondSuccess(res, req.__(localeKeys.global.REQUEST_WAS_SUCCESSFULL), StatusCode.OK, { accessToken });
