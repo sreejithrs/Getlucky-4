@@ -57,7 +57,7 @@ module.exports = {
       const userExist = await commonService.includePasswordByEmail(User, email, constValues.userType.ADMIN);
       if (!userExist) return respondFailure(res, req.__(localeKeys.admin.INCORRECT_EMAIL), StatusCode.NOT_FOUND);
 
-      const comparePassword = await userExist.comparePasswordAwait(password);
+      const comparePassword = await userExist.comparePassword(password);
       if (!comparePassword) return respondFailure(res, req.__(localeKeys.auth.WRONG_PASSWORD), StatusCode.UNAUTHORIZED);
 
       const { accessToken, refreshToken } = getAuthTokens(userExist._id);
