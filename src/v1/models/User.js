@@ -6,26 +6,27 @@ const { Schema } = mongoose;
 
 const userSchema = new Schema(
   {
-    name: { type: String },
+    name: { type: String, default: '' },
     email: {
       type: String, unique: true, lowercase: true, trim: true,
     },
-    profilePicture: { type: String },
+    phoneNumber: { type: String, default: '' },
     password: { type: String, min: 8, select: false },
     verificationCode: { type: Number, default: null },
     isVerified: { type: Boolean, default: false },
     temporaryPassword: { type: String },
     forceChangePassword: { type: Boolean, default: false },
-    isProfileCompleted: { type: Boolean, default: false },
     userType: { type: Number, default: 1 },
-    socialId: { type: String },
     status: { type: Boolean, default: true },
     isNotificationEnabled: { type: Boolean, default: true },
     verifyOtpTime: { type: Date },
     verifyOtpMax: { type: Number, default: 0 },
     passwordOtpTime: { type: Date },
     passOtpMax: { type: Number, default: 0 },
-    loginBy: { type: String },
+    building: { type: String, default: '' },
+    state: { type: String, default: '' },
+    district: { type: String, default: '' },
+    country: { type: String, default: '' },
     language: { type: String, enum: ['en', 'de'], default: 'en' },
   },
   {
@@ -36,27 +37,26 @@ const userSchema = new Schema(
 // on save hook
 userSchema.pre('save', function (next) {
   const user = this;
-  if (!user.isModified('password')) {
+  if (!this.isModified('password')) {
     return next();
   }
   bcrypt.genSalt(10, (err, salt) => {
-    if (err) return next(err);
+    if (err) {
+      return next(err);
+    }
     bcrypt.hash(user.password, salt, (error, hash) => {
-      if (error) return next(error);
+      if (error) {
+        return next(error);
+      }
       user.password = hash;
-      next();
+      return next();
     });
+    return false;
   });
+  return false;
 });
 
-userSchema.methods.comparePassword = function (candidatePassword, callback) {
-  bcrypt.compare(candidatePassword, this.password, (err, isMatch) => {
-    if (err) return callback(err);
-    callback(null, isMatch);
-  });
-};
-
-userSchema.methods.comparePasswordAwait = async function (candidatePassword) {
+userSchema.methods.comparePassword = async function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 

@@ -37,9 +37,7 @@ const checkEmailValidOrNot = async (email) => {
   return !!(wellFormed === true && validDomain === true && validMailbox === true);
 };
 
-const getMessageFromValidationError = (error) => {
-  return error.details[0].message.replace(/"/g, '');
-};
+const getMessageFromValidationError = (error) => error.details[0].message.replace(/"/g, '');
 
 // WORKS ON AWS S3
 const uploadImage = async (file, bucketName, fileName, contentType) => {

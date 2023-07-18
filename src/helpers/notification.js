@@ -2,6 +2,10 @@
 const AWS = require('aws-sdk');
 const nodemailer = require('nodemailer');
 
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+const client = require('twilio')(accountSid, authToken);
+
 module.exports = {
 
   sendMail: (options) => {
@@ -29,5 +33,16 @@ module.exports = {
         }
       });
     });
+  },
+
+  sendSMS: (verificationCode, phoneNumber) => {
+    client.messages
+      .create({
+        body: `Your OTP for Getlucky-4 is ${verificationCode}`,
+        from: '+16184485340',
+        to: phoneNumber,
+      })
+      // eslint-disable-next-line no-console
+      .then((message) => global.logger(message.sid)).catch((err) => global.logger('error', err));
   },
 };

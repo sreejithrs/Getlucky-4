@@ -17,6 +17,11 @@ module.exports = {
   validateRegister: (input) => {
     const schema = Joi.object().keys({
       name: Joi.string().required(),
+      phoneNumber: Joi.string().required(),
+      building: Joi.string().required(),
+      country: Joi.string().required(),
+      state: Joi.string().required(),
+      district: Joi.string().required(),
       ...accountDetails,
     });
     return schema.validate(input);
