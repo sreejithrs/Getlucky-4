@@ -8,11 +8,12 @@ const userSchema = new Schema(
   {
     name: { type: String, default: '' },
     email: {
-      type: String, unique: true, lowercase: true, trim: true,
+      type: String, lowercase: true, trim: true,
     },
     phoneNumber: { type: String, default: '' },
     password: { type: String, min: 8, select: false },
     verificationCode: { type: Number, default: null },
+    otpTimeLimit: { type: Date },
     isVerified: { type: Boolean, default: false },
     temporaryPassword: { type: String },
     forceChangePassword: { type: Boolean, default: false },

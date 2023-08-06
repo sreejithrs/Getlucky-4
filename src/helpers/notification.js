@@ -43,6 +43,6 @@ module.exports = {
         to: phoneNumber,
       })
       // eslint-disable-next-line no-console
-      .then((message) => global.logger(message.sid)).catch((err) => global.logger('error', err));
+      .then((message) => console.log(message.sid)).catch((err) => console.error(err));
   },
 };
