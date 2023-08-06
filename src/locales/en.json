@@ -30,8 +30,8 @@
 	"UPDATED_SUCCESSFULLY": "Updated successfully",
 	"DELETED_SUCCESSFULLY": "Deleted successfully",
 	"NOT_FOUND": "Not Found",
-	"UPDATE_FALIED": "Update failed",
-	"REQUEST_WAS_SUCCESSFULL": "Request Was Successfull",
+	"UPDATE_FAILED": "Update failed",
+	"REQUEST_WAS_SUCCESSFUL": "Request Was Successfull",
 	"TRY_AGAIN": "Server is busy, Please try again",
 	"PLEASE_UPLOAD_FILE": "Please upload file",
 	"FAILED_TO_UPLOAD_FILE": "Failed to upload file",
@@ -42,7 +42,7 @@
 	"USER_ALREADY_EXIST": "User Already Exists",
 	"PROFILE_NOT_COMPLETED": "Profile Not Completed",
 	"INTERNAL_SERVER_ERROR": "Internal Server Error",
-	"OTP_MAX_REACHED": "Maximum Otp Reached, Try again after 24 hours",
+	"OTP_MAX_REACHED": "Maximum Otp Reached, try again after 5 minutes",
 	"TEMPORARY_PASSWORD_NOT_MATCHED": "Temporary Password Not Matched",
 	"PROFILE_COMPLETED_SUCCESSFULLY": "Profile Completed Successfully",
 	"SOMETHING_WENT_WRONG": "Something went wrong",
@@ -54,5 +54,9 @@
 	"MANUFACTURE_ALREADY_EXISTS": "This manufacture already exists",
 	"CATEGORY_NOT_FOUND": "No category found",
 	"DATA_NOT_FOUND": "No data found",
-	"CATEGORY_ALREADY_EXISTS": "Category already exists"
+	"CATEGORY_ALREADY_EXISTS": "Category already exists",
+	"INVALID_EMAIL_OR_PASS": "Incorrect email or password, try again",
+	"INVALID_PHONE_OR_PASS": "Incorrect phone number or password, try again",
+	"OTP_SENT_SUCCESSFULLY": "Otp sent successfully, it will be valid for 3 minutes",
+	"OTP_TIME_LIMIT": "Otp time limit exceeded, try resend"
 }

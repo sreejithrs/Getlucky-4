@@ -190,9 +190,9 @@ const commonService = {
   * @Description Method for including password in response
   *
   */
-  includePasswordByEmail: async (model, email, type) => {
+  includePasswordByEmail: async (model, key, type) => {
     try {
-      const data = await model.findOne({ email: email.toLowerCase(), userType: type }).select('+password');
+      const data = await model.findOne({ ...key, userType: type }).select('+password');
       if (!data) {
         return null;
       }
