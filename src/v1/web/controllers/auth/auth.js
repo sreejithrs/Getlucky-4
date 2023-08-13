@@ -50,7 +50,7 @@ module.exports = {
       body.userType = constValues.userType.USER;
       await commonService.save(User, body);
 
-      process.nextTick(() => sendSMS(verificationCode, phoneNumber));
+      sendSMS(verificationCode, phoneNumber);
       const userDetails = await commonService.findOneByFields(User, { email });
       return respondSuccess(
         _res,
@@ -108,7 +108,7 @@ module.exports = {
     }
   },
 
-  sendOtpCode: async (req, res, next) => {
+  sendVerifyCode: async (req, res, next) => {
     try {
       const { body } = req;
       const { error } = validateResendOtpCode(body);
@@ -121,7 +121,7 @@ module.exports = {
       const fiveDigitCode = 12345;
 
       const status = await sendOtp(fiveDigitCode, userExist, dateDiff, 'verificationCode');
-      if (!status) return respondFailure(res, req.__(localeKeys.auth.OTP_MAX_REACHED), StatusCode.FORBIDDEN);
+      if (!status) return respondFailure(res, req.__(localeKeys.auth.OTP_MAX_REACHED), StatusCode.TOO_MANY_REQUESTS);
 
       return respondSuccess(res, req.__(localeKeys.auth.OTP_SENT_SUCCESSFULLY), StatusCode.OK);
     } catch (error) {
@@ -146,7 +146,7 @@ module.exports = {
       const dateDiff = moment().diff(userDetails.otpTimeLimit, 'minutes');
       if (dateDiff > 3) return respondFailure(res, req.__(localeKeys.auth.OTP_TIME_LIMIT), StatusCode.FORBIDDEN);
 
-      const userData = await commonService.findOneAndUpdateFields(User, { _id: userDetails._id }, { $set: { verificationCode: null, isVerified: true } });
+      const userData = await commonService.findOneAndUpdateFields(User, { _id: userDetails._id }, { $set: { verificationCode: null, otpTimeLimit: null, isVerified: true } });
       const { accessToken, refreshToken } = getAuthTokens(userDetails._id);
       return respondSuccess(res, req.__(localeKeys.auth.USER_VERIFIED_SUCCESSFULLY), StatusCode.OK, {
         accessToken,
@@ -166,12 +166,13 @@ module.exports = {
       const { body } = req;
       const { error } = validateForgotPassword(body);
       const userExist = await module.exports.validateAndCheckExists(error, req);
-      if (userExist.passOtpMax === 3) await commonService.updateById(User, userExist._id, { $set: { passwordOtpTime: Date.now() } });
+      if (userExist.passOtpMax === 4) await commonService.updateById(User, userExist._id, { $set: { passwordOtpTime: Date.now() } });
 
-      const dateDiff = moment().diff(userExist.passwordOtpTime, 'minutes');
+      const passwordTime = userExist.passwordOtpTime || 5;
+      const dateDiff = moment().diff(passwordTime, 'minutes');
       const temporaryPassword = 12345678;
       const status = await sendOtp(temporaryPassword, userExist, dateDiff, 'forgotPassword');
-      if (!status) return respondFailure(res, req.__(localeKeys.auth.OTP_MAX_REACHED), StatusCode.FORBIDDEN);
+      if (!status) return respondFailure(res, req.__(localeKeys.auth.OTP_MAX_REACHED), StatusCode.TOO_MANY_REQUESTS);
 
       return respondSuccess(res, req.__(localeKeys.auth.EMAIL_SENT_SUCCESSFULLY), StatusCode.OK);
     } catch (error) {
@@ -186,24 +187,23 @@ module.exports = {
     try {
       const { body } = req;
       const { password, temporaryPassword } = body;
+
       const { error } = validateResetPassword(body);
       const userData = await module.exports.validateAndCheckExists(error, req);
       if (!userData.forceChangePassword) return respondFailure(res, req.__(localeKeys.auth.CANNOT_CHANGE_PASSWORD), StatusCode.FORBIDDEN);
-      if (userData.temporaryPassword !== temporaryPassword) {
-        return respondFailure(res, req.__(localeKeys.auth.TEMPORARY_PASSWORD_NOT_MATCHED), StatusCode.UNAUTHORIZED);
-      }
+
+      const dateDiff = moment().diff(userData.otpTimeLimit, 'minutes');
+      if (dateDiff > 3) return respondFailure(res, req.__(localeKeys.auth.OTP_TIME_LIMIT), StatusCode.FORBIDDEN);
+      if (userData.temporaryPassword !== temporaryPassword) return respondFailure(res, req.__(localeKeys.auth.TEMPORARY_PASSWORD_NOT_MATCHED), StatusCode.BAD_REQUEST);
 
       userData.temporaryPassword = '';
       userData.password = password;
+      userData.otpTimeLimit = null;
+      userData.passwordOtpTime = null;
       userData.forceChangePassword = constValues.status.DEACTIVE;
       await userData.save();
 
-      const { accessToken, refreshToken } = getAuthTokens(userData._id);
-      return respondSuccess(res, req.__(localeKeys.auth.CHANGE_PASSWORD_SUCCESSFUL), StatusCode.OK, {
-        accessToken,
-        refreshToken,
-        userData: _.pick(userData, ['_id', 'email', 'isVerified']),
-      });
+      return respondSuccess(res, req.__(localeKeys.auth.CHANGE_PASSWORD_SUCCESSFUL), StatusCode.OK);
     } catch (error) {
       return next(respondError(
         error,

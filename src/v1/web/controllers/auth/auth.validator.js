@@ -1,5 +1,7 @@
 const Joi = require('joi');
 
+const mobileValidationMessage = 'You have entered an invalid phone number';
+
 module.exports = {
 
   validateSignIn: (input) => {
@@ -14,13 +16,16 @@ module.exports = {
   validateRegister: (input) => {
     const schema = Joi.object().keys({
       name: Joi.string().required(),
-      phoneNumber: Joi.string().pattern(/^[+]?[0-9]+$/).required(),
-      building: Joi.string().optional(),
+      phoneNumber: Joi.string().pattern(/^[+]?[0-9]+$/).required().messages({
+        'any.required': mobileValidationMessage,
+        'string.pattern.base': mobileValidationMessage,
+      }),
+      building: Joi.string().allow('').optional(),
       country: Joi.string().required(),
       state: Joi.string().required(),
-      district: Joi.string().optional(),
-      email: Joi.string().email({ minDomainSegments: 2 }).optional(),
-      password: Joi.string().min(8).required(),
+      district: Joi.string().allow('').optional(),
+      email: Joi.string().email({ minDomainSegments: 2 }).allow('').optional(),
+      password: Joi.string().min(6).required(),
     });
     return schema.validate(input);
   },
@@ -42,15 +47,20 @@ module.exports = {
 
   validateForgotPassword: (input) => {
     const schema = Joi.object().keys({
-      email: Joi.string().email({ minDomainSegments: 2 }).required(),
+      email: Joi.string().email({ minDomainSegments: 2 }),
+      phoneNumber: Joi.string().pattern(/^[+]?[0-9]+$/).when('email', {
+        is: Joi.exist(),
+        then: Joi.forbidden(),
+        otherwise: Joi.required(),
+      }),
     });
     return schema.validate(input);
   },
 
   validateResetPassword: (input) => {
     const schema = Joi.object().keys({
-      email: Joi.string().email({ minDomainSegments: 2 }).required(),
-      password: Joi.string().min(8).required(),
+      phoneNumber: Joi.string().pattern(/^[+]?[0-9]+$/).required(),
+      password: Joi.string().min(6).required(),
       temporaryPassword: Joi.string().required(),
     });
     return schema.validate(input);
