@@ -13,8 +13,15 @@ const routes = require('./src/routes');
 const i18n = require('./src/config/i18n.config');
 
 // cors options
+const whitelist = ['http://localhost:3000', 'http://3.28.74.200'];
 const corsOptions = {
-  origin: '*',
+  origin: function (origin, callback) {
+    if (whitelist.indexOf(origin) !== -1 || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   exposedHeaders: 'Content-Type, X-Auth-Token',
   methods: 'GET, HEAD, PUT, PATCH, POST, DELETE',
   preflightContinue: false,

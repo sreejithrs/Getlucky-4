@@ -37,7 +37,7 @@ module.exports = {
       setData = { $set: { verificationCode: otp, otpTimeLimit }, $inc: { verifyOtpMax: 1 } };
     }
 
-    if (Number(dateDiff) >= 10) {
+    if (Number(dateDiff) >= 5) {
       await commonService.updateById(User, userData._id, userExist);
       if (process.env.NODE_ENV !== 'test') {
         sendSMS(otp, phoneNumber);
@@ -46,7 +46,6 @@ module.exports = {
       if (process.env.NODE_ENV !== 'test') {
         sendSMS(otp, phoneNumber);
       }
-
       await commonService.updateById(User, userData._id, { ...setData });
     } else {
       return null;
