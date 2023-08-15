@@ -8,7 +8,7 @@ module.exports = {
     const schema = Joi.object().keys({
       phoneNumber: Joi.string().pattern(/^[+]?[0-9]+$/),
       email: Joi.string().email({ minDomainSegments: 2 }),
-      password: Joi.string().min(8).required(),
+      password: Joi.string().min(6).required(),
     }).or('phoneNumber', 'email');
     return schema.validate(input);
   },
@@ -59,10 +59,11 @@ module.exports = {
 
   validateResetPassword: (input) => {
     const schema = Joi.object().keys({
-      phoneNumber: Joi.string().pattern(/^[+]?[0-9]+$/).required(),
-      password: Joi.string().min(6).required(),
+      phoneNumber: Joi.string().pattern(/^[+]?[0-9]+$/),
+      email: Joi.string().email({ minDomainSegments: 2 }),
       temporaryPassword: Joi.string().required(),
-    });
+      password: Joi.string().min(6).required(),
+    }).or('phoneNumber', 'email');
     return schema.validate(input);
   },
 

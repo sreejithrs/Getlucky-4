@@ -62,23 +62,6 @@ module.exports = {
         `;
     },
 
-    emailPassword: (verificationCode, language) => {
-      if (language === 'de') {
-        return `
-          <p>Hier ist Ihr temporäres Passwort: <b>${verificationCode}</b> für Getlucky-4</p>
-          <br/>
-          <p>Grüße,</p>
-          <p><b>Team Getlucky-4</b></p>
-        `;
-      }
-      return `
-          <p>Here is your Temporary Password: <b>${verificationCode}</b> for Getlucky-4</p>
-          <br/>
-          <p>Regards,</p>
-          <p><b>Team Getlucky-4</b></p>
-        `;
-    },
-
     forgotPassword: (password, language) => {
       if (language === 'de') {
         return `

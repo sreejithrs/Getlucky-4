@@ -1,15 +1,18 @@
 const { User } = require('../../../models/index');
-const { sendSMS } = require('../../../../helpers/notification');
+const { sendSMS, sendMail } = require('../../../../helpers/notification');
 const commonService = require('../../../services/common.service');
 const constValues = require('../../../../helpers/constants');
+const { forgotPasswordEmail } = require('../../../../templates/emailTemplate');
 
 module.exports = {
 
-  sendOtp: async (otp, userData, dateDiff, api) => {
+  sendOtp: async (userData, data) => {
     let setData;
     let otpMax;
     let userExist = {};
-    const { phoneNumber } = userData;
+    const {
+      otp, dateDiff, api, key,
+    } = data;
     const otpTimeLimit = new Date();
 
     if (api === 'forgotPassword') {
@@ -38,18 +41,28 @@ module.exports = {
     }
 
     if (Number(dateDiff) >= 5) {
+      module.exports.sendEmailOrSms(otp, key, userData);
       await commonService.updateById(User, userData._id, userExist);
-      if (process.env.NODE_ENV !== 'test') {
-        sendSMS(otp, phoneNumber);
-      }
     } else if (Number(otpMax) < 5) {
-      if (process.env.NODE_ENV !== 'test') {
-        sendSMS(otp, phoneNumber);
-      }
+      module.exports.sendEmailOrSms(otp, key, userData);
       await commonService.updateById(User, userData._id, { ...setData });
     } else {
       return null;
     }
     return true;
+  },
+
+  sendEmailOrSms: (otp, key, userData) => {
+    const {
+      phoneNumber, email, name, language,
+    } = userData;
+    if (process.env.NODE_ENV !== 'test') {
+      if (key === 'email') {
+        const emailOptions = {
+          email, password: otp, name, language,
+        };
+        sendMail(forgotPasswordEmail(emailOptions));
+      } else sendSMS(otp, phoneNumber);
+    }
   },
 };

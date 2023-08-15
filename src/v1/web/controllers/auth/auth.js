@@ -118,9 +118,9 @@ module.exports = {
       if (userExist.verifyOtpMax === 4) await commonService.updateById(User, userExist._id, { $set: { verifyOtpTime: Date.now() } });
 
       const dateDiff = moment().diff(userExist.verifyOtpTime, 'minutes');
-      const fiveDigitCode = 12345;
+      const dataToSend = { otp: 12345, dateDiff, api: 'verificationCode' };
 
-      const status = await sendOtp(fiveDigitCode, userExist, dateDiff, 'verificationCode');
+      const status = await sendOtp(userExist, dataToSend);
       if (!status) return respondFailure(res, req.__(localeKeys.auth.OTP_MAX_REACHED), StatusCode.TOO_MANY_REQUESTS);
 
       return respondSuccess(res, req.__(localeKeys.auth.OTP_SENT_SUCCESSFULLY), StatusCode.OK);
@@ -164,14 +164,24 @@ module.exports = {
   forgotPassword: async (req, res, next) => {
     try {
       const { body } = req;
+      const { email } = body;
+
       const { error } = validateForgotPassword(body);
       const userExist = await module.exports.validateAndCheckExists(error, req);
       if (userExist.passOtpMax === 4) await commonService.updateById(User, userExist._id, { $set: { passwordOtpTime: Date.now() } });
 
+      const key = email ? 'email' : 'phoneNumber';
+      const value = body[key];
+      const searchData = {};
+      searchData[key] = value;
+
       const passwordTime = userExist.passwordOtpTime || 5;
       const dateDiff = moment().diff(passwordTime, 'minutes');
-      const temporaryPassword = 12345678;
-      const status = await sendOtp(temporaryPassword, userExist, dateDiff, 'forgotPassword');
+      const dataToSend = {
+        otp: 12345678, dateDiff, api: 'forgotPassword', key,
+      };
+
+      const status = await sendOtp(userExist, dataToSend);
       if (!status) return respondFailure(res, req.__(localeKeys.auth.OTP_MAX_REACHED), StatusCode.TOO_MANY_REQUESTS);
 
       return respondSuccess(res, req.__(localeKeys.auth.EMAIL_SENT_SUCCESSFULLY), StatusCode.OK);
