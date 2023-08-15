@@ -9,14 +9,14 @@ const StatusCode = require('../../../../helpers/statusCodes.json');
 
 module.exports = {
 
-  getAllProducts: async (req, res, next) => {
+  getHome: async (req, res, next) => {
     try {
-      const products = await commonService.findAllByFields(Product, {});
+      const getHome = await commonService.findAllByFields(Product, {});
       return respondSuccess(
         res,
         req.__(localeKeys.global.REQUEST_WAS_SUCCESSFUL),
         StatusCode.OK,
-        products,
+        getHome,
       );
     } catch (error) {
       return next(respondError(
