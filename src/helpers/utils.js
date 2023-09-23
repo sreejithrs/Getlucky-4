@@ -45,19 +45,25 @@ const uploadImage = async (file, bucketName, fileName, contentType) => {
     Bucket: process.env.AWS_BUCKET,
     Key: `${bucketName}/${fileName}`,
     ContentType: contentType,
-    Body: file.buffer,
+    Body: file.data,
     ACL: 'public-read',
   };
   return s3bucket
     .upload(s3Params)
     .promise()
-    .then((data) => ({ status: true, data }))
-    .catch((err) => ({ status: false, error: err.message }));
+    .then((data) => {
+      console.log(data);
+      return { status: true, data: data };
+    })
+    .catch((err) => {
+      console.log(err);
+      return { status: false, error: err.message };
+    });
 };
 
 const uploadFileCode = async (mainImage, bucketFolder) => {
   let imageName = '';
-  const refExt = mainImage.originalname && mainImage.originalname.substring(mainImage.originalname.lastIndexOf('.') + 1, mainImage.originalname.length);
+  const refExt = mainImage.name && mainImage.name.substring(mainImage.name.lastIndexOf('.') + 1, mainImage.name.length);
   const filename = `${new Date().getTime()}.${refExt}`;
   try {
     const uploadRes = await module.exports.uploadImage(mainImage, bucketFolder, filename, mainImage.mimetype);

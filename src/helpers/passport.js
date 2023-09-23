@@ -67,7 +67,7 @@ const getJWTStrategy = (options) => new JwtStrategy(options, (req, payload, done
         return done(respondError(req.__(localesKeys.auth.USER_DEACTIVE), StatusCode.CONFLICT), false);
       }
       await updateUserData(req, user);
-      done(null, user);
+      return done(null, user);
     }
     return done(respondError(req.__(localesKeys.auth.PLEASE_LOGIN), StatusCode.UNAUTHORIZED), false);
   });

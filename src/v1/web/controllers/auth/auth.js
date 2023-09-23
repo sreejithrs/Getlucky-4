@@ -118,7 +118,7 @@ module.exports = {
       if (userExist.verifyOtpMax === 4) await commonService.updateById(User, userExist._id, { $set: { verifyOtpTime: Date.now() } });
 
       const dateDiff = moment().diff(userExist.verifyOtpTime, 'minutes');
-      const dataToSend = { otp: 12345, dateDiff, api: 'verificationCode' };
+      const dataToSend = { otp: 1234, dateDiff, api: 'verificationCode' };
 
       const status = await sendOtp(userExist, dataToSend);
       if (!status) return respondFailure(res, req.__(localeKeys.auth.OTP_MAX_REACHED), StatusCode.TOO_MANY_REQUESTS);
@@ -178,7 +178,7 @@ module.exports = {
       const passwordTime = userExist.passwordOtpTime || 5;
       const dateDiff = moment().diff(passwordTime, 'minutes');
       const dataToSend = {
-        otp: 12345678, dateDiff, api: 'forgotPassword', key,
+        otp: 1234, dateDiff, api: 'forgotPassword', key,
       };
 
       const status = await sendOtp(userExist, dataToSend);

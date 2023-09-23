@@ -78,9 +78,25 @@ const commonService = {
   * @Description Method for render reset password page
   *
   */
-  findAllByFields: async (model, query) => {
+  findAllByFields: async (model, query, select = '') => {
     try {
-      const getAll = await model.find(query).exec();
+      const getAll = await model.find(query).select(select).exec();
+      if (!getAll) {
+        return null;
+      }
+      return getAll;
+    } catch (err) {
+      return err;
+    }
+  },
+  /**
+  * @Method findAllByFields
+  * @Description Method for render reset password page
+  *
+  */
+  findAllBySkipLimit: async (model, query, skip, limit, select = '') => {
+    try {
+      const getAll = await model.find(query).skip(skip).limit(limit).select(select);
       if (!getAll) {
         return null;
       }
@@ -126,9 +142,9 @@ const commonService = {
   * @Description Method for render reset password page
   *
   */
-  delete: async (model, id) => {
+  delete: async (model, query) => {
     try {
-      const dataDelete = await model.remove({ _id: id }).exec();
+      const dataDelete = await model.deleteMany(query).exec();
       if (!dataDelete) {
         return null;
       }

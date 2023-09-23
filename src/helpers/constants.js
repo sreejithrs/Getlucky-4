@@ -10,7 +10,8 @@ module.exports = {
 
   userType: {
     USER: 1,
-    ADMIN: 2,
+    SALES: 2,
+    ADMIN: 3,
   },
 
   otpMax: {

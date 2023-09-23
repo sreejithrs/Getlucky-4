@@ -2,7 +2,6 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const helmet = require('helmet');
-const multer = require('multer');
 const bodyParser = require('body-parser');
 const mongoSanitize = require('express-mongo-sanitize');
 const hpp = require('hpp');
@@ -11,6 +10,7 @@ require('./src/config/env.config');
 const winston = require('./src/config/winston.config');
 const routes = require('./src/routes');
 const i18n = require('./src/config/i18n.config');
+const fileUpload = require('express-fileupload');
 
 // cors options
 const whitelist = ['http://localhost:3000', 'http://3.28.74.200'];
@@ -47,10 +47,12 @@ expressApp.use(bodyParser.json());
 expressApp.use(limiter);
 expressApp.use(cors(corsOptions));
 expressApp.use(i18n.init);
-const upload = multer();
+expressApp.use(fileUpload({
+  limits: { fileSize: 50 * 1024 * 1024 },
+}));
 
 // routes
-expressApp.use('/api/v1', upload.any(), routes);
+expressApp.use('/api/v1', routes);
 
 expressApp.use((err, req, res, _next) => {
   const error = err;
