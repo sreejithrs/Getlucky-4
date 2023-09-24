@@ -71,7 +71,7 @@ module.exports = {
         orderId: orderDetails._id,
       }));
 
-      await new Quantity(quantityData).save();
+      await Quantity.create(quantityData);
       return respondSuccess(
         res,
         req.__(localeKeys.product.ORDER_CREATED_SUCCESSFULLY),
