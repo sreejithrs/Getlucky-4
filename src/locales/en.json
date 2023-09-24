@@ -56,5 +56,8 @@
 	"INVALID_EMAIL_OR_PASS": "Incorrect email or password, try again",
 	"INVALID_PHONE_OR_PASS": "Incorrect phone number or password, try again",
 	"OTP_SENT_SUCCESSFULLY": "Otp sent successfully, it will be valid for 3 minutes",
-	"OTP_TIME_LIMIT": "Otp time limit exceeded, try resend"
+	"OTP_TIME_LIMIT": "Otp time limit exceeded, try resend",
+	"PRODUCT_NOT_FOUND": "Product not found",
+	"DRAW_ALREADY_EXISTS": "Draw already exists",
+	"ORDER_CREATED_SUCCESSFULLY": "Order created successfully"
 }

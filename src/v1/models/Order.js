@@ -6,11 +6,9 @@ const { Schema } = mongoose;
 const orderSchema = new Schema(
   {
     userId: { type: mongoose.Types.ObjectId },
-    name: { type: String, default: '' },
-    date: { type: Number },
-    price: { type: Number },
-    quantity: { type: String, default: '' },
-    status: { type: Number },
+    drawId: { type: mongoose.Types.ObjectId },
+    totalCost: { type: Number },
+    status: { type: Boolean, default: false },
   },
   {
     timestamps: true,

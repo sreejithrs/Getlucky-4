@@ -1,6 +1,7 @@
 const Joi = require('joi');
 
 const mobileValidationMessage = 'You have entered an invalid phone number';
+const emailOrMobile = 'email or phoneNumber is required';
 
 module.exports = {
 
@@ -9,7 +10,9 @@ module.exports = {
       phoneNumber: Joi.string().pattern(/^[+]?[0-9]+$/),
       email: Joi.string().email({ minDomainSegments: 2 }),
       password: Joi.string().min(6).required(),
-    }).or('phoneNumber', 'email');
+    }).xor('phoneNumber', 'email').messages({
+      'object.xor': 'Either email or phoneNumber is required, not both',
+    });
     return schema.validate(input);
   },
 
@@ -52,6 +55,9 @@ module.exports = {
         is: Joi.exist(),
         then: Joi.forbidden(),
         otherwise: Joi.required(),
+      }).messages({
+        'any.required': emailOrMobile,
+        'string.pattern.base': emailOrMobile,
       }),
     });
     return schema.validate(input);
@@ -63,7 +69,9 @@ module.exports = {
       email: Joi.string().email({ minDomainSegments: 2 }),
       temporaryPassword: Joi.string().required(),
       password: Joi.string().min(6).required(),
-    }).or('phoneNumber', 'email');
+    }).xor('phoneNumber', 'email').messages({
+      'object.xor': 'Either email or phoneNumber is required, not both',
+    });
     return schema.validate(input);
   },
 

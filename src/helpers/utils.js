@@ -6,6 +6,7 @@ const EmailValidator = require('email-deep-validator');
 const emailValidator = new EmailValidator();
 
 const s3bucket = new AWS.S3({
+  region: process.env.AWS_SES_REGION,
   signatureVersion: 'v4',
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
@@ -45,19 +46,25 @@ const uploadImage = async (file, bucketName, fileName, contentType) => {
     Bucket: process.env.AWS_BUCKET,
     Key: `${bucketName}/${fileName}`,
     ContentType: contentType,
-    Body: file.buffer,
+    Body: file.data,
     ACL: 'public-read',
   };
   return s3bucket
     .upload(s3Params)
     .promise()
-    .then((data) => ({ status: true, data }))
-    .catch((err) => ({ status: false, error: err.message }));
+    .then((data) => {
+      console.log(data);
+      return { status: true, data: data };
+    })
+    .catch((err) => {
+      console.log(err);
+      return { status: false, error: err.message };
+    });
 };
 
 const uploadFileCode = async (mainImage, bucketFolder) => {
   let imageName = '';
-  const refExt = mainImage.originalname && mainImage.originalname.substring(mainImage.originalname.lastIndexOf('.') + 1, mainImage.originalname.length);
+  const refExt = mainImage.name && mainImage.name.substring(mainImage.name.lastIndexOf('.') + 1, mainImage.name.length);
   const filename = `${new Date().getTime()}.${refExt}`;
   try {
     const uploadRes = await module.exports.uploadImage(mainImage, bucketFolder, filename, mainImage.mimetype);
@@ -74,7 +81,7 @@ const deleteFileFromS3 = async (key) => {
   const bucket = new AWS.S3({
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    region: 'eu-central-1',
+    region: process.env.AWS_SES_REGION,
   });
   const s3Params = {
     Bucket: process.env.AWS_BUCKET,
@@ -82,10 +89,12 @@ const deleteFileFromS3 = async (key) => {
   };
   return bucket.deleteObject(s3Params, (err, _data) => {
     if (err) {
-      global.logger('error', err);
+      console.log(err, 'error');
     }
   });
 };
+
+const generate3DigitId = (lastPayoutNumber) => `#${lastPayoutNumber.toString().padStart(3, '0')}`;
 
 module.exports = {
   generateVerificationCode,
@@ -96,4 +105,5 @@ module.exports = {
   uploadImage,
   deleteFileFromS3,
   uploadFileCode,
+  generate3DigitId,
 };

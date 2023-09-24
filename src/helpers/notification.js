@@ -25,10 +25,12 @@ module.exports = {
       from: options.from, to: options.to, subject: options.subject, html: options.content,
     };
     return new Promise((resolve) => {
-      transporter.sendMail(mailOptions, (err) => {
+      transporter.sendMail(mailOptions, (err, data) => {
         if (err) {
+          console.log(err, 'awsSESErr');
           resolve(false);
         } else {
+          console.log(data, 'Email sent successfully');
           resolve(true);
         }
       });
