@@ -10,7 +10,7 @@ const { respondSuccess, respondFailure, respondError } = require('../../../../he
 const {
   validateSignIn, validateRegister, validateResendOtpCode, validateVerificationCode, validateForgotPassword, validateResetPassword,
 } = require('./auth.validator');
-const { sendOtp } = require('./auth.helper');
+const { sendOtp } = require('./auth.service');
 const { getMessageFromValidationError } = require('../../../../helpers/utils');
 const { getAuthTokens } = require('../../../../helpers/token');
 const commonService = require('../../../services/common.service');
@@ -42,7 +42,7 @@ module.exports = {
       if (error) return next(respondError(getMessageFromValidationError(error)));
 
       const userExist = await commonService.findOneByFields(User, { $or: [{ email }, { phoneNumber }] });
-      if (userExist && userExist.email === email) return respondFailure(_res, req.__(localeKeys.auth.EMAIL_ALREADY_EXISTS), StatusCode.CONFLICT);
+      if (userExist && userExist.email !== '' && userExist.email === email) return respondFailure(_res, req.__(localeKeys.auth.EMAIL_ALREADY_EXISTS), StatusCode.CONFLICT);
       if (userExist && userExist.phoneNumber === phoneNumber) return respondFailure(_res, req.__(localeKeys.auth.MOBILE_ALREADY_EXISTS), StatusCode.CONFLICT);
 
       const verificationCode = 12345;
@@ -57,7 +57,7 @@ module.exports = {
         req.__(localeKeys.user.USER_REGISTERED_SUCCESSFULLY),
         StatusCode.CREATED,
         {
-          userData: _.pick(userDetails, ['_id', 'email', 'name', 'isVerified']),
+          userData: _.pick(userDetails, ['_id', 'email', 'name', 'phoneNumber', 'isVerified']),
         },
       );
     } catch (error) {
@@ -97,7 +97,7 @@ module.exports = {
         {
           accessToken,
           refreshToken,
-          userData: _.pick(userExist, ['_id', 'email', 'name', 'isVerified']),
+          userData: _.pick(userExist, ['_id', 'email', 'name', 'phoneNumber', 'isVerified']),
         },
       );
     } catch (error) {

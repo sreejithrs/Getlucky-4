@@ -3,6 +3,7 @@ const Product = require('./Product');
 const Quantity = require('./Quantity');
 const Order = require('./Order');
 const Draw = require('./Draw');
+const Counter = require('./Counter');
 
 module.exports = {
   User,
@@ -10,4 +11,5 @@ module.exports = {
   Quantity,
   Order,
   Draw,
+  Counter,
 };

@@ -3,7 +3,7 @@ const { Product } = require('../../../models');
 
 // helpers
 const { respondSuccess, respondError, respondFailure } = require('../../../../helpers/response');
-const { validateAddProduct } = require('./product.validator');
+const { validateAddProduct, validateUpdateProduct } = require('./product.validator');
 const commonService = require('../../../services/common.service');
 const localeKeys = require('../../../../locales/keys.json');
 const StatusCode = require('../../../../helpers/statusCodes.json');
@@ -66,17 +66,17 @@ module.exports = {
 
   updateProduct: async (req, res, next) => {
     try {
-      const { params, files, body } = req;
+      const { params, body } = req;
       const { productId } = params;
 
-      const { error } = validateAddProduct(body);
+      const { error } = validateUpdateProduct(body);
       if (error) return next(respondError(getMessageFromValidationError(error)));
 
       const product = await commonService.findOneById(Product, productId);
       if (!product) return respondFailure(res, req.__(localeKeys.product.PRODUCT_NOT_FOUND), StatusCode.NOT_FOUND);
 
-      if (files.image) {
-        const uploadImage = await uploadFileCode(files.image, 'product');
+      if (req.files) {
+        const uploadImage = await uploadFileCode(req.files.image, 'product');
         if (!uploadImage) return respondFailure(res, req.__(localeKeys.upload.FAILED_TO_UPLOAD_FILE), StatusCode.INTERNAL_SERVER_ERROR);
         body.image = uploadImage;
         process.nextTick(() => deleteFileFromS3(product.image));

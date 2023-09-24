@@ -6,10 +6,10 @@ const { Schema } = mongoose;
 const quantitySchema = new Schema(
   {
     orderId: { type: mongoose.Types.ObjectId },
-    name: { type: String, default: '' },
+    productId: { type: mongoose.Types.ObjectId },
     quantity: { type: Number },
-    pin: { type: Number },
-    price: { type: Number },
+    cost: { type: Number },
+    pin: [{ type: String }],
   },
   {
     timestamps: true,

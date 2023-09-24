@@ -6,6 +6,7 @@ const EmailValidator = require('email-deep-validator');
 const emailValidator = new EmailValidator();
 
 const s3bucket = new AWS.S3({
+  region: process.env.AWS_SES_REGION,
   signatureVersion: 'v4',
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
@@ -80,7 +81,7 @@ const deleteFileFromS3 = async (key) => {
   const bucket = new AWS.S3({
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    region: 'eu-central-1',
+    region: process.env.AWS_SES_REGION,
   });
   const s3Params = {
     Bucket: process.env.AWS_BUCKET,
@@ -88,10 +89,12 @@ const deleteFileFromS3 = async (key) => {
   };
   return bucket.deleteObject(s3Params, (err, _data) => {
     if (err) {
-      global.logger('error', err);
+      console.log(err, 'error');
     }
   });
 };
+
+const generate3DigitId = (lastPayoutNumber) => `#${lastPayoutNumber.toString().padStart(3, '0')}`;
 
 module.exports = {
   generateVerificationCode,
@@ -102,4 +105,5 @@ module.exports = {
   uploadImage,
   deleteFileFromS3,
   uploadFileCode,
+  generate3DigitId,
 };

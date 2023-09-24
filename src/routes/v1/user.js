@@ -12,12 +12,12 @@ const requireAuth = passport.authenticate('accessTokenAuth', { session: false })
 const router = Router();
 
 router.use(authRoutes);
+router.use(homeRoutes);
 
 /**
 * Routes for only authenticated and allowed users
 */
 router.use(requireAuth);
 router.use(userAllowed);
-router.use(homeRoutes);
 
 module.exports = router;
