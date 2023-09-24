@@ -57,7 +57,7 @@ module.exports = {
         req.__(localeKeys.user.USER_REGISTERED_SUCCESSFULLY),
         StatusCode.CREATED,
         {
-          userData: _.pick(userDetails, ['_id', 'email', 'name', 'isVerified']),
+          userData: _.pick(userDetails, ['_id', 'email', 'phoneNumber', 'name', 'isVerified']),
         },
       );
     } catch (error) {
