@@ -7,21 +7,14 @@ const mongoSanitize = require('express-mongo-sanitize');
 const hpp = require('hpp');
 const rateLimit = require('express-rate-limit');
 require('./src/config/env.config');
+const fileUpload = require('express-fileupload');
 const winston = require('./src/config/winston.config');
 const routes = require('./src/routes');
 const i18n = require('./src/config/i18n.config');
-const fileUpload = require('express-fileupload');
 
 // cors options
-const whitelist = ['http://localhost:3000', 'http://3.28.74.200'];
 const corsOptions = {
-  origin: function (origin, callback) {
-    if (whitelist.indexOf(origin) !== -1 || !origin) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: '*',
   exposedHeaders: 'Content-Type, X-Auth-Token',
   methods: 'GET, HEAD, PUT, PATCH, POST, DELETE',
   preflightContinue: false,
