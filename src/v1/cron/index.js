@@ -1,0 +1,59 @@
+// modules
+const moment = require('moment');
+const schedule = require('node-schedule');
+
+const constValues = require('../../helpers/constants');
+
+const rule = new schedule.RecurrenceRule();
+rule.hour = 3; // 7 am at UAE
+rule.minute = 0;
+rule.tz = 'Etc/UTC';
+
+// models
+const { Draw } = require('../models/index');
+// helpers
+const commonService = require('../services/common.service');
+
+// Execute a cron job every day 6:00:00 am UTC
+schedule.scheduleJob(rule, async () => {
+  await module.exports.createDraw();
+});
+
+module.exports = {
+
+  createDraw: async () => {
+    const currentDate = new Date();
+    currentDate.setUTCHours(17, 0, 0, 0);
+    const nextDay = new Date(moment(currentDate).add(1));
+    const twoDaysAfter = new Date(moment(currentDate).add(2));
+    const getNextDayValues = nextDay.getDay();
+    const getTwoDayValue = twoDaysAfter.getDay();
+
+    const checkDraw = await commonService.findAllByFields(
+      Draw,
+      {
+        $or: [
+          { $expr: { $eq: ['$date', nextDay] } },
+          { $expr: { $eq: ['$date', twoDaysAfter] } },
+        ],
+      },
+    );
+    console.log('----Cron Executed----', checkDraw);
+
+    const dataToSave = {
+      drawName: constValues.drawName,
+      date: nextDay,
+    };
+
+    if (!checkDraw.length && getNextDayValues !== 0) {
+      await commonService.save(Draw, dataToSave);
+    }
+
+    const getTwoDaysAfter = checkDraw.map((elem) => elem.date === twoDaysAfter);
+    if (!getTwoDaysAfter.length && getTwoDayValue !== 0) {
+      dataToSave.date = twoDaysAfter;
+      await commonService.save(Draw, dataToSave);
+    }
+  },
+
+};

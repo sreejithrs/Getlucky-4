@@ -3,6 +3,21 @@ const allowedLanguages = ['en', 'de'];
 module.exports = {
   allowedLanguages,
 
+  drawName: 'Getlucky Draw',
+
+  priceAmount: {
+    STRAIGHT: 3000,
+    RUMBLE: 1000,
+    CHANCE: 100,
+  },
+
+  priceCategory: {
+    STRAIGHT: 'straight',
+    REVERSE: 'reverse',
+    RUMBLE: 'mix',
+    CHANCE: 'chance',
+  },
+
   status: {
     ACTIVE: true,
     DEACTIVE: false,

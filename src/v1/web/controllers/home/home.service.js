@@ -7,8 +7,8 @@ module.exports = {
 
   getPlay: async () => {
     const currentDate = new Date();
-    const oneDayAdd = moment(currentDate, 'YYYY-MM-DD').add(1, 'days').format('YYYY-MM-DD');
-    const twoDaysAdd = moment(currentDate, 'YYYY-MM-DD').add(2, 'days').format('YYYY-MM-DD');
+    const oneDayAdd = new Date(moment(currentDate, 'YYYY-MM-DD').add(1, 'days'));
+    const twoDaysAdd = new Date(moment(currentDate, 'YYYY-MM-DD').add(2, 'days'));
 
     return Product.aggregate([
       {
@@ -20,22 +20,53 @@ module.exports = {
           pipeline: [
             {
               $match: {
-                $or: [
+                $and: [
                   {
-                    $expr: {
-                      $eq: [
-                        { $dateToString: { format: '%Y-%m-%d', date: '$date' } },
-                        oneDayAdd,
-                      ],
-                    },
+                    status: true,
                   },
                   {
-                    $expr: {
-                      $eq: [
-                        { $dateToString: { format: '%Y-%m-%d', date: '$date' } },
-                        twoDaysAdd,
-                      ],
-                    },
+                    $or: [
+                      {
+                        $and: [
+                          {
+                            $expr: {
+                              $gte: [
+                                '$date',
+                                currentDate,
+                              ],
+                            },
+                          },
+                          {
+                            $expr: {
+                              $lte: [
+                                oneDayAdd,
+                                '$date',
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                      {
+                        $and: [
+                          {
+                            $expr: {
+                              $gte: [
+                                '$date',
+                                currentDate,
+                              ],
+                            },
+                          },
+                          {
+                            $expr: {
+                              $lte: [
+                                twoDaysAdd,
+                                '$date',
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    ],
                   },
                 ],
               },

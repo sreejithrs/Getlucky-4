@@ -1,5 +1,7 @@
 // model
-const { Product, Order, Quantity } = require('../../../models');
+const {
+  Product, Order, Quantity, Draw,
+} = require('../../../models');
 
 // helpers
 const { validateCreateOrder } = require('./home.validator');
@@ -35,8 +37,13 @@ module.exports = {
       const { id } = user;
       const { data, drawId } = body;
 
+      const currentDate = new Date();
       const { error } = validateCreateOrder(body);
       if (error) return next(respondError(getMessageFromValidationError(error)));
+
+      const getDraw = await commonService.findOneById(Draw, drawId);
+      if (!getDraw) return respondFailure(res, req.__(localeKeys.product.DRAW_NOT_FOUND), StatusCode.NOT_FOUND);
+      if (getDraw.date < currentDate) return respondFailure(res, req.__(localeKeys.product.PURCHASE_NOT_ALLOWED), StatusCode.FORBIDDEN);
 
       const productIdArray = data.map((elem) => elem.productId);
       const getProducts = await commonService.findAllByFields(Product, { _id: { $in: productIdArray } });
@@ -53,7 +60,7 @@ module.exports = {
         return {
           productId: item.productId,
           quantity: item.quantity,
-          pin: item.items,
+          ticketNumber: item.items,
           cost,
         };
       });

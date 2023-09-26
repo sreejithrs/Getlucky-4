@@ -59,5 +59,8 @@
 	"OTP_TIME_LIMIT": "Otp time limit exceeded, try resend",
 	"PRODUCT_NOT_FOUND": "Product not found",
 	"DRAW_ALREADY_EXISTS": "Draw already exists",
-	"ORDER_CREATED_SUCCESSFULLY": "Order created successfully"
+	"ORDER_CREATED_SUCCESSFULLY": "Order created successfully",
+	"DRAW_NOT_FOUND": "Currently no draws available",
+	"PURCHASE_NOT_ALLOWED": "Purchase not allowed",
+	"DRAW_COMPLETED": "Updated not allowed as this draw is completed"
 }

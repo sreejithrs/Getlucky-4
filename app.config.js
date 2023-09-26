@@ -56,4 +56,6 @@ expressApp.use((err, req, res, _next) => {
   });
 });
 
+require('./src/v1/cron');
+
 module.exports = expressApp;

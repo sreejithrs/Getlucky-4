@@ -10,4 +10,13 @@ module.exports = {
     return schema.validate(input);
   },
 
+  validateUpdateDraw: (input) => {
+    const schema = Joi.object().keys({
+      drawId: Joi.string().required(),
+      drawStatus: Joi.boolean().required(),
+      ticketNumber: Joi.string().optional().allow(''),
+    });
+    return schema.validate(input);
+  },
+
 };
