@@ -48,6 +48,7 @@
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
     "secure-random-password": "^0.2.3",
+    "stripe": "^13.8.0",
     "twilio": "^4.14.0",
     "winston": "^3.10.0",
     "winston-daily-rotate-file": "^4.7.1"

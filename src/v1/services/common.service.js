@@ -16,6 +16,22 @@ const commonService = {
     }
   },
   /**
+  * @Method insertMany
+  * @Description Method for inserting many
+  *
+  */
+  insertMany: async (model, data) => {
+    try {
+      const save = await model.insertMany(data);
+      if (!save) {
+        return null;
+      }
+      return save;
+    } catch (err) {
+      return err;
+    }
+  },
+  /**
   * @Method updateById
   * @Description Method for render reset password page
   *
@@ -78,9 +94,9 @@ const commonService = {
   * @Description Method for render reset password page
   *
   */
-  findAllByFields: async (model, query, select = '') => {
+  findAllByFields: async (model, query, select = {}, sort = {}) => {
     try {
-      const getAll = await model.find(query).select(select).exec();
+      const getAll = await model.find(query, select).sort(sort).exec();
       if (!getAll) {
         return null;
       }

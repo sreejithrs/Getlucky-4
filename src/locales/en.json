@@ -61,6 +61,9 @@
 	"DRAW_ALREADY_EXISTS": "Draw already exists",
 	"ORDER_CREATED_SUCCESSFULLY": "Order created successfully",
 	"DRAW_NOT_FOUND": "Currently no draws available",
-	"PURCHASE_NOT_ALLOWED": "Purchase not allowed",
-	"DRAW_COMPLETED": "Updated not allowed as this draw is completed"
+	"DRAW_EXPIRED": "This draw is expired",
+	"DRAW_COMPLETED": "Updated not allowed as this draw is completed",
+	"DRAW_INACTIVE": "This draw is currently inactive, please update the draw status and publish",
+	"WINNER_NOT_ANNOUNCED": "Please update the winning ticket and publish result",
+	"INVALID_DRAW_ID": "Draw not found"
 }

@@ -2,21 +2,30 @@
 const moment = require('moment');
 const schedule = require('node-schedule');
 
-const constValues = require('../../helpers/constants');
-
 const rule = new schedule.RecurrenceRule();
-rule.hour = 3; // 7 am at UAE
-rule.minute = 0;
 rule.tz = 'Etc/UTC';
 
 // models
-const { Draw } = require('../models/index');
+const { Draw, Cart } = require('../models/index');
 // helpers
+const constValues = require('../../helpers/constants');
 const commonService = require('../services/common.service');
 
-// Execute a cron job every day 6:00:00 am UTC
+// Execute a cron job every day 7:00:00 am UTC
+rule.hour = 3; // 7 am at UAE
+rule.minute = 0;
+
 schedule.scheduleJob(rule, async () => {
   await module.exports.createDraw();
+});
+
+// Execute a cron job every day 9:00:00 pm UTC
+rule.hour = 17;
+rule.minute = 30;
+
+// Execute a cron job every half hour
+schedule.scheduleJob(rule, async () => {
+  await module.exports.deletePendingCart();
 });
 
 module.exports = {
@@ -56,4 +65,8 @@ module.exports = {
     }
   },
 
+  deletePendingCart: async () => {
+    await commonService.delete(Cart, {});
+    console.log(new Date(), '----Cart Deleted----');
+  },
 };

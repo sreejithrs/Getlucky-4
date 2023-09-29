@@ -3,6 +3,7 @@ const cors = require('cors');
 const morgan = require('morgan');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
+const passport = require('passport');
 const mongoSanitize = require('express-mongo-sanitize');
 const hpp = require('hpp');
 const rateLimit = require('express-rate-limit');
@@ -11,6 +12,7 @@ const fileUpload = require('express-fileupload');
 const winston = require('./src/config/winston.config');
 const routes = require('./src/routes');
 const i18n = require('./src/config/i18n.config');
+const homeController = require('./src/v1/web/controllers/home/home');
 
 // cors options
 const corsOptions = {
@@ -35,14 +37,18 @@ expressApp.use(helmet());
 expressApp.use(mongoSanitize());
 expressApp.use(hpp());
 expressApp.use(morgan('combined', { stream: winston.stream }));
+expressApp.use(cors(corsOptions));
+expressApp.use(i18n.init);
+
+expressApp.post('/stripe-webhooks', express.raw({ type: '*/*' }), homeController.webhooks);
+
 expressApp.use(bodyParser.urlencoded({ extended: true }));
 expressApp.use(bodyParser.json());
 expressApp.use(limiter);
-expressApp.use(cors(corsOptions));
-expressApp.use(i18n.init);
 expressApp.use(fileUpload({
   limits: { fileSize: 50 * 1024 * 1024 },
 }));
+expressApp.use(passport.initialize());
 
 // routes
 expressApp.use('/api/v1', routes);

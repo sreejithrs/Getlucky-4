@@ -93,8 +93,6 @@ const deleteFileFromS3 = async (key) => {
   });
 };
 
-const reverseString = (inputString) => inputString.split('').reverse().join('');
-
 const allCharactersAreSame = (str) => {
   for (let i = 1; i < str.length; i += 1) {
     if (str[i] !== str[0]) {
@@ -114,15 +112,19 @@ const getPermutations = (value) => {
     if (chars.length === 0) {
       permutations.push(currentPermutation);
     } else {
+      const usedChars = new Set();
       for (let i = 0; i < chars.length; i += 1) {
-        const remainingChars = chars.slice(0, i) + chars.slice(i + 1);
-        generatePermutations(remainingChars, currentPermutation + chars[i]);
+        if (!usedChars.has(chars[i])) {
+          usedChars.add(chars[i]);
+          const remainingChars = chars.slice(0, i) + chars.slice(i + 1);
+          generatePermutations(remainingChars, currentPermutation + chars[i]);
+        }
       }
     }
   }
 
   generatePermutations(value);
-  return permutations;
+  return permutations.filter((item) => item !== value);
 };
 
 const generate3DigitId = (lastPayoutNumber) => `#${lastPayoutNumber.toString().padStart(3, '0')}`;
@@ -137,6 +139,5 @@ module.exports = {
   deleteFileFromS3,
   uploadFileCode,
   generate3DigitId,
-  reverseString,
   getPermutations,
 };

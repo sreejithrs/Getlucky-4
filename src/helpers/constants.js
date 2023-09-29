@@ -13,9 +13,14 @@ module.exports = {
 
   priceCategory: {
     STRAIGHT: 'straight',
-    REVERSE: 'reverse',
-    RUMBLE: 'mix',
+    RUMBLE: 'rumble',
     CHANCE: 'chance',
+  },
+
+  paymentStatus: {
+    FAILED: 0,
+    SUCCESS: 1,
+    PENDING: 2,
   },
 
   status: {

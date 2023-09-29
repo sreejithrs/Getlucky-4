@@ -1,11 +1,13 @@
 // modules
 const moment = require('moment');
+const { ObjectId } = require('mongoose').Types;
 // models
-const { Product } = require('../../../models/index');
+const { Product, Cart } = require('../../../models/index');
 
 module.exports = {
 
-  getPlay: async () => {
+  getAllProducts: async (req) => {
+    const userId = req.user ? req.user.id : null;
     const currentDate = new Date();
     const oneDayAdd = new Date(moment(currentDate, 'YYYY-MM-DD').add(1, 'days'));
     const twoDaysAdd = new Date(moment(currentDate, 'YYYY-MM-DD').add(2, 'days'));
@@ -13,6 +15,22 @@ module.exports = {
     return Product.aggregate([
       {
         $match: {},
+      },
+      {
+        $lookup: {
+          from: 'carts',
+          pipeline: [
+            {
+              $match: {
+                userId: { $eq: ObjectId(userId) },
+              },
+            },
+          ],
+          as: 'cartData',
+        },
+      },
+      {
+        $unwind: { path: '$cartData', preserveNullAndEmptyArrays: true },
       },
       {
         $lookup: {
@@ -113,7 +131,30 @@ module.exports = {
               name: '$name',
               image: '$image',
               cost: '$cost',
-              priceAmount: '$priceAmount',
+              ticketNumbers: {
+                $cond: {
+                  if: {
+                    $and: [
+                      { $ifNull: ['$cartData', false] },
+                      { $in: ['$_id', '$cartData.products.productId'] },
+                    ],
+                  },
+                  then: {
+                    $reduce: {
+                      input: {
+                        $filter: {
+                          input: '$cartData.products',
+                          as: 'cartProduct',
+                          cond: { $eq: ['$$cartProduct.productId', '$_id'] },
+                        },
+                      },
+                      initialValue: [],
+                      in: { $concatArrays: ['$$value', '$$this.ticketNumbers'] },
+                    },
+                  },
+                  else: [],
+                },
+              },
             },
           },
         },
@@ -125,4 +166,74 @@ module.exports = {
       },
     ]);
   },
+
+  getOrderData: async (id) => Cart.aggregate([
+    {
+      $match: {
+        userId: ObjectId(id),
+      },
+    },
+    {
+      $unwind: { path: '$products', preserveNullAndEmptyArrays: true },
+    },
+    {
+      $lookup: {
+        from: 'products',
+        localField: 'products.productId',
+        foreignField: '_id',
+        as: 'productData',
+      },
+    },
+    {
+      $unwind: { path: '$productData', preserveNullAndEmptyArrays: true },
+    },
+    {
+      $group: {
+        _id: null,
+        totalCost: { $first: '$totalCost' },
+        products: {
+          $push: {
+            _id: '$products.productId',
+            name: '$productData.name',
+            priceAmount: '$productData.priceAmount',
+            ticketNumbers: '$products.ticketNumbers',
+            quantity: '$products.quantity',
+            actualCost: { $multiply: ['$productData.cost', { $size: '$products.ticketNumbers' }] },
+            cost: '$products.cost',
+          },
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+      },
+    },
+  ]),
+
+  getCartData: async (id) => Cart.aggregate([
+    {
+      $match: {
+        userId: ObjectId(id),
+      },
+    },
+    {
+      $unwind: { path: '$products', preserveNullAndEmptyArrays: true },
+    },
+    {
+      $lookup: {
+        from: 'products',
+        localField: 'products.productId',
+        foreignField: '_id',
+        as: 'productData',
+      },
+    },
+    {
+      $group: {
+        _id: '$_id',
+        priceId: { $first: '$productData.stripe_price' },
+        stripeQuantity: { $first: '$stripeQuantity' },
+      },
+    },
+  ]),
 };
