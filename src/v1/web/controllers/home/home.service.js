@@ -233,9 +233,14 @@ module.exports = {
     },
     {
       $group: {
-        _id: '$products.productId',
-        price: { $first: '$productData.stripe_price' },
-        quantity: { $first: '$products.stripeQuantity' },
+        _id: '$_id',
+        totalCost: { $first: '$totalCost' },
+        data: {
+          $push: {
+            price: '$productData.stripe_price',
+            quantity: '$products.stripeQuantity',
+          },
+        },
       },
     },
   ]),
