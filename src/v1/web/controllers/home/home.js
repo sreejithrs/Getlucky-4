@@ -225,7 +225,7 @@ module.exports = {
         const { cartId } = dataObject.metadata;
         const totalAmount = dataObject.amount_total;
         const paymentStatus = dataObject.status;
-        if (paymentStatus !== 'complete' || cartId) break;
+        if (paymentStatus !== 'complete' || !cartId) break;
 
         const cartData = await commonService.findOneAndDelete(Cart, { _id: cartId });
 
