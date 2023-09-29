@@ -1,5 +1,6 @@
 // node modules
 const mongoose = require('mongoose');
+
 const Counter = require('./Counter');
 const { generate3DigitId } = require('../../helpers/utils');
 

@@ -41,6 +41,7 @@ expressApp.use(cors(corsOptions));
 expressApp.use(i18n.init);
 
 expressApp.post('/stripe-webhooks', express.raw({ type: '*/*' }), homeController.webhooks);
+expressApp.get('/payment', homeController.getPaymentStatus);
 
 expressApp.use(bodyParser.urlencoded({ extended: true }));
 expressApp.use(bodyParser.json());

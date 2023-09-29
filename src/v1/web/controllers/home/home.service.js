@@ -129,7 +129,7 @@ module.exports = {
             $push: {
               _id: '$_id',
               name: '$name',
-              image: '$image',
+              image: `${process.env.AWS_S3_URL}/$image`,
               cost: '$cost',
               ticketNumbers: {
                 $cond: {
@@ -229,10 +229,13 @@ module.exports = {
       },
     },
     {
+      $unwind: { path: '$productData', preserveNullAndEmptyArrays: true },
+    },
+    {
       $group: {
-        _id: '$_id',
-        priceId: { $first: '$productData.stripe_price' },
-        stripeQuantity: { $first: '$stripeQuantity' },
+        _id: '$products.productId',
+        price: { $first: '$productData.stripe_price' },
+        quantity: { $first: '$products.stripeQuantity' },
       },
     },
   ]),
