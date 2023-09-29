@@ -11,7 +11,8 @@ const productSchema = new Schema(
     name: { type: String, default: '' },
     cost: { type: Number },
     image: { type: String, default: '' },
-    priceAmount: { type: Number },
+    stripe_price: { type: String },
+    stripe_product: { type: String },
   },
   {
     timestamps: true,

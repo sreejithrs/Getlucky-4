@@ -1,14 +1,16 @@
 // modules
 const moment = require('moment');
+const { ObjectId } = require('mongoose').Types;
 // models
-const { Product } = require('../../../models/index');
+const { Product, Cart } = require('../../../models/index');
 
 module.exports = {
 
-  getPlay: async () => {
+  getAllProducts: async (req) => {
+    const userId = req.user ? req.user.id : null;
     const currentDate = new Date();
-    const oneDayAdd = moment(currentDate, 'YYYY-MM-DD').add(1, 'days').format('YYYY-MM-DD');
-    const twoDaysAdd = moment(currentDate, 'YYYY-MM-DD').add(2, 'days').format('YYYY-MM-DD');
+    const oneDayAdd = new Date(moment(currentDate, 'YYYY-MM-DD').add(1, 'days'));
+    const twoDaysAdd = new Date(moment(currentDate, 'YYYY-MM-DD').add(2, 'days'));
 
     return Product.aggregate([
       {
@@ -16,26 +18,73 @@ module.exports = {
       },
       {
         $lookup: {
+          from: 'carts',
+          pipeline: [
+            {
+              $match: {
+                userId: { $eq: ObjectId(userId) },
+              },
+            },
+          ],
+          as: 'cartData',
+        },
+      },
+      {
+        $unwind: { path: '$cartData', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $lookup: {
           from: 'draws',
           pipeline: [
             {
               $match: {
-                $or: [
+                $and: [
                   {
-                    $expr: {
-                      $eq: [
-                        { $dateToString: { format: '%Y-%m-%d', date: '$date' } },
-                        oneDayAdd,
-                      ],
-                    },
+                    status: true,
                   },
                   {
-                    $expr: {
-                      $eq: [
-                        { $dateToString: { format: '%Y-%m-%d', date: '$date' } },
-                        twoDaysAdd,
-                      ],
-                    },
+                    $or: [
+                      {
+                        $and: [
+                          {
+                            $expr: {
+                              $gte: [
+                                '$date',
+                                currentDate,
+                              ],
+                            },
+                          },
+                          {
+                            $expr: {
+                              $lte: [
+                                oneDayAdd,
+                                '$date',
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                      {
+                        $and: [
+                          {
+                            $expr: {
+                              $gte: [
+                                '$date',
+                                currentDate,
+                              ],
+                            },
+                          },
+                          {
+                            $expr: {
+                              $lte: [
+                                twoDaysAdd,
+                                '$date',
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    ],
                   },
                 ],
               },
@@ -82,7 +131,30 @@ module.exports = {
               name: '$name',
               image: '$image',
               cost: '$cost',
-              priceAmount: '$priceAmount',
+              ticketNumbers: {
+                $cond: {
+                  if: {
+                    $and: [
+                      { $ifNull: ['$cartData', false] },
+                      { $in: ['$_id', '$cartData.products.productId'] },
+                    ],
+                  },
+                  then: {
+                    $reduce: {
+                      input: {
+                        $filter: {
+                          input: '$cartData.products',
+                          as: 'cartProduct',
+                          cond: { $eq: ['$$cartProduct.productId', '$_id'] },
+                        },
+                      },
+                      initialValue: [],
+                      in: { $concatArrays: ['$$value', '$$this.ticketNumbers'] },
+                    },
+                  },
+                  else: [],
+                },
+              },
             },
           },
         },
@@ -94,4 +166,74 @@ module.exports = {
       },
     ]);
   },
+
+  getOrderData: async (id) => Cart.aggregate([
+    {
+      $match: {
+        userId: ObjectId(id),
+      },
+    },
+    {
+      $unwind: { path: '$products', preserveNullAndEmptyArrays: true },
+    },
+    {
+      $lookup: {
+        from: 'products',
+        localField: 'products.productId',
+        foreignField: '_id',
+        as: 'productData',
+      },
+    },
+    {
+      $unwind: { path: '$productData', preserveNullAndEmptyArrays: true },
+    },
+    {
+      $group: {
+        _id: null,
+        totalCost: { $first: '$totalCost' },
+        products: {
+          $push: {
+            _id: '$products.productId',
+            name: '$productData.name',
+            priceAmount: '$productData.priceAmount',
+            ticketNumbers: '$products.ticketNumbers',
+            quantity: '$products.quantity',
+            actualCost: { $multiply: ['$productData.cost', { $size: '$products.ticketNumbers' }] },
+            cost: '$products.cost',
+          },
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+      },
+    },
+  ]),
+
+  getCartData: async (id) => Cart.aggregate([
+    {
+      $match: {
+        userId: ObjectId(id),
+      },
+    },
+    {
+      $unwind: { path: '$products', preserveNullAndEmptyArrays: true },
+    },
+    {
+      $lookup: {
+        from: 'products',
+        localField: 'products.productId',
+        foreignField: '_id',
+        as: 'productData',
+      },
+    },
+    {
+      $group: {
+        _id: '$_id',
+        priceId: { $first: '$productData.stripe_price' },
+        stripeQuantity: { $first: '$stripeQuantity' },
+      },
+    },
+  ]),
 };

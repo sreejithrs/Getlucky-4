@@ -9,11 +9,14 @@ const drawSchema = new Schema(
   {
     drawNo: { type: String },
     drawName: { type: String, default: '' },
+    status: { type: Boolean, default: true },
+    isCompleted: { type: Boolean, default: false },
+    isTicketAdded: { type: Boolean, default: false },
     date: { type: Date },
     link: { type: String, default: '' },
-    firstPrice: { type: String },
-    secondPrice: { type: String },
-    thirdPrice: { type: String },
+    straight: { type: String, default: '' },
+    mix: [{ type: String }],
+    chance: [{ type: String }],
   },
   {
     timestamps: true,

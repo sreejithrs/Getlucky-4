@@ -8,12 +8,15 @@ const commonService = require('../../../services/common.service');
 const localeKeys = require('../../../../locales/keys.json');
 const StatusCode = require('../../../../helpers/statusCodes.json');
 const { getMessageFromValidationError, uploadFileCode, deleteFileFromS3 } = require('../../../../helpers/utils');
+const { createStripeProduct } = require('./product.service');
 
 module.exports = {
 
   getAllProducts: async (req, res, next) => {
     try {
-      const products = await commonService.findAllByFields(Product, {});
+      const products = await commonService.findAllByFields(Product, {}, {
+        _id: 1, productNo: 1, name: 1, cost: 1, image: 1,
+      });
       return respondSuccess(res, req.__(localeKeys.global.REQUEST_WAS_SUCCESSFUL), StatusCode.OK, products);
     } catch (error) {
       return next(respondError(
@@ -35,6 +38,7 @@ module.exports = {
       if (!uploadImage) return respondFailure(res, req.__(localeKeys.upload.FAILED_TO_UPLOAD_FILE), StatusCode.INTERNAL_SERVER_ERROR);
 
       body.image = uploadImage;
+      createStripeProduct(body);
       await commonService.save(Product, body);
       return respondSuccess(res, req.__(localeKeys.global.ADDED_SUCCESSFULLY), StatusCode.OK);
     } catch (error) {
