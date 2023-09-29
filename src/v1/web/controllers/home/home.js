@@ -143,9 +143,10 @@ module.exports = {
           },
         ],
         mode: 'payment',
-        success_url: process.env.PAYMENT_REDIRECT,
-        cancel_url: process.env.PAYMENT_REDIRECT,
+        success_url: `${process.env.GETLUCKY_URL}/payment`,
+        cancel_url: `${process.env.GETLUCKY_URL}/payment`,
       });
+      console.log(session)
 
       return respondSuccess(
         res,
@@ -157,6 +158,31 @@ module.exports = {
         error,
         StatusCode.INTERNAL_SERVER_ERROR,
       ));
+    }
+  },
+
+  getPaymentStatus: async (req, res, next) => {
+    try {
+      const { query } = req;
+      const { session_id } = query;
+      let file;
+
+      const session = await stripe.checkout.sessions.retrieve(session_id);
+      const paymentStatus = intent.status;
+      const link = process.env.GETLUCKY_URL;
+      switch (paymentStatus) {
+        case 'succeeded':
+          file = 'payment/success.ejs';
+          break;
+        case 'requires_payment_method':
+          file = 'payment/failed.ejs';
+          break;
+        default:
+          file = 'payment/failed.ejs';
+      }
+      return res.render(path.join(__dirname, `../../../../templates/${file}`), { link });
+    } catch (err) {
+      return next(respondError(err.message, constValues.StatusCode.INTERNAL_SERVER_ERROR));
     }
   },
 

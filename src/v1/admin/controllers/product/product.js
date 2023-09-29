@@ -17,7 +17,12 @@ module.exports = {
       const products = await commonService.findAllByFields(Product, {}, {
         _id: 1, productNo: 1, name: 1, cost: 1, image: 1,
       });
-      return respondSuccess(res, req.__(localeKeys.global.REQUEST_WAS_SUCCESSFUL), StatusCode.OK, products);
+      const productsList = products.map((product) => ({
+        // eslint-disable-next-line no-underscore-dangle
+        ...product._doc,
+        image: `${process.env.AWS_S3_URL}/${product.image}`,
+      }));
+      return respondSuccess(res, req.__(localeKeys.global.REQUEST_WAS_SUCCESSFUL), StatusCode.OK, productsList);
     } catch (error) {
       return next(respondError(
         error,
