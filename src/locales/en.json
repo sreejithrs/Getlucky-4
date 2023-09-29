@@ -65,5 +65,6 @@
 	"DRAW_COMPLETED": "Updated not allowed as this draw is completed",
 	"DRAW_INACTIVE": "This draw is currently inactive, please update the draw status and publish",
 	"WINNER_NOT_ANNOUNCED": "Please update the winning ticket and publish result",
-	"INVALID_DRAW_ID": "Draw not found"
+	"INVALID_DRAW_ID": "Draw not found",
+	"CART_NOT_FOUND": "Your cart is empty"
 }

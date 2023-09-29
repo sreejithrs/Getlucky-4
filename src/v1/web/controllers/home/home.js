@@ -1,6 +1,7 @@
 // model
+const path = require('path');
 const {
-  Product, Cart, Draw, Booking,
+  Product, Cart, Draw, Booking, Order, Quantity,
 } = require('../../../models');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
@@ -134,24 +135,34 @@ module.exports = {
     try {
       const { id } = req.user;
 
-      const getUserCart = await getCartData(id);
+      const [getUserCart] = await getCartData(id);
+      if (!getUserCart) return respondFailure(res, req.__(localeKeys.product.CART_NOT_FOUND), StatusCode.NOT_FOUND);
+      const { totalCost, _id, data } = getUserCart;
+
+      const bookingObj = {
+        cartId: _id,
+        userId: id,
+        totalPrice: totalCost,
+        taxAmount: (5 / totalCost) * 100,
+      };
+
+      await commonService.save(Booking, bookingObj);
       const session = await stripe.checkout.sessions.create({
-        line_items: [
-          {
-            price: '{{PRICE_ID}}',
-            quantity: 1,
-          },
-        ],
+        line_items: data,
         mode: 'payment',
+        metadata: {
+          cartId: String(_id),
+        },
         success_url: `${process.env.GETLUCKY_URL}/payment`,
         cancel_url: `${process.env.GETLUCKY_URL}/payment`,
       });
-      console.log(session)
+      const redirectUrl = session.url;
 
       return respondSuccess(
         res,
         req.__(localeKeys.global.REQUEST_WAS_SUCCESSFUL),
         StatusCode.OK,
+        redirectUrl,
       );
     } catch (error) {
       return next(respondError(
@@ -164,11 +175,12 @@ module.exports = {
   getPaymentStatus: async (req, res, next) => {
     try {
       const { query } = req;
+      // eslint-disable-next-line camelcase
       const { session_id } = query;
       let file;
 
       const session = await stripe.checkout.sessions.retrieve(session_id);
-      const paymentStatus = intent.status;
+      const paymentStatus = session.status;
       const link = process.env.GETLUCKY_URL;
       switch (paymentStatus) {
         case 'succeeded':
@@ -208,11 +220,42 @@ module.exports = {
     console.log('=========================================');
 
     switch (event.type) {
-      case 'charge.succeeded': {
+      case 'checkout.session.completed': {
         const paymentIntent = dataObject.payment_intent;
         const { cartId } = dataObject.metadata;
-        if (!cartId) break;
-        const cartData = await Cart.findByIdAndDelete(cartId);
+        const totalAmount = dataObject.amount_total;
+        const paymentStatus = dataObject.status;
+        if (paymentStatus !== 'complete' || cartId) break;
+
+        const cartData = await commonService.findOneAndDelete(Cart, { _id: cartId });
+
+        const orderData = {
+          userId: cartData.userId,
+          drawId: cartData.drawId,
+          totalCost: cartData.totalCost,
+          status: constValues.status.ACTIVE,
+        };
+
+        const orderDetails = await commonService.save(Order, orderData);
+        const { _id, userId } = orderDetails._id;
+        const { products } = cartData;
+
+        const quantityData = products.map((elem) => ({
+          orderId: _id,
+          productId: elem.productId,
+          quantity: elem.quantity,
+          cost: elem.cost,
+          ticketNumbers: elem.ticketNumbers,
+        }));
+
+        await commonService.insertMany(Quantity, quantityData);
+        const bookingData = {
+          orderId: _id,
+          userPaid: totalAmount,
+          paymentStatus: constValues.paymentStatus.SUCCESS,
+          paymentIntent,
+        };
+        await commonService.updateOneByFields(Booking, { userId, cartId }, { $set: bookingData });
         break;
       }
       case 'charge.failed': {

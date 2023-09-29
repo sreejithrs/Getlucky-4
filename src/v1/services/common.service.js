@@ -154,6 +154,22 @@ const commonService = {
     }
   },
   /**
+  * @Method findOneAndDelete
+  * @Description Method for render reset password page
+  *
+  */
+  findOneAndDelete: async (model, query) => {
+    try {
+      const dataDelete = await model.findOneAndDelete(query).exec();
+      if (!dataDelete) {
+        return null;
+      }
+      return dataDelete;
+    } catch (err) {
+      return err;
+    }
+  },
+  /**
   * @Method delete
   * @Description Method for render reset password page
   *
