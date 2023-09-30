@@ -50,6 +50,7 @@
     "secure-random-password": "^0.2.3",
     "stripe": "^13.8.0",
     "twilio": "^4.14.0",
+    "uuid": "^9.0.1",
     "winston": "^3.10.0",
     "winston-daily-rotate-file": "^4.7.1"
   },

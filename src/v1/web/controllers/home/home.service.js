@@ -129,7 +129,7 @@ module.exports = {
             $push: {
               _id: '$_id',
               name: '$name',
-              image: `${process.env.AWS_S3_URL}/$image`,
+              image: { $concat: [process.env.AWS_S3_URL, '/', '$image'] },
               cost: '$cost',
               ticketNumbers: {
                 $cond: {
