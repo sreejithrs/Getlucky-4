@@ -7,6 +7,7 @@ const { Schema } = mongoose;
 const userSchema = new Schema(
   {
     name: { type: String, default: '' },
+    tempEmail: { type: String, lowercase: true, trim: true },
     email: {
       type: String, lowercase: true, trim: true,
     },
@@ -24,6 +25,8 @@ const userSchema = new Schema(
     verifyOtpMax: { type: Number, default: 0 },
     passwordOtpTime: { type: Date },
     passOtpMax: { type: Number, default: 0 },
+    isChangeEmail: { type: Boolean, default: false },
+    emailChangeOtp: { type: Number },
     building: { type: String, default: '' },
     state: { type: String, default: '' },
     district: { type: String, default: '' },
@@ -59,6 +62,11 @@ userSchema.pre('save', function (next) {
 
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
+};
+
+userSchema.methods.hashPassword = async function (candidatePassword) {
+  const salt = bcrypt.genSaltSync(10);
+  return bcrypt.hashSync(candidatePassword, salt);
 };
 
 module.exports = mongoose.model('User', userSchema);

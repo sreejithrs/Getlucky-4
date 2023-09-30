@@ -12,10 +12,12 @@
 	"USER_NOT_FOUND": "User not found",
 	"ERROR_UPDATING_USER": "Error updating the user",
 	"EMAIL_VERIFICATION_FAILED": "Could not send verification email",
-	"EMAIL_SENT_SUCCESSFULLY": "Temporary password has been sent succesfully",
+	"EMAIL_SENT_SUCCESSFULLY": "Email sent successfully",
+	"TEMP_PASSWORD_SENT": "Temporary password send successfully",
 	"VERIFICATION_CODE_SENT_SUCCESSFULLY": "Verification code sent successfully",
 	"USER_ALREADY_VERIFIED": "User already verified",
 	"WRONG_OTP": "Wrong verification code",
+	"EMAIL_CHANGED_SUCCESSFULLY": "Email changed successfully",
 	"CANNOT_CHANGE_PASSWORD": "Password already updated",
 	"CHANGE_PASSWORD_SUCCESSFUL": "Password changed successfully",
 	"LANGUAGE_CHANGE_SUCCESSFUL": "Language changed successfully",
@@ -66,5 +68,7 @@
 	"DRAW_INACTIVE": "This draw is currently inactive, please update the draw status and publish",
 	"WINNER_NOT_ANNOUNCED": "Please update the winning ticket and publish result",
 	"INVALID_DRAW_ID": "Draw not found",
-	"CART_NOT_FOUND": "Your cart is empty"
+	"CART_NOT_FOUND": "Your cart is empty",
+	"EMAIL_EXISTS": "This email is already registered, try another",
+	"EMAIL_UPDATE_NOT_ALLOWED": "Email update is not allowed"
 }

@@ -6,6 +6,7 @@ const { Router } = require('express');
 const { userAllowed } = require('../../middlewares/checkAccessControl');
 const authRoutes = require('../../v1/web/controllers/auth/auth.routes');
 const homeRoutes = require('../../v1/web/controllers/home/home.routes');
+const userRoutes = require('../../v1/web/controllers/user/user.routes');
 
 const requireAuth = passport.authenticate('accessTokenAuth', { session: false });
 
@@ -19,5 +20,7 @@ router.use(homeRoutes);
 */
 router.use(requireAuth);
 router.use(userAllowed);
+
+router.use(userRoutes);
 
 module.exports = router;

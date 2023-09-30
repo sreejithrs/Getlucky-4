@@ -48,6 +48,13 @@ module.exports = {
       return 'Confirmation Code';
     },
 
+    changeEmail: (language) => {
+      if (language === 'de') {
+        return 'Bestätigung Code';
+      }
+      return 'Update your Email';
+    },
+
     forgotPassword: (language) => {
       if (language === 'de') {
         return 'Neues Passwort';
