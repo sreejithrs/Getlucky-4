@@ -5,9 +5,9 @@ const { Schema } = mongoose;
 
 const bookingSchema = new Schema(
   {
-    cartId: { type: Schema.Types.ObjectId, ref: 'Cart' },
-    orderId: { type: Schema.Types.ObjectId },
+    orderId: { type: Schema.Types.ObjectId, ref: 'Order' },
     userId: { type: Schema.Types.ObjectId, ref: 'User' },
+    transactionId: { type: String, default: '' },
     totalPrice: { type: Number, default: 0 },
     taxAmount: { type: Number, default: 0 },
     userPaid: { type: Number, default: 0 },
