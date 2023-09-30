@@ -34,6 +34,24 @@ module.exports = {
     };
   },
 
+  changeEmail: (emailOptions) => {
+    const {
+      email, name, otp, language,
+    } = emailOptions;
+    const file = {
+      en: './emails/en/changeEmail.ejs',
+    };
+    const filePath = path.join(__dirname, file[language]);
+    const source = fs.readFileSync(filePath, 'utf8');
+    const outputString = ejs.render(source, { name, otp });
+    return {
+      from: process.env.AWS_SES_FROM_EMAIL,
+      to: email,
+      subject: emailSubject.changeEmail(language),
+      content: outputString,
+    };
+  },
+
   passwordChangeEmail: (emailOptions) => {
     const { email, language } = emailOptions;
     return {
