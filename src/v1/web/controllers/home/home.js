@@ -124,12 +124,12 @@ module.exports = {
   purchaseOrder: async (req, res, next) => {
     try {
       const { protocol, user } = req;
-      const { id } = user;
+      const { id, email } = user;
 
       const [getUserCart] = await getCartData(id);
       if (!getUserCart) return respondFailure(res, req.__(localeKeys.product.CART_NOT_FOUND), StatusCode.NOT_FOUND);
       const { totalCost, _id, data } = getUserCart;
-      const transactionId = generateOrderId();
+      const transactionId = generateOrderId('T');
 
       const bookingObj = {
         userId: id,
@@ -145,6 +145,9 @@ module.exports = {
         metadata: {
           cartId: String(_id),
           transactionId,
+        },
+        payment_intent_data: {
+          receipt_email: email,
         },
         success_url: `${protocol}://${req.get('host')}/payment?id=${transactionId}`,
         cancel_url: `${protocol}://${req.get('host')}/payment?id=${transactionId}`,
@@ -164,34 +167,6 @@ module.exports = {
         error,
         StatusCode.INTERNAL_SERVER_ERROR,
       ));
-    }
-  },
-
-  getPaymentStatus: async (req, res, next) => {
-    try {
-      const { query } = req;
-      console.log(req.query, 'query');
-      // eslint-disable-next-line camelcase
-      const { id } = query;
-      let file;
-
-      const bookingData = await commonService.findOneByFields(Booking, { transactionId: id });
-      console.log(bookingData);
-      const { paymentStatus } = bookingData;
-      const link = process.env.GETLUCKY_URL;
-      switch (paymentStatus) {
-        case 1:
-          file = 'payment/success.ejs';
-          break;
-        case 0:
-          file = 'payment/failed.ejs';
-          break;
-        default:
-          file = 'payment/failed.ejs';
-      }
-      return res.render(path.join(__dirname, `../../../../templates/${file}`), { link });
-    } catch (err) {
-      return next(respondError(err.message, StatusCode.INTERNAL_SERVER_ERROR));
     }
   },
 
@@ -227,53 +202,70 @@ module.exports = {
         console.log(cartData);
         const { products } = cartData;
 
-        const orderData = {
-          userId: cartData.userId,
-          drawId: cartData.drawId,
-          totalCost: cartData.totalCost,
-        };
-
         if (dataObject.payment_status === 'paid') {
-          orderData.status = constValues.status.ACTIVE;
+          const orderData = {
+            orderNo: generateOrderId('O'),
+            userId: cartData.userId,
+            drawId: cartData.drawId,
+            date: new Date(),
+            totalCost: cartData.totalCost,
+          };
+          const orderDetails = await new Order(orderData).save();
+          const { _id, userId } = orderDetails;
+
+          const quantityData = products.map((elem) => ({
+            orderId: _id,
+            productId: elem.productId,
+            quantity: elem.quantity,
+            cost: elem.cost,
+            ticketNumbers: elem.ticketNumbers,
+          }));
+          await Quantity.insertMany(quantityData);
+
+          bookingData.orderId = _id;
           bookingData.userPaid = totalAmount / 100;
           bookingData.paymentStatus = constValues.paymentStatus.SUCCESS;
+
+          await Booking.updateOne({ userId, transactionId }, { $set: bookingData });
           await Cart.deleteMany({ userId: cartData.userId });
         }
-
-        const orderDetails = await new Order(orderData).save();
-        const { _id, userId } = orderDetails;
-        bookingData.orderId = _id;
-        console.log(userId, transactionId);
-        const updateData = await Booking.updateOne({ userId, transactionId }, { $set: bookingData });
-        console.log(updateData);
-        const quantityData = products.map((elem) => ({
-          orderId: _id,
-          productId: elem.productId,
-          quantity: elem.quantity,
-          cost: elem.cost,
-          ticketNumbers: elem.ticketNumbers,
-        }));
-
-        await Quantity.insertMany(quantityData);
         break;
       }
-      case 'charge.failed': {
+      case 'checkout.session.expired': {
         const failedIntent = dataObject.id;
         if (!failedIntent) break;
         await Booking.updateOne({ paymentIntent: failedIntent }, { paymentStatus: constValues.paymentStatus.FAILED });
         break;
       }
-      case 'charge.expired': {
-        const expiredIntent = dataObject.id;
-        if (!expiredIntent) break;
-        await Booking.updateOne({ paymentIntent: expiredIntent }, { paymentStatus: constValues.paymentStatus.FAILURE });
-        break;
-      }
       default:
-        // eslint-disable-next-line no-console
         console.log('unhandled event...');
     }
     return respondSuccess(res, '', StatusCode.OK);
+  },
+
+  getPaymentStatus: async (req, res, next) => {
+    try {
+      const { query } = req;
+      const { id } = query;
+      let file;
+
+      const bookingData = await commonService.findOneByFields(Booking, { transactionId: id });
+      const { paymentStatus } = bookingData;
+      const link = process.env.GETLUCKY_URL;
+      switch (paymentStatus) {
+        case 1:
+          file = 'payment/success.ejs';
+          break;
+        case 0:
+          file = 'payment/failed.ejs';
+          break;
+        default:
+          file = 'payment/failed.ejs';
+      }
+      return res.render(path.join(__dirname, `../../../../templates/${file}`), { link });
+    } catch (err) {
+      return next(respondError(err.message, StatusCode.INTERNAL_SERVER_ERROR));
+    }
   },
 
 };

@@ -32,33 +32,32 @@ module.exports = {
 
   createDraw: async () => {
     const currentDate = new Date();
-    currentDate.setUTCHours(17, 0, 0, 0);
-    const nextDay = new Date(moment(currentDate).add(1));
-    const twoDaysAfter = new Date(moment(currentDate).add(2));
-    const getNextDayValues = nextDay.getDay();
-    const getTwoDayValue = twoDaysAfter.getDay();
+    let nextDay = moment(currentDate).add(1, 'd').format('YYYY-MM-DD');
+    let twoDaysAfter = moment(currentDate).add(2, 'd').format('YYYY-MM-DD');
+    const getNextDayValues = moment(nextDay).day();
+    const getTwoDayValue = moment(twoDaysAfter).day();
 
     const checkDraw = await commonService.findAllByFields(
       Draw,
       {
         $or: [
-          { $expr: { $eq: ['$date', nextDay] } },
-          { $expr: { $eq: ['$date', twoDaysAfter] } },
+          { $expr: { $eq: [{ $dateToString: { format: '%Y-%m-%d', date: '$date' } }, nextDay] } },
+          { $expr: { $eq: [{ $dateToString: { format: '%Y-%m-%d', date: '$date' } }, twoDaysAfter] } },
         ],
       },
     );
     console.log('----Cron Executed----', checkDraw);
 
+    nextDay = new Date(new Date(nextDay).setUTCHours(17, 0, 0, 0));
+    twoDaysAfter = new Date(new Date(twoDaysAfter).setUTCHours(17, 0, 0, 0));
+
     const dataToSave = {
-      drawName: constValues.drawName,
+      drawName: constValues.drawDetails.drawName,
       date: nextDay,
     };
+    if (!checkDraw.length && getNextDayValues !== 0) await commonService.save(Draw, dataToSave);
 
-    if (!checkDraw.length && getNextDayValues !== 0) {
-      await commonService.save(Draw, dataToSave);
-    }
-
-    const getTwoDaysAfter = checkDraw.map((elem) => elem.date === twoDaysAfter);
+    const getTwoDaysAfter = checkDraw.filter((elem) => String(elem.date) === String(twoDaysAfter));
     if (!getTwoDaysAfter.length && getTwoDayValue !== 0) {
       dataToSave.date = twoDaysAfter;
       await commonService.save(Draw, dataToSave);

@@ -55,7 +55,6 @@ module.exports = {
       {
         $match: {
           drawId: ObjectId(drawId),
-          status: constValues.status.ACTIVE,
         },
       },
       {

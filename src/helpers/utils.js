@@ -1,7 +1,7 @@
+const crypto = require('crypto');
 const AWS = require('aws-sdk');
 const passwordGenerator = require('secure-random-password');
 const EmailValidator = require('email-deep-validator');
-const { v4: uuidv4 } = require('uuid');
 
 const emailValidator = new EmailValidator();
 
@@ -46,7 +46,10 @@ const checkEmailValidOrNot = async (email) => {
 
 const getMessageFromValidationError = (error) => error.details[0].message.replace(/"/g, '');
 
-const generateOrderId = () => `ORDER_${uuidv4()}`;
+const generateOrderId = (value) => {
+  const id = crypto.randomBytes(16).toString('hex');
+  return `${value}${id}`;
+};
 
 // WORKS ON AWS S3
 const uploadImage = async (file, bucketName, fileName, contentType) => {

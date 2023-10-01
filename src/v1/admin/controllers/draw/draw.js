@@ -32,7 +32,7 @@ module.exports = {
       if (checkDraw) return respondFailure(res, req.__(localeKeys.admin.DRAW_ALREADY_EXISTS), StatusCode.CONFLICT);
 
       body.date = new Date(drawDate).setUTCHours(17, 0, 0, 0);
-      body.drawName = constValues.drawName;
+      body.drawName = constValues.drawDetails.drawName;
 
       await commonService.save(Draw, body);
       return respondSuccess(res, req.__(localeKeys.global.ADDED_SUCCESSFULLY), StatusCode.OK);
