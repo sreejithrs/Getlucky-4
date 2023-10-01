@@ -140,7 +140,7 @@ const getPermutations = (value) => {
 };
 
 const generate3DigitId = (lastPayoutNumber) => `#${lastPayoutNumber.toString().padStart(3, '0')}`;
-const generate6DigitId = (value, lastPayoutNumber) => `#${value}${lastPayoutNumber.toString().padStart(6, '0')}`;
+const generate6DigitId = (value, lastPayoutNumber) => `${value}${lastPayoutNumber.toString().padStart(6, '0')}`;
 
 module.exports = {
   generateVerificationCode,
