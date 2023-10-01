@@ -1,9 +1,9 @@
 // modules
 const { ObjectId } = require('mongoose').Types;
 // models
-const { Order } = require('../../../models/index');
+const { Order, Booking } = require('../../../models/index');
 // helpers
-// const constValues = require('../../../../helpers/constants');
+const constValues = require('../../../../helpers/constants');
 
 module.exports = {
 
@@ -12,18 +12,20 @@ module.exports = {
     const { skip, limit, year } = query;
     const { id } = user;
     let skipLimitQuery = [];
+    let currentYear = new Date().getFullYear();
 
     if (skip && limit) {
       skipLimitQuery = [{ $skip: Number(skip) }, { $limit: Number(limit) }];
     }
-    console.log(skipLimitQuery );
+    if (year && year !== '') currentYear = Number(year);
+    console.log(skipLimitQuery);
 
     return Order.aggregate([
       {
         $match: {
           $expr: {
             $and: [
-              { $eq: [{ $year: '$date' }, Number(year)] },
+              { $eq: [{ $year: '$date' }, currentYear] },
               { $eq: ['$userId', ObjectId(id)] },
             ],
           },
@@ -79,6 +81,65 @@ module.exports = {
         },
       },
       ...skipLimitQuery,
+    ]);
+  },
+
+  getUserTransactions: (req) => {
+    const { user } = req;
+    const { id } = user;
+
+    return Booking.aggregate([
+      {
+        $match: {
+          userId: ObjectId(id),
+        },
+      },
+      {
+        $lookup: {
+          from: 'orders',
+          localField: 'orderId',
+          foreignField: '_id',
+          as: 'orderData',
+        },
+      },
+      {
+        $unwind: { path: '$orderData', preserveNullAndEmptyArrays: true },
+      },
+      {
+        $group: {
+          _id: '$_id',
+          transactionId: { $first: '$transactionId' },
+          paymentStatus: {
+            $first: {
+              $switch: {
+                branches: [
+                  {
+                    case: { $eq: ['$paymentStatus', constValues.paymentStatus.SUCCESS] },
+                    then: 'Complete',
+                  },
+                  {
+                    case: { $eq: ['$paymentStatus', constValues.paymentStatus.PENDING] },
+                    then: 'Pending',
+                  },
+                  {
+                    case: { $eq: ['$paymentStatus', constValues.paymentStatus.FAILED] },
+                    then: 'Failed',
+                  },
+                ],
+                default: 'Not Available',
+              },
+            },
+          },
+          date: { $first: '$date' },
+          amount: { $first: '$userPaid' },
+          ticketId: { $first: '$orderData.ticketId' },
+        },
+      },
+      {
+        $sort: {
+          date: -1,
+        },
+      },
     ]);
   },
 

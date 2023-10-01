@@ -14,7 +14,7 @@ const commonService = require('../../../services/common.service');
 const localeKeys = require('../../../../locales/keys.json');
 const StatusCode = require('../../../../helpers/statusCodes.json');
 const constValues = require('../../../../helpers/constants');
-const { getMessageFromValidationError, generateOrderId } = require('../../../../helpers/utils');
+const { getMessageFromValidationError } = require('../../../../helpers/utils');
 const { getAllProducts, getOrderData, getCartData } = require('./home.service');
 
 module.exports = {
@@ -129,16 +129,15 @@ module.exports = {
       const [getUserCart] = await getCartData(id);
       if (!getUserCart) return respondFailure(res, req.__(localeKeys.product.CART_NOT_FOUND), StatusCode.NOT_FOUND);
       const { totalCost, _id, data } = getUserCart;
-      const transactionId = generateOrderId();
 
       const bookingObj = {
         userId: id,
         totalPrice: totalCost,
         taxAmount: (5 / 100) * totalCost,
-        transactionId,
       };
 
       const bookingData = await commonService.save(Booking, bookingObj);
+      const { transactionId } = bookingData;
       const session = await stripe.checkout.sessions.create({
         line_items: data,
         mode: 'payment',
@@ -152,8 +151,7 @@ module.exports = {
         success_url: `${protocol}://${req.get('host')}/payment?id=${transactionId}`,
         cancel_url: `${protocol}://${req.get('host')}/payment?id=${transactionId}`,
       });
-      bookingData.paymentIntent = session.id;
-      await bookingData.save();
+      await commonService.updateById(Booking, bookingData._id, { $set: { paymentIntent: session.id } });
       const redirectUrl = session.url;
 
       return respondSuccess(
@@ -247,11 +245,13 @@ module.exports = {
     try {
       const { query } = req;
       const { id } = query;
-      let file;
+      let file = 'payment/404.ejs';
+      const link = process.env.GETLUCKY_URL;
 
       const bookingData = await commonService.findOneByFields(Booking, { transactionId: id });
+      if (!bookingData) return res.render(path.join(__dirname, `../../../../templates/${file}`), { link });
+
       const { paymentStatus } = bookingData;
-      const link = process.env.GETLUCKY_URL;
       switch (paymentStatus) {
         case 1:
           file = 'payment/success.ejs';

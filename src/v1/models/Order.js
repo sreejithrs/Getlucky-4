@@ -21,8 +21,7 @@ const orderSchema = new Schema(
 orderSchema.pre('save', async function () {
   const draw = this;
   const counter = await Counter.findOneAndUpdate({ _id: 'orders' }, { $inc: { seq_value: 1 } }, { returnOriginal: false, upsert: true });
-  const value = 'TK';
-  draw.ticketId = generate6DigitId(value, counter.seq_value);
+  draw.ticketId = generate6DigitId('#TK', counter.seq_value);
 });
 
 module.exports = mongoose.model('Order', orderSchema);
