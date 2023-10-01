@@ -46,9 +46,9 @@ const checkEmailValidOrNot = async (email) => {
 
 const getMessageFromValidationError = (error) => error.details[0].message.replace(/"/g, '');
 
-const generateOrderId = (value) => {
+const generateOrderId = () => {
   const id = crypto.randomBytes(16).toString('hex');
-  return `${value}${id}`;
+  return `T${id}`;
 };
 
 // WORKS ON AWS S3
@@ -140,6 +140,7 @@ const getPermutations = (value) => {
 };
 
 const generate3DigitId = (lastPayoutNumber) => `#${lastPayoutNumber.toString().padStart(3, '0')}`;
+const generate6DigitId = (value, lastPayoutNumber) => `#${value}${lastPayoutNumber.toString().padStart(6, '0')}`;
 
 module.exports = {
   generateVerificationCode,
@@ -154,4 +155,5 @@ module.exports = {
   getPermutations,
   generateOrderId,
   generate4DigitOTP,
+  generate6DigitId,
 };

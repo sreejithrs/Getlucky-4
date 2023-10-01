@@ -15,6 +15,7 @@ const constValues = require('../../../../helpers/constants');
 const { getMessageFromValidationError } = require('../../../../helpers/utils');
 const { sendMail } = require('../../../../helpers/notification');
 const { changeEmail } = require('../../../../templates/emailTemplate');
+const { getUserTickets } = require('./user.service');
 
 module.exports = {
 
@@ -155,4 +156,20 @@ module.exports = {
     }
   },
 
+  getUserTickets: async (req, res, next) => {
+    try {
+      const userTickets = await getUserTickets(req);
+      return respondSuccess(
+        res,
+        req.__(localeKeys.global.REQUEST_WAS_SUCCESSFUL),
+        StatusCode.OK,
+        userTickets,
+      );
+    } catch (error) {
+      return next(respondError(
+        error,
+        StatusCode.INTERNAL_SERVER_ERROR,
+      ));
+    }
+  },
 };
