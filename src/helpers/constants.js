@@ -3,7 +3,9 @@ const allowedLanguages = ['en', 'de'];
 module.exports = {
   allowedLanguages,
 
-  drawName: 'Getlucky Draw',
+  drawDetails: {
+    drawName: 'Getlucky Draw',
+  },
 
   priceAmount: {
     STRAIGHT: 3000,

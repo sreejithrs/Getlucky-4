@@ -3,14 +3,15 @@ const moment = require('moment');
 const { ObjectId } = require('mongoose').Types;
 // models
 const { Product, Cart } = require('../../../models/index');
+// helpers
+const constValues = require('../../../../helpers/constants');
 
 module.exports = {
 
   getAllProducts: async (req) => {
     const userId = req.user ? req.user.id : null;
     const currentDate = new Date();
-    const oneDayAdd = new Date(moment(currentDate, 'YYYY-MM-DD').add(1, 'days'));
-    const twoDaysAdd = new Date(moment(currentDate, 'YYYY-MM-DD').add(2, 'days'));
+    const currentDateFormat = moment(currentDate).format('YYYY-MM-DDTHH:mm:ss');
 
     return Product.aggregate([
       {
@@ -37,57 +38,51 @@ module.exports = {
           from: 'draws',
           pipeline: [
             {
+              $addFields: {
+                hourUTC: { $hour: { date: '$date' } },
+                minuteUTC: { $minute: { date: '$date' } },
+                secondUTC: { $second: { date: '$date' } },
+              },
+            },
+            {
               $match: {
                 $and: [
                   {
-                    status: true,
+                    $expr: {
+                      $ne: [{ $dayOfWeek: { date: '$date' } }, 1],
+                    },
                   },
+                  { status: constValues.status.ACTIVE },
                   {
                     $or: [
                       {
-                        $and: [
-                          {
-                            $expr: {
-                              $gte: [
-                                '$date',
-                                currentDate,
-                              ],
-                            },
-                          },
-                          {
-                            $expr: {
-                              $lte: [
-                                oneDayAdd,
-                                '$date',
-                              ],
-                            },
-                          },
-                        ],
+                        $expr: {
+                          $gte: [
+                            { $dateToString: { format: '%Y-%m-%dT%H:%M:%S', date: '$date' } },
+                            currentDateFormat,
+                          ],
+                        },
                       },
                       {
-                        $and: [
-                          {
-                            $expr: {
-                              $gte: [
-                                '$date',
-                                currentDate,
-                              ],
-                            },
-                          },
-                          {
-                            $expr: {
-                              $lte: [
-                                twoDaysAdd,
-                                '$date',
-                              ],
-                            },
-                          },
-                        ],
+                        $expr: {
+                          $gt: [
+                            { $dateToString: { format: '%Y-%m-%d', date: '$date' } },
+                            currentDateFormat,
+                          ],
+                        },
                       },
                     ],
                   },
                 ],
               },
+            },
+            {
+              $sort: {
+                date: 1,
+              },
+            },
+            {
+              $limit: 1,
             },
           ],
           as: 'drawDetails',
@@ -98,30 +93,7 @@ module.exports = {
       },
       {
         $group: {
-          _id: {
-            $min: {
-              $cond: [
-                {
-                  $eq: [
-                    {
-                      $dateToString: {
-                        format: '%Y-%m-%d',
-                        date: '$drawDetails.date',
-                      },
-                    },
-                    oneDayAdd,
-                  ],
-                },
-                {
-                  $dateToString: {
-                    format: '%Y-%m-%d',
-                    date: '$drawDetails.date',
-                  },
-                },
-                twoDaysAdd,
-              ],
-            },
-          },
+          _id: '$drawDetails._id',
           drawId: { $first: { $ifNull: ['$drawDetails._id', ''] } },
           drawName: { $first: { $ifNull: [{ $concat: ['$drawDetails.drawName', ' ', '$drawDetails.drawNo'] }, ''] } },
           drawDate: { $first: { $ifNull: [{ $dateToString: { format: '%Y-%m-%d', date: '$drawDetails.date' } }, ''] } },
