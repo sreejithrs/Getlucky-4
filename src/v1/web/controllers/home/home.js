@@ -129,7 +129,7 @@ module.exports = {
       const [getUserCart] = await getCartData(id);
       if (!getUserCart) return respondFailure(res, req.__(localeKeys.product.CART_NOT_FOUND), StatusCode.NOT_FOUND);
       const { totalCost, _id, data } = getUserCart;
-      const transactionId = generateOrderId('T');
+      const transactionId = generateOrderId();
 
       const bookingObj = {
         userId: id,
@@ -199,12 +199,12 @@ module.exports = {
         console.log(cartId, transactionId);
 
         const cartData = await Cart.findOne({ _id: cartId }).lean();
+        if (!cartData) return true;
         console.log(cartData);
         const { products } = cartData;
 
         if (dataObject.payment_status === 'paid') {
           const orderData = {
-            orderNo: generateOrderId('O'),
             userId: cartData.userId,
             drawId: cartData.drawId,
             date: new Date(),
