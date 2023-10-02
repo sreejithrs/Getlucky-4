@@ -77,7 +77,9 @@ module.exports = {
     try {
       const { params } = req;
       const { skip, limit } = params;
-      const usersList = await commonService.findAllBySkipLimit(User, { userType: constValues.userType.USER }, Number(skip), Number(limit), '_id name email phoneNumber country');
+      const usersList = await commonService.findAllBySkipLimit(User, { userType: constValues.userType.USER }, { _id: -1 }, Number(skip), Number(limit), {
+        _id: 1, name: 1, email: 1, phoneNumber: 1, country: 1,
+      });
       const totalUsers = await commonService.count(User, { userType: constValues.userType.USER });
       return respondSuccess(
         res,

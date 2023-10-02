@@ -61,8 +61,14 @@ module.exports = {
         const emailOptions = {
           email, password: otp, name, language,
         };
-        sendMail(forgotPasswordEmail(emailOptions));
-      } else sendSMS(otp, phoneNumber);
+        process.nextTick(() => sendMail(forgotPasswordEmail(emailOptions)));
+      } else {
+        const smsContent = {
+          phoneNumber,
+          message: constValues.smsContent(otp),
+        };
+        process.nextTick(() => sendSMS(smsContent));
+      }
     }
   },
 };

@@ -8,7 +8,7 @@ module.exports = {
   validateSignIn: (input) => {
     const schema = Joi.object().keys({
       phoneNumber: Joi.string().pattern(/^[+]?[0-9]+$/),
-      email: Joi.string().email({ minDomainSegments: 2 }),
+      email: Joi.string().email({ minDomainSegments: 2 }).allow(''),
       password: Joi.string().min(6).required(),
     }).xor('phoneNumber', 'email').messages({
       'object.xor': 'Either email or phoneNumber is required, not both',

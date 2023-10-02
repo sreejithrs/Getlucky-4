@@ -2,7 +2,7 @@
 const { ObjectId } = require('mongoose').Types;
 
 // models
-const { Order, Winner, Draw } = require('../../../models/index');
+const { Order, Winner } = require('../../../models/index');
 
 // helpers
 const constValues = require('../../../../helpers/constants');
@@ -18,22 +18,32 @@ module.exports = {
 
     const straightQuery = { $in: straight };
     const rumbleQuery = { $in: mixNumbers };
-    const chanceQuery = {
-      $regex: regexPattern,
-    };
+    const chanceQuery = { $regex: regexPattern };
 
-    const filterChanceQuery = { $regexMatch: { input: '$$ticket', regex: regexPattern } };
+    const filterChanceQuery = {
+      $and: [
+        {
+          $ne: ['$$ticket', ticket],
+        },
+        {
+          $regexMatch: {
+            input: '$$ticket',
+            regex: regexPattern,
+          },
+        },
+      ],
+    };
     const filterRumbleQuery = { $in: ['$$ticket', mixNumbers] };
     const filterStraightQuery = { $in: ['$$ticket', straight] };
 
     const chanceObj = {
-      query: chanceQuery, filterQuery: filterChanceQuery, category: constValues.priceCategory.CHANCE, price: constValues.priceAmount.CHANCE,
+      query: chanceQuery, filterQuery: filterChanceQuery, category: constValues.priceCategory.CHANCE, price: constValues.priceAmount.chance,
     };
     const rumbleObj = {
-      query: rumbleQuery, filterQuery: filterRumbleQuery, category: constValues.priceCategory.RUMBLE, price: constValues.priceAmount.RUMBLE,
+      query: rumbleQuery, filterQuery: filterRumbleQuery, category: constValues.priceCategory.RUMBLE, price: constValues.priceAmount.rumble,
     };
     const straightObj = {
-      query: straightQuery, filterQuery: filterStraightQuery, category: constValues.priceCategory.STRAIGHT, price: constValues.priceAmount.STRAIGHT,
+      query: straightQuery, filterQuery: filterStraightQuery, category: constValues.priceCategory.STRAIGHT, price: constValues.priceAmount.straight,
     };
 
     const winnersChance = await module.exports.findWinner(drawId, chanceObj);
@@ -41,9 +51,8 @@ module.exports = {
     const straightRumble = await module.exports.findWinner(drawId, straightObj);
     const dateToSave = [...winnersChance, ...winnersRumble, ...straightRumble];
 
-    console.log(dateToSave);
     const getWinners = await commonService.findAllByFields(Winner, { drawId });
-    if (getWinners.length) await commonService.delete({ drawId });
+    if (getWinners.length) await commonService.delete(Winner, { drawId });
     if (dateToSave.length) await commonService.insertMany(Winner, dateToSave);
   },
 
@@ -105,12 +114,18 @@ module.exports = {
           userId: { $first: '$userId' },
           productId: { $first: '$product._id' },
           ticketNumbers: { $push: '$pin' },
+          raffleId: { $first: '$tickets.raffleId' },
           matchOrder: { $first: category },
         },
       },
       {
         $addFields: {
           priceAmount: { $multiply: [price, { $size: '$ticketNumbers' }] },
+        },
+      },
+      {
+        $match: {
+          ticketNumbers: { $not: { $size: 0 } },
         },
       },
       {
@@ -121,31 +136,4 @@ module.exports = {
     ]);
   },
 
-  drawResult: async (drawId) => Draw.aggregate([
-    {
-      $match: {
-        _id: ObjectId(drawId),
-      },
-    },
-    {
-      $lookup: {
-        from: 'winners',
-        localField: '_id',
-        foreignField: 'drawId',
-        as: 'winners',
-      },
-    },
-    {
-      $group: {
-        _id: '$_id',
-        drawName: { $first: '$drawName' },
-        drawNo: { $first: '$drawNo' },
-        date: { $first: { $dateToString: { format: '%Y-%m-%d', date: '$date' } } },
-        winners: { $first: '$winners' },
-        straight: { $first: '$straight' },
-        rumble: { $first: '$rumble' },
-        chance: { $first: '$chance' },
-      },
-    },
-  ]),
 };
