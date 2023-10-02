@@ -14,9 +14,17 @@ const drawSchema = new Schema(
     isTicketAdded: { type: Boolean, default: false },
     date: { type: Date },
     link: { type: String, default: '' },
-    straight: { type: String, default: '' },
-    mix: [{ type: String }],
-    chance: [{ type: String }],
+    totalWonPrice: { type: Number, default: 0 },
+    totalWinners: { type: Number, default: 0 },
+    wonTicket: { type: String, default: '' },
+    result: [
+      {
+        category: { type: String, enum: ['straight', 'rumble', 'chance'] },
+        tickets: [{ type: String }],
+        totalPrices: { type: Number },
+        winnersCount: { type: Number },
+      },
+    ],
   },
   {
     timestamps: true,

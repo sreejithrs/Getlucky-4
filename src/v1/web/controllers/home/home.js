@@ -104,23 +104,6 @@ module.exports = {
     }
   },
 
-  getDrawList: async (req, res, next) => {
-    try {
-      const drawList = await commonService.findAllByFields(Draw, { isCompleted: constValues.status.ACTIVE }, { _id: 1, name: { $concat: ['$drawName', ' ', '$drawNo'] } }, { date: -1 });
-      return respondSuccess(
-        res,
-        req.__(localeKeys.global.REQUEST_WAS_SUCCESSFUL),
-        StatusCode.OK,
-        drawList,
-      );
-    } catch (error) {
-      return next(respondError(
-        error,
-        StatusCode.INTERNAL_SERVER_ERROR,
-      ));
-    }
-  },
-
   purchaseOrder: async (req, res, next) => {
     try {
       const { protocol, user } = req;

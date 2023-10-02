@@ -7,7 +7,6 @@ const requireAuth = passport.authenticate('accessTokenAuth', { session: false })
 
 const router = Router();
 
-router.get('/home/draws', homeController.getDrawList);
 router.get('/home/play', checkAccessToken, homeController.getProducts);
 router.post('/home/order', requireAuth, homeController.createOrder);
 router.get('/home/order', requireAuth, homeController.getOrder);

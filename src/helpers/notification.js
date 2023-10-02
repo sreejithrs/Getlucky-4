@@ -2,10 +2,6 @@
 const AWS = require('aws-sdk');
 const nodemailer = require('nodemailer');
 
-const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
-const client = require('twilio')(accountSid, authToken);
-
 module.exports = {
 
   sendMail: (options) => {
@@ -17,8 +13,8 @@ module.exports = {
       SES: new AWS.SES({
         apiVersion: '2010-12-01',
         region: process.env.AWS_SES_REGION,
-        accessKeyId: process.env.AWS_SES_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SES_SECRET_ACCESS_KEY,
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
       }),
     });
     const mailOptions = {
@@ -37,14 +33,27 @@ module.exports = {
     });
   },
 
-  sendSMS: (verificationCode, phoneNumber) => {
-    client.messages
-      .create({
-        body: `Your OTP for Getlucky-4 is ${verificationCode}`,
-        from: '+16184485340',
-        to: phoneNumber,
-      })
-      // eslint-disable-next-line no-console
-      .then((message) => console.log(message.sid)).catch((err) => console.error(err));
+  sendSMS: async (smsOptions) => {
+    AWS.config.update({
+      region: process.env.AWS_SNS_REGION,
+      accessKeyId: process.env.AWS_SMS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SMS_SECRET_ACCESS_KEY,
+    });
+
+    const { message, phoneNumber } = smsOptions;
+    const params = {
+      Message: message,
+      PhoneNumber: phoneNumber,
+    };
+
+    try {
+      const sns = new AWS.SNS({ apiVersion: '2010-03-31' });
+      const data = await sns.publish(params).promise();
+      console.log(data, 'data');
+      return true;
+    } catch (e) {
+      console.log(e);
+      return false;
+    }
   },
 };

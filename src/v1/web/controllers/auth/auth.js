@@ -50,7 +50,12 @@ module.exports = {
       body.userType = constValues.userType.USER;
       await commonService.save(User, body);
 
-      sendSMS(verificationCode, phoneNumber);
+      const smsContent = {
+        phoneNumber,
+        message: constValues.smsContent(verificationCode),
+      };
+
+      process.nextTick(() => sendSMS(smsContent));
       const userDetails = await commonService.findOneByFields(User, { email });
       return respondSuccess(
         _res,
@@ -114,7 +119,7 @@ module.exports = {
       const { error } = validateResendOtpCode(body);
 
       const userExist = await module.exports.validateAndCheckExists(error, req);
-      if (userExist.isVerified) return respondFailure(res, req.__(localeKeys.auth.USER_ALREADY_VERIFIED), StatusCode.CONFLICT);
+      // if (userExist.isVerified) return respondFailure(res, req.__(localeKeys.auth.USER_ALREADY_VERIFIED), StatusCode.CONFLICT);
       if (userExist.verifyOtpMax === 4) await commonService.updateById(User, userExist._id, { $set: { verifyOtpTime: Date.now() } });
 
       const dateDiff = moment().diff(userExist.verifyOtpTime, 'minutes');

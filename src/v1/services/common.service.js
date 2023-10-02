@@ -110,9 +110,9 @@ const commonService = {
   * @Description Method for render reset password page
   *
   */
-  findAllBySkipLimit: async (model, query, skip, limit, select = '') => {
+  findAllBySkipLimit: async (model, query, sort, skip, limit, select = {}) => {
     try {
-      const getAll = await model.find(query).skip(skip).limit(limit).select(select);
+      const getAll = await model.find(query, select).sort(sort).skip(skip).limit(limit);
       if (!getAll) {
         return null;
       }

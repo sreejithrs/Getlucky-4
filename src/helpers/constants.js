@@ -1,16 +1,19 @@
 const allowedLanguages = ['en', 'de'];
+const drawCategoryArray = ['straight', 'rumble', 'chance'];
 
 module.exports = {
   allowedLanguages,
+
+  drawCategoryArray,
 
   drawDetails: {
     drawName: 'Getlucky Draw',
   },
 
   priceAmount: {
-    STRAIGHT: 3000,
-    RUMBLE: 1000,
-    CHANCE: 100,
+    straight: 3000,
+    rumble: 1000,
+    chance: 100,
   },
 
   priceCategory: {
@@ -40,6 +43,8 @@ module.exports = {
     FIRST: 1,
     SECOND: 2,
   },
+
+  smsContent: (otp) => `Your OTP for mobile number verification in Getlucky4 is ${otp}. Please use this 4-digit code within the next 3 minutes. For your security, do not share this code with anyone`,
 
   emailSubject: {
 

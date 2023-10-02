@@ -10,7 +10,8 @@ const commonService = require('../../../services/common.service');
 const localeKeys = require('../../../../locales/keys.json');
 const StatusCode = require('../../../../helpers/statusCodes.json');
 const constValues = require('../../../../helpers/constants');
-const { calculateDrawResult, drawResult } = require('./draw.service');
+const { calculateDrawResult } = require('./draw.service');
+const { drawResult } = require('../../../common/common.service');
 const { getMessageFromValidationError } = require('../../../../helpers/utils');
 
 module.exports = {
@@ -83,14 +84,28 @@ module.exports = {
       };
 
       if (ticketNumber && ticketNumber !== '') {
-        console.log('heh');
         dataToSet.isTicketAdded = constValues.status.ACTIVE;
+        dataToSet.wonTicket = ticketNumber;
         calculateDrawResult(ticketNumber, drawId);
       }
 
-      console.log(dataToSet);
       await commonService.updateById(Draw, drawId, { $set: dataToSet });
       return respondSuccess(res, req.__(localeKeys.global.UPDATED_SUCCESSFULLY), StatusCode.OK);
+    } catch (error) {
+      return next(respondError(
+        error,
+        StatusCode.INTERNAL_SERVER_ERROR,
+      ));
+    }
+  },
+
+  getDrawResult: async (req, res, next) => {
+    try {
+      const { params } = req;
+      const { drawId } = params;
+
+      const drawResults = await drawResult(drawId);
+      return respondSuccess(res, req.__(localeKeys.global.REQUEST_WAS_SUCCESSFUL), StatusCode.OK, drawResults);
     } catch (error) {
       return next(respondError(
         error,
@@ -110,23 +125,14 @@ module.exports = {
       if (!drawData.isTicketAdded) return respondFailure(res, req.__(localeKeys.product.WINNER_NOT_ANNOUNCED), StatusCode.FORBIDDEN);
       if (drawData.isCompleted) return respondFailure(res, req.__(localeKeys.product.DRAW_COMPLETED), StatusCode.FORBIDDEN);
 
-      await commonService.updateById(Draw, drawId, { $set: { isCompleted: constValues.status.ACTIVE } });
+      const drawDetails = await drawResult(drawId);
+      const { totalWinners, totalWonPrice, result } = drawDetails;
+      await commonService.updateById(Draw, drawId, {
+        $set: {
+          isCompleted: constValues.status.ACTIVE, totalWinners, totalWonPrice, result,
+        },
+      });
       return respondSuccess(res, req.__(localeKeys.global.UPDATED_SUCCESSFULLY), StatusCode.OK);
-    } catch (error) {
-      return next(respondError(
-        error,
-        StatusCode.INTERNAL_SERVER_ERROR,
-      ));
-    }
-  },
-
-  getDrawResult: async (req, res, next) => {
-    try {
-      const { params } = req;
-      const { drawId } = params;
-
-      const drawResults = await drawResult(drawId);
-      return respondSuccess(res, req.__(localeKeys.global.REQUEST_WAS_SUCCESSFUL), StatusCode.OK, drawResults);
     } catch (error) {
       return next(respondError(
         error,
