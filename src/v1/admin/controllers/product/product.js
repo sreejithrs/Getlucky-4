@@ -8,7 +8,6 @@ const commonService = require('../../../services/common.service');
 const localeKeys = require('../../../../locales/keys.json');
 const StatusCode = require('../../../../helpers/statusCodes.json');
 const { getMessageFromValidationError, uploadFileCode, deleteFileFromS3 } = require('../../../../helpers/utils');
-const { createStripeProduct } = require('./product.service');
 
 module.exports = {
 
@@ -43,7 +42,6 @@ module.exports = {
       if (!uploadImage) return respondFailure(res, req.__(localeKeys.upload.FAILED_TO_UPLOAD_FILE), StatusCode.INTERNAL_SERVER_ERROR);
 
       body.image = uploadImage;
-      createStripeProduct(body);
       await commonService.save(Product, body);
       return respondSuccess(res, req.__(localeKeys.global.ADDED_SUCCESSFULLY), StatusCode.OK);
     } catch (error) {
