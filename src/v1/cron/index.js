@@ -21,7 +21,7 @@ schedule.scheduleJob(rule, async () => {
 
 // Execute a cron job every day 9:00:00 pm UTC
 rule.hour = 17;
-rule.minute = 30;
+rule.minute = 0;
 
 // Execute a cron job every half hour
 schedule.scheduleJob(rule, async () => {

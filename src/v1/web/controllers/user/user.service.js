@@ -143,4 +143,116 @@ module.exports = {
     ]);
   },
 
+  getPDFInvoiceData: (id) => Booking.aggregate([
+    {
+      $match: {
+        transactionId: id,
+      },
+    },
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'userId',
+        foreignField: '_id',
+        as: 'userData',
+      },
+    },
+    {
+      $unwind: { path: '$userData', preserveNullAndEmptyArrays: true },
+    },
+    {
+      $lookup: {
+        from: 'orders',
+        localField: 'orderId',
+        foreignField: '_id',
+        pipeline: [
+          {
+            $lookup: {
+              from: 'quantities',
+              localField: '_id',
+              foreignField: 'orderId',
+              pipeline: [
+                {
+                  $lookup: {
+                    from: 'products',
+                    localField: 'productId',
+                    foreignField: '_id',
+                    as: 'productData',
+                  },
+                },
+                {
+                  $unwind: { path: '$productData', preserveNullAndEmptyArrays: true },
+                },
+              ],
+              as: 'tickets',
+            },
+          },
+          {
+            $addFields: {
+              sequenceNumber: {
+                $add: [
+                  { $indexOfArray: [['$$CURRENT'], '$$CURRENT'] },
+                  1,
+                ],
+              },
+            },
+          },
+          {
+            $unwind: { path: '$tickets', preserveNullAndEmptyArrays: true },
+          },
+        ],
+        as: 'orderData',
+      },
+    },
+    {
+      $unwind: { path: '$orderData', preserveNullAndEmptyArrays: true },
+    },
+    {
+      $group: {
+        _id: '$_id',
+        transactionId: { $first: '$transactionId' },
+        invoiceId: { $first: '$invoiceId' },
+        date: { $first: { $dateToString: { format: '%Y-%m-%d', date: '$date' } } },
+        paymentStatus: {
+          $first: {
+            $switch: {
+              branches: [
+                {
+                  case: { $eq: ['$paymentStatus', constValues.paymentStatus.SUCCESS] },
+                  then: 'Complete',
+                },
+                {
+                  case: { $eq: ['$paymentStatus', constValues.paymentStatus.PENDING] },
+                  then: 'Pending',
+                },
+                {
+                  case: { $eq: ['$paymentStatus', constValues.paymentStatus.FAILED] },
+                  then: 'Failed',
+                },
+              ],
+              default: 'Not Available',
+            },
+          },
+        },
+        name: { $first: '$userData.name' },
+        email: { $first: { $ifNull: ['$userData.email', ''] } },
+        building: { $first: '$userData.building' },
+        district: { $first: '$userData.district' },
+        state: { $first: '$userData.state' },
+        country: { $first: '$userData.country' },
+        totalAmount: { $first: '$userPaid' },
+        products: {
+          $push: {
+            siNo: '$orderData.sequenceNumber',
+            productName: '$orderData.tickets.productData.name',
+            tickets: { $first: '$orderData.tickets.ticketNumbers' },
+            quantity: '$orderData.tickets.quantity',
+            cost: '$orderData.tickets.productData.cost',
+            totalCost: '$orderData.tickets.cost',
+          },
+        },
+      },
+    },
+  ]),
+
 };

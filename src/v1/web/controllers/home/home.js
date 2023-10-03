@@ -1,5 +1,4 @@
 // model
-const path = require('path');
 const { ObjectId } = require('mongoose').Types;
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 // models
@@ -48,7 +47,7 @@ module.exports = {
 
       const getDraw = await commonService.findOneById(Draw, drawId);
       if (!getDraw) return respondFailure(res, req.__(localeKeys.product.DRAW_NOT_FOUND), StatusCode.NOT_FOUND);
-      if (getDraw.date < currentDate) return respondFailure(res, req.__(localeKeys.product.DRAW_EXPIRED), StatusCode.FORBIDDEN);
+      if (getDraw.date <= currentDate) return respondFailure(res, req.__(localeKeys.product.DRAW_EXPIRED), StatusCode.FORBIDDEN);
 
       const productIdArray = data.map((elem) => elem.productId);
       const getProducts = await commonService.findAllByFields(Product, { _id: { $in: productIdArray } });
@@ -131,9 +130,10 @@ module.exports = {
         payment_intent_data: {
           receipt_email: email,
         },
-        success_url: `${protocol}://${req.get('host')}/payment?id=${transactionId}`,
-        cancel_url: `${protocol}://${req.get('host')}/payment?id=${transactionId}`,
+        success_url: `${protocol}://${req.get('host')}/ticket-view?id=${transactionId}`,
+        cancel_url: `${protocol}://${req.get('host')}/ticket-view?id=${transactionId}`,
       });
+      if (!session) return respondFailure(res, req.__(localeKeys.product.PAYMENT_ERROR), StatusCode.INTERNAL_SERVER_ERROR);
       await commonService.updateById(Booking, bookingData._id, { $set: { paymentIntent: session.id } });
       const redirectUrl = session.url;
 
@@ -222,33 +222,6 @@ module.exports = {
         console.log('unhandled event...');
     }
     return respondSuccess(res, '', StatusCode.OK);
-  },
-
-  getPaymentStatus: async (req, res, next) => {
-    try {
-      const { query } = req;
-      const { id } = query;
-      let file = 'payment/404.ejs';
-      const link = process.env.GETLUCKY_URL;
-
-      const bookingData = await commonService.findOneByFields(Booking, { transactionId: id });
-      if (!bookingData) return res.render(path.join(__dirname, `../../../../templates/${file}`), { link });
-
-      const { paymentStatus } = bookingData;
-      switch (paymentStatus) {
-        case 1:
-          file = 'payment/success.ejs';
-          break;
-        case 0:
-          file = 'payment/failed.ejs';
-          break;
-        default:
-          file = 'payment/failed.ejs';
-      }
-      return res.render(path.join(__dirname, `../../../../templates/${file}`), { link });
-    } catch (err) {
-      return next(respondError(err.message, StatusCode.INTERNAL_SERVER_ERROR));
-    }
   },
 
 };
