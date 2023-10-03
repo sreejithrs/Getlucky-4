@@ -1,5 +1,9 @@
 // model
+const fs = require('fs');
+const path = require('path');
 const _ = require('lodash');
+const ejs = require('ejs');
+const PDFDocument = require('pdfkit');
 // models
 const {
   User, Cart, Booking, Quantity, Order, Winner,
@@ -15,7 +19,7 @@ const constValues = require('../../../../helpers/constants');
 const { getMessageFromValidationError } = require('../../../../helpers/utils');
 const { sendMail } = require('../../../../helpers/notification');
 const { changeEmail } = require('../../../../templates/emailTemplate');
-const { getUserTickets, getUserTransactions } = require('./user.service');
+const { getUserTickets, getUserTransactions, getPDFInvoiceData } = require('./user.service');
 
 module.exports = {
 
@@ -187,6 +191,66 @@ module.exports = {
         error,
         StatusCode.INTERNAL_SERVER_ERROR,
       ));
+    }
+  },
+
+  getTicketView: async (req, res, next) => {
+    try {
+      const { query } = req;
+      const { id } = query;
+      let file = 'payment/404.ejs';
+      const link = process.env.GETLUCKY_URL;
+
+      const bookingData = await commonService.findOneByFields(Booking, { transactionId: id });
+      if (!bookingData) return res.render(path.join(__dirname, `../../../../templates/${file}`), { link });
+
+      const { paymentStatus } = bookingData;
+      switch (paymentStatus) {
+        case 1:
+          file = 'payment/success.ejs';
+          break;
+        case 0:
+          file = 'payment/failed.ejs';
+          break;
+        default:
+          file = 'payment/failed.ejs';
+      }
+      return res.render(path.join(__dirname, `../../../../templates/${file}`), { link });
+    } catch (err) {
+      return next(respondError(err.message, StatusCode.INTERNAL_SERVER_ERROR));
+    }
+  },
+
+  getInvoice: async (req, res, next) => {
+    try {
+      const { id } = req.query;
+
+      const invoiceData = await getPDFInvoiceData(id);
+      console.log(JSON.stringify(invoiceData, null, 4));
+      ejs.renderFile(path.join(__dirname, '../../../../templates/generatePDF.ejs'), invoiceData, (err, html) => {
+        if (err) {
+          console.error('Error rendering EJS template:', err);
+          return;
+        }
+
+        // Create a PDF document
+        const doc = new PDFDocument();
+
+        // Pipe the PDF document to a writable stream (e.g., a file)
+        const stream = fs.createWriteStream('invoice.pdf');
+        doc.pipe(stream);
+
+        // Embed the HTML content into the PDF
+        doc.font('Helvetica').fontSize(12).text(html, { align: 'left' });
+
+        // Finalize the PDF
+        doc.end();
+
+        console.log('PDF generated successfully.');
+      });
+      return res.render(path.join(__dirname, '../../../../templates/payment/404.html'));
+    } catch (err) {
+      return next(respondError(err.message, StatusCode.INTERNAL_SERVER_ERROR));
     }
   },
 };

@@ -70,5 +70,6 @@
 	"INVALID_DRAW_ID": "Draw not found",
 	"CART_NOT_FOUND": "Your cart is empty",
 	"EMAIL_EXISTS": "This email is already registered, try another",
-	"EMAIL_UPDATE_NOT_ALLOWED": "Email update is not allowed"
+	"EMAIL_UPDATE_NOT_ALLOWED": "Email update is not allowed",
+	"PAYMENT_ERROR": "Currently not accepting payments, try after some time"
 }
