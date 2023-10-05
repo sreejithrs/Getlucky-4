@@ -99,4 +99,74 @@ module.exports = {
     return drawResult;
   },
 
+  getWinnersList: async (drawId) => Draw.aggregate([
+    {
+      $match: {
+        _id: ObjectId(drawId),
+      },
+    },
+    {
+      $lookup: {
+        from: 'winners',
+        localField: '_id',
+        foreignField: 'drawId',
+        pipeline: [
+          {
+            $unwind: { path: '$ticketNumbers', preserveNullAndEmptyArrays: true },
+          },
+          {
+            $lookup: {
+              from: 'users',
+              localField: 'userId',
+              foreignField: '_id',
+              as: 'userData',
+            },
+          },
+          {
+            $unwind: { path: '$userData', preserveNullAndEmptyArrays: true },
+          },
+          {
+            $group: {
+              _id: {
+                userId: '$userId',
+                matchOrder: '$matchOrder',
+              },
+              name: { $first: '$userData.name' },
+              nationality: { $first: '$userData.country' },
+              state: { $first: '$userData.state' },
+              tickets: { $push: '$ticketNumbers' },
+              matchOrder: { $first: '$matchOrder' },
+              wonPrice: { $first: '$priceAmount' },
+            },
+          },
+          {
+            $sort: {
+              matchOrder: -1,
+            },
+          },
+          {
+            $project: {
+              _id: 0,
+            },
+          },
+        ],
+        as: 'winnerData',
+      },
+    },
+    {
+      $group: {
+        _id: '$_id',
+        drawName: { $first: { $concat: ['$drawName', ' ', '$drawNo'] } },
+        date: { $first: { $dateToString: { format: '%Y-%m-%d', date: '$date' } } },
+        wonTicket: { $first: '$wonTicket' },
+        users: { $first: '$winnerData' },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+      },
+    },
+  ]),
+
 };
