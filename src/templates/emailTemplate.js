@@ -18,36 +18,36 @@ module.exports = {
 
   forgotPasswordEmail: (emailOptions) => {
     const {
-      email, name, password, language,
+      email, name, password,
     } = emailOptions;
     const file = {
       en: './emails/en/forgotPassword.ejs',
     };
-    const filePath = path.join(__dirname, file[language]);
+    const filePath = path.join(__dirname, file);
     const source = fs.readFileSync(filePath, 'utf8');
     const outputString = ejs.render(source, { name, password });
     return {
       from: process.env.AWS_SES_FROM_EMAIL,
       to: email,
-      subject: emailSubject.forgotPassword(language),
+      subject: emailSubject.forgotPassword(),
       content: outputString,
     };
   },
 
   changeEmail: (emailOptions) => {
     const {
-      email, name, otp, language,
+      email, name, otp,
     } = emailOptions;
     const file = {
       en: './emails/en/changeEmail.ejs',
     };
-    const filePath = path.join(__dirname, file[language]);
+    const filePath = path.join(__dirname, file);
     const source = fs.readFileSync(filePath, 'utf8');
     const outputString = ejs.render(source, { name, otp });
     return {
       from: process.env.AWS_SES_FROM_EMAIL,
       to: email,
-      subject: emailSubject.changeEmail(language),
+      subject: emailSubject.changeEmail(),
       content: outputString,
     };
   },

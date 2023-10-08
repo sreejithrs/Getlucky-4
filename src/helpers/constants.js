@@ -57,26 +57,11 @@ module.exports = {
       return 'Confirmation Code';
     },
 
-    changeEmail: (language) => {
-      if (language === 'de') {
-        return 'Bestätigung Code';
-      }
-      return 'Update your Email';
-    },
+    changeEmail: () => 'Update your Email',
 
-    forgotPassword: (language) => {
-      if (language === 'de') {
-        return 'Neues Passwort';
-      }
-      return 'New Password';
-    },
+    forgotPassword: () => 'New Password',
 
-    passwordChange: (language) => {
-      if (language === 'de') {
-        return 'Passwortänderung';
-      }
-      return 'Password Change';
-    },
+    passwordChange: () => 'Password Change',
 
   },
 
