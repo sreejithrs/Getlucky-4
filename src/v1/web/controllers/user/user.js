@@ -123,7 +123,7 @@ module.exports = {
 
   changeEmailRequest: async (req, res, next) => {
     try {
-      const { body, language, user } = req;
+      const { body, user } = req;
       const { id, name } = user;
       const { email } = body;
 
@@ -135,7 +135,7 @@ module.exports = {
 
       const otp = 1234;
       const emailOptions = {
-        email, otp, name, language,
+        email, otp, name,
       };
 
       await commonService.updateById(User, id, { $set: { isChangeEmail: constValues.status.ACTIVE, tempEmail: email, emailChangeOtp: otp } });

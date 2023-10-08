@@ -22,8 +22,8 @@ module.exports = {
 
   validateUpdatePassword: (input) => {
     const schema = Joi.object().keys({
-      oldPassword: Joi.string().min(8).required(),
-      password: Joi.string().min(8).required(),
+      oldPassword: Joi.string().min(6).required(),
+      password: Joi.string().min(6).required(),
     });
     return schema.validate(input);
   },

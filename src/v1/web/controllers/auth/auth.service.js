@@ -54,12 +54,12 @@ module.exports = {
 
   sendEmailOrSms: (otp, key, userData) => {
     const {
-      phoneNumber, email, name, language,
+      phoneNumber, email, name,
     } = userData;
     if (process.env.NODE_ENV !== 'test') {
       if (key === 'email') {
         const emailOptions = {
-          email, password: otp, name, language,
+          email, password: otp, name,
         };
         process.nextTick(() => sendMail(forgotPasswordEmail(emailOptions)));
       } else {
