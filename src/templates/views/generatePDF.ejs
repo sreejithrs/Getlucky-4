@@ -121,9 +121,6 @@
     <div class="invoice">
         <div class="invoice-header">
             <div style="display: flex; align-items: center;">
-                <div
-                    style="width: 50px; height: 50px; background-image: url('https://getlucky-4.s3.me-south-1.amazonaws.com/logo.jpg'); background-size: 75px 75px; background-position: center center; background-repeat: no-repeat; border-radius: 100%; overflow: hidden;">
-                </div>
                 <h2 style="margin-left: 10px;">Getlucky4</h2>
             </div>
             <h2>Invoice</h2>
@@ -171,31 +168,33 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>
-                            <%= siNo %>
-                        </td>
-                        <td>
-                            <%= productName %>
-                        </td>
-                        <td>
-                            <%= tickets %>
-                        </td>
-                        <td>
-                            <%= quantity %>
-                        </td>
-                        <td>
-                            <%= cost %>
-                        </td>
-                        <td>
-                            <%= totalCost %>
-                        </td>
-                    </tr>
+                    <% for (let i=0; i < products.length; i++) { %>
+                        <tr>
+                            <td>
+                                <%= products[i].siNo %>
+                            </td>
+                            <td>
+                                <%= products[i].productName %>
+                            </td>
+                            <td>
+                                <%= products[i].tickets %>
+                            </td>
+                            <td>
+                                <%= products[i].quantity %>
+                            </td>
+                            <td>
+                                <%= products[i].cost %>
+                            </td>
+                            <td>
+                                <%= products[i].totalCost %>
+                            </td>
+                        </tr>
+                        <% } %>
                 </tbody>
             </table>
         </div>
         <div class="invoice-total">
-            <strong>Total: <%= totalAmount %></strong>
+            <strong>Total Amount (AED): <%= totalAmount %></strong>
         </div>
         <div class="system-msg">
             <h6>This is a system generated invoice, no signature is required</h6>
@@ -204,7 +203,8 @@
             <p>NOTES:</p>
             <ul>
                 <li>No refund or exchange.</li>
-                <li>For clarifications, call or Whatsapp 04 33 98880 within UAE, +97143398880 from outside UAE or email
+                <li>For clarifications, call or Whatsapp 04 33 98880 within UAE, +97143398880 from outside UAE or
+                    email
                     us at
                     <a href="mailto:getlucky4@gmail.com">getlucky4you@gmail.com</a>
                 </li>

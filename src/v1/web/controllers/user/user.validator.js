@@ -9,7 +9,6 @@ module.exports = {
       country: Joi.string().optional(),
       district: Joi.string().optional(),
       state: Joi.string().optional(),
-      password: Joi.string().optional(),
     });
     return schema.validate(input);
   },
@@ -17,6 +16,14 @@ module.exports = {
   validateChangeEmail: (input) => {
     const schema = Joi.object().keys({
       email: Joi.string().email({ minDomainSegments: 2 }).required(),
+    });
+    return schema.validate(input);
+  },
+
+  validateUpdatePassword: (input) => {
+    const schema = Joi.object().keys({
+      oldPassword: Joi.string().min(8).required(),
+      password: Joi.string().min(8).required(),
     });
     return schema.validate(input);
   },

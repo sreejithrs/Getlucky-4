@@ -14,9 +14,28 @@ const localeKeys = require('../../../../locales/keys.json');
 const StatusCode = require('../../../../helpers/statusCodes.json');
 const constValues = require('../../../../helpers/constants');
 const { getMessageFromValidationError } = require('../../../../helpers/utils');
-const { getAllProducts, getOrderData, getCartData } = require('./home.service');
+const {
+  getHomePage, getAllProducts, getOrderData, getCartData,
+} = require('./home.service');
 
 module.exports = {
+
+  getHomePage: async (req, res, next) => {
+    try {
+      const homeDetails = await getHomePage(req);
+      return respondSuccess(
+        res,
+        req.__(localeKeys.global.REQUEST_WAS_SUCCESSFUL),
+        StatusCode.OK,
+        homeDetails,
+      );
+    } catch (error) {
+      return next(respondError(
+        error,
+        StatusCode.INTERNAL_SERVER_ERROR,
+      ));
+    }
+  },
 
   getProducts: async (req, res, next) => {
     try {
@@ -114,6 +133,7 @@ module.exports = {
 
       const bookingObj = {
         userId: id,
+        date: new Date(),
         totalPrice: totalCost,
         taxAmount: (5 / 100) * totalCost,
       };

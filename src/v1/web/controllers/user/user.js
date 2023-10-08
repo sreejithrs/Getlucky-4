@@ -1,16 +1,18 @@
-// model
+// modules
 const fs = require('fs');
 const path = require('path');
 const _ = require('lodash');
 const ejs = require('ejs');
-const PDFDocument = require('pdfkit');
+const puppeteer = require('puppeteer');
 // models
 const {
   User, Cart, Booking, Quantity, Order, Winner,
 } = require('../../../models');
 
 // helpers
-const { validateUpdateProfile, validateChangeEmail, validateUpdateEmail } = require('./user.validator');
+const {
+  validateUpdateProfile, validateUpdatePassword, validateChangeEmail, validateUpdateEmail,
+} = require('./user.validator');
 const { respondSuccess, respondError, respondFailure } = require('../../../../helpers/response');
 const commonService = require('../../../services/common.service');
 const localeKeys = require('../../../../locales/keys.json');
@@ -41,6 +43,36 @@ module.exports = {
     }
   },
 
+  updatePassword: async (req, res, next) => {
+    try {
+      const { body, user } = req;
+      const { oldPassword, password } = body;
+      const { id } = user;
+
+      const { error } = validateUpdatePassword(body);
+      if (error) return next(respondError(getMessageFromValidationError(error)));
+
+      const userData = await commonService.includePasswordById(User, id);
+
+      const checkPassword = await userData.comparePassword(oldPassword);
+      if (!checkPassword) return respondFailure(res, req.__(localeKeys.auth.PASSWORD_NOT_MATCHED), StatusCode.FORBIDDEN);
+
+      if (oldPassword === password) return respondFailure(res, req.__(localeKeys.auth.SAME_PASSWORD), StatusCode.CONFLICT);
+      userData.password = password;
+      await userData.save();
+      return respondSuccess(
+        res,
+        req.__(localeKeys.global.UPDATED_SUCCESSFULLY),
+        StatusCode.OK,
+      );
+    } catch (error) {
+      return next(respondError(
+        error,
+        StatusCode.INTERNAL_SERVER_ERROR,
+      ));
+    }
+  },
+
   updateProfile: async (req, res, next) => {
     try {
       const { body, user } = req;
@@ -48,11 +80,6 @@ module.exports = {
 
       const { error } = validateUpdateProfile(body);
       if (error) return next(respondError(getMessageFromValidationError(error)));
-
-      const userData = await commonService.findOneById(User, id);
-      if (body.password) {
-        body.password = await userData.hashPassword(body.password);
-      }
 
       await commonService.updateById(User, id, { $set: body });
       return respondSuccess(
@@ -207,13 +234,13 @@ module.exports = {
       const { paymentStatus } = bookingData;
       switch (paymentStatus) {
         case 1:
-          file = 'payment/success.ejs';
+          file = 'views/success.ejs';
           break;
         case 0:
-          file = 'payment/failed.ejs';
+          file = 'views/failed.ejs';
           break;
         default:
-          file = 'payment/failed.ejs';
+          file = 'views/failed.ejs';
       }
       return res.render(path.join(__dirname, `../../../../templates/${file}`), { link });
     } catch (err) {
@@ -221,34 +248,28 @@ module.exports = {
     }
   },
 
-  getInvoice: async (req, res, next) => {
+  // eslint-disable-next-line consistent-return
+  generateInvoice: async (req, res, next) => {
     try {
       const { id } = req.query;
 
-      const invoiceData = await getPDFInvoiceData(id);
-      console.log(JSON.stringify(invoiceData, null, 4));
-      ejs.renderFile(path.join(__dirname, '../../../../templates/generatePDF.ejs'), invoiceData, (err, html) => {
-        if (err) {
-          console.error('Error rendering EJS template:', err);
-          return;
-        }
+      const [invoiceData] = await getPDFInvoiceData(id);
 
-        // Create a PDF document
-        const doc = new PDFDocument();
+      const browser = await puppeteer.launch({ headless: 'new' });
+      const page = await browser.newPage();
 
-        // Pipe the PDF document to a writable stream (e.g., a file)
-        const stream = fs.createWriteStream('invoice.pdf');
-        doc.pipe(stream);
+      const ejsFilePath = path.join(__dirname, '../../../../templates/views/generatePDF.ejs');
+      const ejsContent = fs.readFileSync(ejsFilePath, 'utf-8');
 
-        // Embed the HTML content into the PDF
-        doc.font('Helvetica').fontSize(12).text(html, { align: 'left' });
+      const content = ejs.render(ejsContent, invoiceData);
+      await page.setContent(content);
+      const pdfBuffer = await page.pdf();
 
-        // Finalize the PDF
-        doc.end();
+      res.setHeader('Content-Disposition', 'attachment; filename=generated.pdf');
+      res.contentType('application/pdf');
+      res.send(pdfBuffer);
 
-        console.log('PDF generated successfully.');
-      });
-      return res.render(path.join(__dirname, '../../../../templates/payment/404.html'));
+      await browser.close();
     } catch (err) {
       return next(respondError(err.message, StatusCode.INTERNAL_SERVER_ERROR));
     }

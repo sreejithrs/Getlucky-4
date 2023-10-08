@@ -28,6 +28,8 @@ module.exports = {
     PENDING: 2,
   },
 
+  months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+
   status: {
     ACTIVE: true,
     DEACTIVE: false,

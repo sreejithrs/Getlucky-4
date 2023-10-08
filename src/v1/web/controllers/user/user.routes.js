@@ -5,6 +5,7 @@ const router = Router();
 
 router.get('/user/profile', userController.getProfile);
 router.put('/user/profile', userController.updateProfile);
+router.patch('/user/profile/change-password', userController.updatePassword);
 router.delete('/user/profile', userController.deleteAccount);
 router.post('/user/email/send-otp', userController.changeEmailRequest);
 router.patch('/user/email/change-email', userController.updateEmail);

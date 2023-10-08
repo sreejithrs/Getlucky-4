@@ -1,4 +1,5 @@
 // modules
+const moment = require('moment');
 const { ObjectId } = require('mongoose').Types;
 
 // models
@@ -16,6 +17,7 @@ module.exports = {
           _id: ObjectId(drawId),
         },
       },
+      module.exports.commonFormatDate,
       {
         $lookup: {
           from: 'winners',
@@ -35,7 +37,7 @@ module.exports = {
           _id: '$winnerData.matchOrder',
           winnersCount: { $sum: 1 },
           drawName: { $first: '$drawName' },
-          drawDate: { $first: '$date' },
+          drawDate: { $first: '$formattedDate' },
           drawNo: { $first: '$drawNo' },
           wonTicket: { $first: '$wonTicket' },
           tickets: { $push: '$winnerData.ticketNumbers' },
@@ -65,7 +67,7 @@ module.exports = {
         $group: {
           _id: null,
           drawName: { $first: { $concat: ['$drawName', ' ', '$drawNo'] } },
-          date: { $first: { $dateToString: { format: '%Y-%m-%d', date: '$drawDate' } } },
+          date: { $first: '$drawDate' },
           drawNo: { $first: '$drawNo' },
           wonTicket: { $first: '$wonTicket' },
           totalWinners: { $sum: '$winnersCount' },
@@ -105,6 +107,7 @@ module.exports = {
         _id: ObjectId(drawId),
       },
     },
+    module.exports.commonFormatDate,
     {
       $lookup: {
         from: 'winners',
@@ -123,7 +126,7 @@ module.exports = {
             },
           },
           {
-            $unwind: { path: '$userData', preserveNullAndEmptyArrays: true },
+            $unwind: { path: '$userData', preserveNullAndEmptyArrays: false },
           },
           {
             $group: {
@@ -157,7 +160,7 @@ module.exports = {
       $group: {
         _id: '$_id',
         drawName: { $first: { $concat: ['$drawName', ' ', '$drawNo'] } },
-        date: { $first: { $dateToString: { format: '%Y-%m-%d', date: '$date' } } },
+        date: { $first: '$formattedDate' },
         wonTicket: { $first: '$wonTicket' },
         users: { $first: '$winnerData' },
       },
@@ -168,5 +171,90 @@ module.exports = {
       },
     },
   ]),
+
+  commonFormatDate: {
+    $addFields: {
+      formattedDate: {
+        $concat: [
+          { $dateToString: { format: '%d', date: '$date' } },
+          '-',
+          {
+            $arrayElemAt: [
+              constValues.months,
+              { $subtract: [{ $month: '$date' }, 1] },
+            ],
+          },
+          '-',
+          { $toString: { $year: '$date' } },
+        ],
+      },
+    },
+  },
+
+  commonDrawFind: () => {
+    const currentDate = new Date();
+    const currentDateFormat = moment(currentDate).format('YYYY-MM-DDTHH:mm:ss');
+    return [
+      {
+        $lookup: {
+          from: 'draws',
+          pipeline: [
+            {
+              $addFields: {
+                hourUTC: { $hour: { date: '$date' } },
+                minuteUTC: { $minute: { date: '$date' } },
+                secondUTC: { $second: { date: '$date' } },
+              },
+            },
+            module.exports.commonFormatDate,
+            {
+              $match: {
+                $and: [
+                  {
+                    $expr: {
+                      $ne: [{ $dayOfWeek: { date: '$date' } }, 1],
+                    },
+                  },
+                  { status: constValues.status.ACTIVE },
+                  {
+                    $or: [
+                      {
+                        $expr: {
+                          $gte: [
+                            { $dateToString: { format: '%Y-%m-%dT%H:%M:%S', date: '$date' } },
+                            currentDateFormat,
+                          ],
+                        },
+                      },
+                      {
+                        $expr: {
+                          $gt: [
+                            { $dateToString: { format: '%Y-%m-%d', date: '$date' } },
+                            currentDateFormat,
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+            {
+              $sort: {
+                date: 1,
+              },
+            },
+            {
+              $limit: 1,
+            },
+          ],
+          as: 'drawDetails',
+        },
+      },
+      {
+        $unwind: { path: '$drawDetails', preserveNullAndEmptyArrays: true },
+      },
+    ];
+  },
 
 };
