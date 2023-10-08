@@ -2,27 +2,15 @@ const fs = require('fs');
 const path = require('path');
 const ejs = require('ejs');
 
-const { emailSubject, emailContent } = require('../helpers/constants');
+const { emailSubject } = require('../helpers/constants');
 
 module.exports = {
-
-  emailVerifcationTemplate: (emailOptions) => {
-    const { email, verificationCode, language } = emailOptions;
-    return {
-      from: process.env.AWS_SES_FROM_EMAIL,
-      to: email,
-      subject: emailSubject.emailVerification(language),
-      content: emailContent.emailVerification(verificationCode, language),
-    };
-  },
 
   forgotPasswordEmail: (emailOptions) => {
     const {
       email, name, password,
     } = emailOptions;
-    const file = {
-      en: './emails/en/forgotPassword.ejs',
-    };
+    const file = './emails/en/forgotPassword.ejs';
     const filePath = path.join(__dirname, file);
     const source = fs.readFileSync(filePath, 'utf8');
     const outputString = ejs.render(source, { name, password });
@@ -38,9 +26,8 @@ module.exports = {
     const {
       email, name, otp,
     } = emailOptions;
-    const file = {
-      en: './emails/en/changeEmail.ejs',
-    };
+    const file = './emails/en/changeEmail.ejs';
+
     const filePath = path.join(__dirname, file);
     const source = fs.readFileSync(filePath, 'utf8');
     const outputString = ejs.render(source, { name, otp });
@@ -52,13 +39,4 @@ module.exports = {
     };
   },
 
-  passwordChangeEmail: (emailOptions) => {
-    const { email, language } = emailOptions;
-    return {
-      from: process.env.AWS_SES_FROM_EMAIL,
-      to: email,
-      subject: emailSubject.passwordChange(language),
-      content: emailContent.passwordChange(language),
-    };
-  },
 };

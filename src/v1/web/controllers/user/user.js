@@ -57,7 +57,6 @@ module.exports = {
       const checkPassword = await userData.comparePassword(oldPassword);
       if (!checkPassword) return respondFailure(res, req.__(localeKeys.auth.PASSWORD_NOT_MATCHED), StatusCode.FORBIDDEN);
 
-      if (oldPassword === password) return respondFailure(res, req.__(localeKeys.auth.SAME_PASSWORD), StatusCode.CONFLICT);
       userData.password = password;
       await userData.save();
       return respondSuccess(
