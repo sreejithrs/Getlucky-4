@@ -43,7 +43,7 @@ expressApp.use(i18n.init);
 
 expressApp.post('/stripe-webhooks', express.raw({ type: '*/*' }), homeController.webhooks);
 expressApp.get('/ticket-view', userController.getTicketView);
-expressApp.get('/invoice', userController.getInvoice);
+expressApp.get('/invoice', userController.generateInvoice);
 
 expressApp.use(bodyParser.urlencoded({ extended: true }));
 expressApp.use(bodyParser.json());

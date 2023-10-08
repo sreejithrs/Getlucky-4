@@ -47,7 +47,7 @@
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
-    "pdfkit": "^0.13.0",
+    "puppeteer": "^21.3.8",
     "secure-random-password": "^0.2.3",
     "stripe": "^13.8.0",
     "twilio": "^4.14.0",

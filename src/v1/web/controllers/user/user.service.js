@@ -4,6 +4,7 @@ const { ObjectId } = require('mongoose').Types;
 const { Order, Booking } = require('../../../models/index');
 // helpers
 const constValues = require('../../../../helpers/constants');
+const { commonFormatDate } = require('../../../common/common.service');
 
 module.exports = {
 
@@ -31,11 +32,15 @@ module.exports = {
           },
         },
       },
+      commonFormatDate,
       {
         $lookup: {
           from: 'draws',
           localField: 'drawId',
           foreignField: '_id',
+          pipeline: [
+            commonFormatDate,
+          ],
           as: 'drawDetails',
         },
       },
@@ -57,9 +62,9 @@ module.exports = {
         $group: {
           _id: '$_id',
           ticketId: { $first: { $ifNull: ['$ticketId', ''] } },
-          purchaseDate: { $first: { $dateToString: { format: '%Y-%m-%d', date: '$date' } } },
+          purchaseDate: { $first: '$formattedDate' },
           sortDate: { $first: '$date' },
-          drawName: { $first: { $concat: ['$drawDetails.drawName', ' ', '$drawDetails.drawNo', ' ', '(', { $dateToString: { format: '%Y-%m-%d', date: '$drawDetails.date' } }, ')'] } },
+          drawName: { $first: { $concat: ['$drawDetails.drawName', ' ', '$drawDetails.drawNo', ' ', '(', '$drawDetails.formattedDate', ')'] } },
           products: {
             $push: {
               price: '$tickets.cost',
@@ -94,6 +99,7 @@ module.exports = {
           userId: ObjectId(id),
         },
       },
+      commonFormatDate,
       {
         $lookup: {
           from: 'orders',
@@ -130,7 +136,7 @@ module.exports = {
               },
             },
           },
-          date: { $first: '$date' },
+          date: { $first: '$formattedDate' },
           amount: { $first: '$userPaid' },
           ticketId: { $first: '$orderData.ticketId' },
         },
@@ -149,6 +155,7 @@ module.exports = {
         transactionId: id,
       },
     },
+    commonFormatDate,
     {
       $lookup: {
         from: 'users',
@@ -158,7 +165,7 @@ module.exports = {
       },
     },
     {
-      $unwind: { path: '$userData', preserveNullAndEmptyArrays: true },
+      $unwind: { path: '$userData', preserveNullAndEmptyArrays: false },
     },
     {
       $lookup: {
@@ -212,7 +219,7 @@ module.exports = {
         _id: '$_id',
         transactionId: { $first: '$transactionId' },
         invoiceId: { $first: '$invoiceId' },
-        date: { $first: { $dateToString: { format: '%Y-%m-%d', date: '$date' } } },
+        date: { $first: '$formattedDate' },
         paymentStatus: {
           $first: {
             $switch: {
@@ -236,8 +243,8 @@ module.exports = {
         },
         name: { $first: '$userData.name' },
         email: { $first: { $ifNull: ['$userData.email', ''] } },
-        building: { $first: '$userData.building' },
-        district: { $first: '$userData.district' },
+        building: { $first: { $ifNull: ['$userData.building', ''] } },
+        district: { $first: { $ifNull: ['$userData.district', ''] } },
         state: { $first: '$userData.state' },
         country: { $first: '$userData.country' },
         totalAmount: { $first: '$userPaid' },

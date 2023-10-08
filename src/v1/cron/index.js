@@ -23,7 +23,6 @@ schedule.scheduleJob(rule, async () => {
 rule.hour = 17;
 rule.minute = 0;
 
-// Execute a cron job every half hour
 schedule.scheduleJob(rule, async () => {
   await module.exports.deletePendingCart();
 });

@@ -1,18 +1,82 @@
 // modules
-const moment = require('moment');
 const { ObjectId } = require('mongoose').Types;
 // models
 const { Product, Cart } = require('../../../models/index');
 // helpers
 const constValues = require('../../../../helpers/constants');
+const { commonFormatDate, commonDrawFind } = require('../../../common/common.service');
 
 module.exports = {
 
+  getHomePage: async () => Product.aggregate([
+    {
+      $match: {},
+    },
+    ...commonDrawFind(),
+    {
+      $lookup: {
+        from: 'draws',
+        pipeline: [
+          {
+            $match: {
+              isCompleted: constValues.status.ACTIVE,
+            },
+          },
+          commonFormatDate,
+          {
+            $group: {
+              _id: '$_id',
+              date: { $first: '$date' },
+              drawName: {
+                $first: {
+                  $concat: ['$formattedDate', ' Draw ', '$drawNo'],
+                },
+              },
+              wonTicket: { $first: '$wonTicket' },
+            },
+          },
+          {
+            $sort: {
+              date: -1,
+            },
+          },
+          {
+            $limit: 3,
+          },
+          {
+            $project: {
+              _id: 0,
+              date: 0,
+            },
+          },
+        ],
+        as: 'pastDraws',
+      },
+    },
+    {
+      $group: {
+        _id: '$drawDetails._id',
+        drawName: { $first: { $ifNull: [{ $concat: ['$drawDetails.drawName', ' ', '$drawDetails.drawNo'] }, ''] } },
+        drawDate: { $first: { $ifNull: ['$drawDetails.date', ''] } },
+        pastDraws: { $first: '$pastDraws' },
+        products: {
+          $push: {
+            name: '$name',
+            image: { $concat: [process.env.AWS_S3_URL, '/', '$image'] },
+            cost: '$cost',
+          },
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+      },
+    },
+  ]),
+
   getAllProducts: async (req) => {
     const userId = req.user ? req.user.id : null;
-    const currentDate = new Date();
-    const currentDateFormat = moment(currentDate).format('YYYY-MM-DDTHH:mm:ss');
-
     return Product.aggregate([
       {
         $match: {},
@@ -33,70 +97,13 @@ module.exports = {
       {
         $unwind: { path: '$cartData', preserveNullAndEmptyArrays: true },
       },
-      {
-        $lookup: {
-          from: 'draws',
-          pipeline: [
-            {
-              $addFields: {
-                hourUTC: { $hour: { date: '$date' } },
-                minuteUTC: { $minute: { date: '$date' } },
-                secondUTC: { $second: { date: '$date' } },
-              },
-            },
-            {
-              $match: {
-                $and: [
-                  {
-                    $expr: {
-                      $ne: [{ $dayOfWeek: { date: '$date' } }, 1],
-                    },
-                  },
-                  { status: constValues.status.ACTIVE },
-                  {
-                    $or: [
-                      {
-                        $expr: {
-                          $gte: [
-                            { $dateToString: { format: '%Y-%m-%dT%H:%M:%S', date: '$date' } },
-                            currentDateFormat,
-                          ],
-                        },
-                      },
-                      {
-                        $expr: {
-                          $gt: [
-                            { $dateToString: { format: '%Y-%m-%d', date: '$date' } },
-                            currentDateFormat,
-                          ],
-                        },
-                      },
-                    ],
-                  },
-                ],
-              },
-            },
-            {
-              $sort: {
-                date: 1,
-              },
-            },
-            {
-              $limit: 1,
-            },
-          ],
-          as: 'drawDetails',
-        },
-      },
-      {
-        $unwind: { path: '$drawDetails', preserveNullAndEmptyArrays: true },
-      },
+      ...commonDrawFind(),
       {
         $group: {
           _id: '$drawDetails._id',
           drawId: { $first: { $ifNull: ['$drawDetails._id', ''] } },
           drawName: { $first: { $ifNull: [{ $concat: ['$drawDetails.drawName', ' ', '$drawDetails.drawNo'] }, ''] } },
-          drawDate: { $first: { $ifNull: [{ $dateToString: { format: '%Y-%m-%d', date: '$drawDetails.date' } }, ''] } },
+          drawDate: { $first: { $ifNull: ['$drawDetails.formattedDate', ''] } },
           products: {
             $push: {
               _id: '$_id',

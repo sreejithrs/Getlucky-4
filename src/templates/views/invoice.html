@@ -1,0 +1,365 @@
+<!-- <!doctype html>
+<html>
+
+<body style='height: 100%; width: 100%; overflow: hidden; margin:0px; background-color: rgb(82, 86, 89);'>
+    <embed name='myPDF' style='position:absolute; left: 0; top: 0;' width='100%' height='100%'
+        src='https://example.com/path/to/your-pdf-file.pdf' type='application/pdf'>
+</body>
+
+</html> -->
+<!DOCTYPE html>
+<html lang="en" class="">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Getlucky 4</title>
+    <meta name="description" content="Getlucky4">
+    <meta name="keywords" content="">
+    <link rel="icon" type="image/png" href="assets/images/favicon.png" sizes="16x16">
+    <style>
+        @charset "utf-8";
+
+        /* CSS Document */
+        #ticket:after,
+        .row.destinations:after,
+        .row.normRow:after {
+            content: "";
+            clear: both;
+            display: block
+        }
+
+        .city,
+        .label {
+            text-transform: uppercase
+        }
+
+        #qr,
+        .right {
+            float: right
+        }
+
+        #qr,
+        #ticket:after,
+        .row.perforated {
+            position: relative
+        }
+
+        .row.text-center,
+        .text-footer,
+        td {
+            text-align: center
+        }
+
+        .row.justify-content-center {
+            display: inline-flex
+        }
+
+        .col-md-4.pd-10 {
+            padding-right: 20px
+        }
+
+        span.number-range {
+            font-size: 17px;
+            font-family: Montserrat, sans-serif !important
+        }
+
+        .tickets-bg {
+            background-image: -webkit-linear-gradient(-45deg, #0e3b69 0, #0270bf 100%);
+            min-height: auto;
+            font-family: Poppins, sans-serif !important
+        }
+
+        .text-footer {
+            background: #efefef;
+            padding: 5px
+        }
+
+        .terms-footer {
+            font-size: 11px;
+            font-weight: 500
+        }
+
+        .terms-p {
+            font-size: 10px;
+            font-weight: 400
+        }
+
+        .feedback {
+            position: absolute;
+            opacity: 0
+        }
+
+        .perforated.destinations p {
+            margin: 0;
+            padding-left: 9px
+        }
+
+        .table5 {
+            display: table;
+            width: 100%;
+            height: 100%
+        }
+
+        .table-cell {
+            display: table-cell;
+            vertical-align: middle
+        }
+
+        #ticket {
+            width: 350px;
+            background: #fff;
+            height: auto;
+            margin: 0 auto
+        }
+
+        #ticket>.row:first-child:after,
+        #ticket>.row:first-child:before {
+            background-color: #094e88;
+            position: absolute;
+            content: "";
+            display: block;
+            width: 20px;
+            height: 20px;
+            border-radius: 100%;
+            bottom: 0;
+            margin-bottom: -10px
+        }
+
+        #ticket>.row:first-child:before {
+            left: 0;
+            margin-left: -10px
+        }
+
+        #ticket>.row:first-child:after {
+            right: 0;
+            margin-right: -10px
+        }
+
+        .logo-ticket {
+            width: 160px
+        }
+
+        .row.text-center {
+            padding-top: 7px
+        }
+
+        .row.perforated {
+            border-bottom: 1px dashed #ddd;
+            padding: 11px
+        }
+
+        .label {
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1.2 !important
+        }
+
+        .airport {
+            font-size: 32px
+        }
+
+        .city,
+        table {
+            font-size: 12px
+        }
+
+        .smalltext,
+        .terms-footer p {
+            font-size: 10px
+        }
+
+        .right {
+            text-align: right
+        }
+
+        .col6,
+        .left,
+        .sparkler {
+            float: left
+        }
+
+        .left {
+            text-align: left
+        }
+
+        svg#plane {
+            width: 30px;
+            position: absolute;
+            left: 50%;
+            margin-left: -15px;
+            margin-top: 15px;
+            opacity: .5;
+            display: inline-block
+        }
+
+        .smalltext {
+            padding: 20px;
+            opacity: .6
+        }
+
+        .col,
+        .col6 {
+            font-size: 21px
+        }
+
+        .col6 {
+            width: 50%;
+            line-height: 1.5
+        }
+
+        .normRow {
+            padding-bottom: 0
+        }
+
+        #qr {
+            width: 80px;
+            right: -5px;
+            bottom: 5px;
+            margin-left: 10px
+        }
+
+        .sparkler {
+            width: 70px;
+            height: 70px;
+            margin-right: 20px
+        }
+
+        .sparkler .square {
+            width: 12.5%;
+            height: 12.5%;
+            background-color: grey;
+            float: left;
+            transition: background-color .1s
+        }
+
+        td,
+        th {
+            padding: 8px
+        }
+
+        .center {
+            margin: 0 auto
+        }
+    </style>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,800;1,900&display=swap"
+        rel="stylesheet">
+</head>
+
+<body class="tickets-bg"><input type="hidden" id="barcodeid" value="KT1260">
+    <div class="table5">
+        <div class="table-cell">
+            <div id="ticket">
+                <div class="row perforated first"><img src="https://www.littledraw.ae/assets/images/logo.jpg"
+                        alt="site-logo"></div>
+                <div>
+                    <h4>Getlucky4</h4>
+                </div>
+                <div class="row text-center perforated destinations">
+                    <div class="row text-center perforated destinations">
+                        <p style="font-size: 20px !important;">Ticket Details</p>
+                    </div>
+                    <div class="row perforated destinations">
+                        <div class="left">
+                            <div class="label">Customer Name</div>
+                            <div class="city">
+                                <%= name %>
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div class="label">Mobile No. </div>
+                            <div class="city">
+                                <%= phoneNumber %>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row text-center perforated destinations">
+                        <p style="font-size: 15px !important;">
+                            <%= drawName %>
+                        </p>
+                    </div>
+                    <!-- <div class="row perforated destinations">
+                        <div class="left">
+                            <div class="label">Grand Prize UPTO</div>
+                            <div class="city">AED 1,
+                                000,
+                                000</div>
+                        </div>
+                        <div class="right">
+                            <div class="label">Issued On</div>
+                            <div class="city">28 Sep 2023 10:29 pm</div>
+                        </div>
+                    </div> -->
+                    <div class="row perforated destinations">
+                        <div class="prize-total">
+                            <p>Just3 Draw Prizes</p>
+                            <div class="row justify-content-center">
+                                <div class="col-md-4 pd-10">
+                                    <div class="label">1<span style="font-size:9px;">st</span>Prize</div>
+                                    <div class="city">AED 3,000.00</div>
+                                </div>
+                                <div class="col-md-4 pd-10">
+                                    <div class="label">2<span style="font-size:9px;">nd</span>Prize</div>
+                                    <div class="city">AED 1,000.00</div>
+                                </div>
+                                <div class="col-md-4 pd-20">
+                                    <div class="label">3<span style="font-size:9px;">rd</span>Prize</div>
+                                    <div class="city">AED 100.00</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row perforated destinations">
+                        <div class="left">
+                            <div class="label">Total Items</div>
+                            <div class="city">
+                                <%= totalCount %>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row perforated destinations">
+                        <div class="col-3"></div>
+                        <div class="col-3"></div>
+                        <div class="col-3"></div>
+                        <div class="col-3"></div>
+                        <table>
+                            <tr>
+                                <th style="text-align: center;">Products</th>
+                                <th>Quantity</th>
+                                <th>Tickets</th>
+                                <th>Raffle ID</th>
+                            </tr>
+                            <% for (let i=0; i < products.length; i++) { %>
+                                <tr>
+                                    <td>
+                                        <%= products[i].productName %>
+                                    </td>
+                                    <td>
+                                        <%= products[i].quantity %>
+                                    </td>
+                                    <td>
+                                        <%= products[i].tickets %>
+                                    </td>
+                                    <td>
+                                        <%= products[i].raffleId %>
+                                    </td>
+                                </tr>
+                                <% } %>
+                        </table>
+                    </div>
+                    <div class="row">
+                        <div class="row text-center">
+                            <p>Ticket ID: #KT1260</p>
+                        </div>
+                    </div>
+                    <div class="row text-center">
+                        <div class="terms-footer"><strong>All Other Terms and Conditions Apply</strong></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
