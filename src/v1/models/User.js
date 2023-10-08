@@ -31,7 +31,7 @@ const userSchema = new Schema(
     state: { type: String, default: '' },
     district: { type: String, default: '' },
     country: { type: String, default: '' },
-    language: { type: String, enum: ['en', 'de'], default: 'en' },
+    language: { type: String, default: 'en' },
   },
   {
     timestamps: true,
