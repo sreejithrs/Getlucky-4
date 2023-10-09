@@ -2,7 +2,7 @@
 const path = require('path');
 const _ = require('lodash');
 const ejs = require('ejs');
-const puppeteer = require('pdf-puppeteer');
+const puppeteer = require('puppeteer');
 // models
 const {
   User, Cart, Booking, Quantity, Order, Winner,
@@ -261,21 +261,35 @@ module.exports = {
 
     const [invoiceData] = await getPDFInvoiceData(id);
 
-    ejs.renderFile(path.join(__dirname, '../../../../templates/views/generatePDF.ejs'), invoiceData, (err, html) => {
+    ejs.renderFile(path.join(__dirname, '../../../../templates/views/generatePDF.ejs'), invoiceData, async (err, html) => {
       if (err) {
         console.error('Error rendering EJS:', err);
         return res.status(500).send('Error rendering EJS');
       }
 
-      puppeteer.generatePdf(html).then((pdfBuffer) => {
+      try {
+        const browser = await puppeteer.launch({ headless: true });
+        const page = await browser.newPage();
+
+        // Set the HTML content of the page
+        await page.setContent(html);
+
+        // Generate the PDF from the page
+        const pdfBuffer = await page.pdf();
+
+        // Close the browser
+        await browser.close();
+
+        // Set response headers for download
         res.setHeader('Content-Disposition', 'attachment; filename="downloaded-file.pdf"');
         res.setHeader('Content-Type', 'application/pdf');
 
+        // Send the PDF buffer as the response
         res.send(pdfBuffer);
-      }).catch((error) => {
+      } catch (error) {
         console.error('Error generating PDF:', error);
         return res.status(500).send('Error generating PDF');
-      });
+      }
     });
   },
 };
