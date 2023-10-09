@@ -1,9 +1,7 @@
 // modules
-const fs = require('fs');
 const path = require('path');
 const _ = require('lodash');
 const ejs = require('ejs');
-const puppeteer = require('puppeteer');
 // models
 const {
   User, Cart, Booking, Quantity, Order, Winner,
@@ -58,6 +56,9 @@ module.exports = {
 
       const checkPassword = await userData.comparePassword(oldPassword);
       if (!checkPassword) return respondFailure(res, req.__(localeKeys.auth.PASSWORD_NOT_MATCHED), StatusCode.FORBIDDEN);
+
+      const checkSamePassword = await userData.comparePassword(password);
+      if (checkSamePassword) return respondFailure(res, req.__(localeKeys.auth.SAME_PASSWORD), StatusCode.CONFLICT);
 
       userData.password = password;
       await userData.save();
@@ -259,21 +260,35 @@ module.exports = {
 
       const [invoiceData] = await getPDFInvoiceData(id);
 
-      const browser = await puppeteer.launch({ headless: 'new' });
-      const page = await browser.newPage();
+      ejs.renderFile(path.join(__dirname, '../../../../templates/views/generatePDF.ejs'), invoiceData, (err, html) => {
+        if (err) {
+          console.error('Error rendering EJS:', err);
+          return res.status(500).send('Error rendering EJS');
+        }
 
-      const ejsFilePath = path.join(__dirname, '../../../../templates/views/generatePDF.ejs');
-      const ejsContent = fs.readFileSync(ejsFilePath, 'utf-8');
+        // Set response headers for download
+        res.setHeader('Content-Disposition', 'attachment; filename="downloaded-file.html"');
+        res.setHeader('Content-Type', 'application/octet-stream');
 
-      const content = ejs.render(ejsContent, invoiceData);
-      await page.setContent(content);
-      const pdfBuffer = await page.pdf();
+        // Send the rendered EJS file as the response
+        res.send(html);
+      });
 
-      res.setHeader('Content-Disposition', 'attachment; filename=generated.pdf');
-      res.contentType('application/pdf');
-      res.send(pdfBuffer);
+      // const browser = await puppeteer.launch({ headless: 'new' });
+      // const page = await browser.newPage();
 
-      await browser.close();
+      // const ejsFilePath = path.join(__dirname, '../../../../templates/views/generatePDF.ejs');
+      // const ejsContent = fs.readFileSync(ejsFilePath, 'utf-8');
+
+      // const content = ejs.render(ejsContent, invoiceData);
+      // await page.setContent(content);
+      // const pdfBuffer = await page.pdf();
+
+      // res.setHeader('Content-Disposition', 'attachment; filename=generated.pdf');
+      // res.contentType('application/pdf');
+      // res.send(pdfBuffer);
+
+      // await browser.close();
     } catch (err) {
       return next(respondError(err.message, StatusCode.INTERNAL_SERVER_ERROR));
     }

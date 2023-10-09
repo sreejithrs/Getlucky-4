@@ -5,7 +5,7 @@ module.exports = {
 
   validateUpdateProfile: (input) => {
     const schema = Joi.object().keys({
-      building: Joi.string().optional(),
+      building: Joi.string().optional().allow(''),
       country: Joi.string().optional(),
       district: Joi.string().optional(),
       state: Joi.string().optional(),
