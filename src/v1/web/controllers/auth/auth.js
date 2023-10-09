@@ -37,11 +37,19 @@ module.exports = {
     try {
       const { body } = req;
       const { email, phoneNumber } = body;
+      const condition = {};
+      const checkArray = [];
 
       const { error } = validateRegister(body);
       if (error) return next(respondError(getMessageFromValidationError(error)));
 
-      const userExist = await commonService.findOneByFields(User, { $or: [{ email }, { phoneNumber }] });
+      checkArray.push({ phoneNumber });
+      if (email && email !== '') {
+        checkArray.push({ email });
+      }
+      condition.$or = checkArray;
+
+      const userExist = await commonService.findOneByFields(User, condition);
       if (userExist && userExist.email !== '' && userExist.email === email) return respondFailure(_res, req.__(localeKeys.auth.EMAIL_ALREADY_EXISTS), StatusCode.CONFLICT);
       if (userExist && userExist.phoneNumber === phoneNumber) return respondFailure(_res, req.__(localeKeys.auth.MOBILE_ALREADY_EXISTS), StatusCode.CONFLICT);
 
