@@ -234,11 +234,12 @@ module.exports = {
       const [bookingData] = await getTicketDetails(id);
       if (!bookingData) return res.render(path.join(__dirname, `../../../../templates/${file}`), { link });
 
+      const pdfDownload = `${process.env.GETLUCKY_URL}/invoice?id=${id}`;
       const { paymentStatus } = bookingData;
       switch (paymentStatus) {
         case 1:
           file = 'views/invoice.ejs';
-          dataToSend = { ...bookingData, link };
+          dataToSend = { ...bookingData, link, pdfDownload };
           break;
         case 0:
           file = 'views/failed.ejs';
