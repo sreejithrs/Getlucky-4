@@ -12,7 +12,10 @@ module.exports = {
           quantity: Joi.number().optional(),
           items: Joi.array().items(Joi.string()).min(1).required(),
         }),
-      ).min(1).required(),
+      ).min(1).required()
+        .messages({
+          'array.min': 'Please choose at least one ticket',
+        }),
     });
 
     return schema.validate(input);

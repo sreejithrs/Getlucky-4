@@ -21,7 +21,9 @@ const constValues = require('../../../../helpers/constants');
 const { getMessageFromValidationError } = require('../../../../helpers/utils');
 const { sendMail } = require('../../../../helpers/notification');
 const { changeEmail } = require('../../../../templates/emailTemplate');
-const { getUserTickets, getUserTransactions, getPDFInvoiceData } = require('./user.service');
+const {
+  getUserTickets, getUserTransactions, getPDFInvoiceData, getTicketDetails,
+} = require('./user.service');
 
 module.exports = {
 
@@ -224,16 +226,18 @@ module.exports = {
     try {
       const { query } = req;
       const { id } = query;
-      let file = 'payment/404.ejs';
+      let file = 'views/404.ejs';
       const link = process.env.GETLUCKY_URL;
+      let dataToSend = { link };
 
-      const bookingData = await commonService.findOneByFields(Booking, { transactionId: id });
+      const [bookingData] = await getTicketDetails(id);
       if (!bookingData) return res.render(path.join(__dirname, `../../../../templates/${file}`), { link });
 
       const { paymentStatus } = bookingData;
       switch (paymentStatus) {
         case 1:
-          file = 'views/success.ejs';
+          file = 'views/invoice.ejs';
+          dataToSend = { ...bookingData, link };
           break;
         case 0:
           file = 'views/failed.ejs';
@@ -241,7 +245,8 @@ module.exports = {
         default:
           file = 'views/failed.ejs';
       }
-      return res.render(path.join(__dirname, `../../../../templates/${file}`), { link });
+
+      return res.render(path.join(__dirname, `../../../../templates/${file}`), dataToSend);
     } catch (err) {
       return next(respondError(err.message, StatusCode.INTERNAL_SERVER_ERROR));
     }

@@ -67,7 +67,10 @@ module.exports = {
     const schema = Joi.object().keys({
       phoneNumber: Joi.string().pattern(/^[+]?[0-9]+$/),
       email: Joi.string().email({ minDomainSegments: 2 }),
-      temporaryPassword: Joi.string().required(),
+      temporaryPassword: Joi.string().required().messages({
+        'string.empty': 'Please enter the OTP',
+        'any.required': 'OTP is required',
+      }),
       password: Joi.string().min(6).required(),
     }).xor('phoneNumber', 'email').messages({
       'object.xor': 'Either email or phoneNumber is required, not both',

@@ -209,7 +209,7 @@ module.exports = {
 
       const dateDiff = moment().diff(userData.otpTimeLimit, 'minutes');
       if (dateDiff > 3) return respondFailure(res, req.__(localeKeys.auth.OTP_TIME_LIMIT), StatusCode.FORBIDDEN);
-      if (userData.temporaryPassword !== temporaryPassword) return respondFailure(res, req.__(localeKeys.auth.TEMPORARY_PASSWORD_NOT_MATCHED), StatusCode.BAD_REQUEST);
+      if (userData.temporaryPassword !== temporaryPassword) return respondFailure(res, req.__(localeKeys.auth.OTP_NOT_MATCHED), StatusCode.BAD_REQUEST);
 
       userData.temporaryPassword = '';
       userData.password = password;
