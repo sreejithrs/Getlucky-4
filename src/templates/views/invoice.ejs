@@ -107,7 +107,7 @@
         }
 
         #ticket {
-            width: 350px;
+            width: 400px;
             background: #fff;
             height: auto;
             margin: 0 auto
@@ -251,10 +251,11 @@
     <div class="table5">
         <div class="table-cell">
             <div id="ticket">
-                <div class="row perforated first"><img src="https://www.littledraw.ae/assets/images/logo.jpg"
-                        alt="site-logo"></div>
-                <div>
-                    <h4>Getlucky4</h4>
+                <div class="row perforated first">
+                    <img src="https://getlucky-4.s3.me-south-1.amazonaws.com/logo.jpg"
+                        style="height: 40px; width: 40px;" alt="site-logo">
+                    <h2 style="display: inline-block; vertical-align: middle; margin-left: 15px; margin-top: -10px;">
+                        Getlucky4</h2>
                 </div>
                 <div class="row text-center perforated destinations">
                     <div class="row text-center perforated destinations">
@@ -294,7 +295,7 @@
                     <div class="row perforated destinations">
                         <div class="prize-total">
                             <p>Just3 Draw Prizes</p>
-                            <div class="row justify-content-center">
+                            <div style="margin-top: 10px;" class="row justify-content-center">
                                 <div class="col-md-4 pd-10">
                                     <div class="label">1<span style="font-size:9px;">st</span>Prize</div>
                                     <div class="city">AED 3,000.00</div>
@@ -339,18 +340,24 @@
                                         <%= products[i].quantity %>
                                     </td>
                                     <td>
-                                        <%= products[i].tickets %>
+                                        <!-- Use JavaScript to join ticket numbers into a comma-separated string -->
+                                        <div class="ticket-numbers">
+                                            <% let ticketNumbers=Array.isArray(products[i].tickets) ?
+                                                products[i].tickets.join(', ') : ''; %>
+                                            <%= ticketNumbers %>
+                                        </div>
                                     </td>
                                     <td>
                                         <%= products[i].raffleId %>
                                     </td>
                                 </tr>
-                                <% } %>
+                            <% } %>
                         </table>
                     </div>
                     <div class="row">
                         <div class="row text-center">
-                            <p>Ticket ID: #KT1260</p>
+                            <p>Ticket ID: <%= ticketId %>
+                            </p>
                         </div>
                     </div>
                     <div class="row text-center">

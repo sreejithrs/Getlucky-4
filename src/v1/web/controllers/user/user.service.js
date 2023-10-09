@@ -262,4 +262,94 @@ module.exports = {
     },
   ]),
 
+  getTicketDetails: (id) => Booking.aggregate([
+    {
+      $match: {
+        transactionId: id,
+      },
+    },
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'userId',
+        foreignField: '_id',
+        as: 'userData',
+      },
+    },
+    {
+      $unwind: { path: '$userData', preserveNullAndEmptyArrays: true },
+    },
+    {
+      $lookup: {
+        from: 'orders',
+        localField: 'orderId',
+        foreignField: '_id',
+        pipeline: [
+          {
+            $lookup: {
+              from: 'draws',
+              localField: 'drawId',
+              foreignField: '_id',
+              as: 'drawData',
+            },
+          },
+          {
+            $unwind: { path: '$drawData', preserveNullAndEmptyArrays: true },
+          },
+          {
+            $lookup: {
+              from: 'quantities',
+              localField: '_id',
+              foreignField: 'orderId',
+              pipeline: [
+                {
+                  $lookup: {
+                    from: 'products',
+                    localField: 'productId',
+                    foreignField: '_id',
+                    as: 'productData',
+                  },
+                },
+                {
+                  $unwind: { path: '$productData', preserveNullAndEmptyArrays: true },
+                },
+              ],
+              as: 'tickets',
+            },
+          },
+          {
+            $unwind: { path: '$tickets', preserveNullAndEmptyArrays: true },
+          },
+        ],
+        as: 'orderData',
+      },
+    },
+    {
+      $unwind: { path: '$orderData', preserveNullAndEmptyArrays: true },
+    },
+    {
+      $group: {
+        _id: '$_id',
+        name: { $first: '$userData.name' },
+        phoneNumber: { $first: '$userData.phoneNumber' },
+        paymentStatus: { $first: '$paymentStatus' },
+        drawName: { $first: { $concat: ['$orderData.drawData.drawName', ' ', '$orderData.drawData.drawNo'] } },
+        ticketId: { $first: '$orderData.ticketId' },
+        products: {
+          $push: {
+            productName: '$orderData.tickets.productData.name',
+            tickets: '$orderData.tickets.ticketNumbers',
+            quantity: '$orderData.tickets.quantity',
+            raffleId: '$orderData.tickets.raffleId',
+          },
+        },
+      },
+    },
+    {
+      $addFields: {
+        totalCount: { $size: '$products' },
+      },
+    },
+  ]),
+
 };
