@@ -2,6 +2,7 @@
 const path = require('path');
 const _ = require('lodash');
 const ejs = require('ejs');
+const puppeteer = require('pdf-puppeteer');
 // models
 const {
   User, Cart, Booking, Quantity, Order, Winner,
@@ -234,7 +235,7 @@ module.exports = {
       const [bookingData] = await getTicketDetails(id);
       if (!bookingData) return res.render(path.join(__dirname, `../../../../templates/${file}`), { link });
 
-      const pdfDownload = `${process.env.GETLUCKY_URL}/invoice?id=${id}`;
+      const pdfDownload = `${process.env.MAIN_URL}/invoice?id=${id}`;
       const { paymentStatus } = bookingData;
       switch (paymentStatus) {
         case 1:
@@ -255,43 +256,26 @@ module.exports = {
   },
 
   // eslint-disable-next-line consistent-return
-  generateInvoice: async (req, res, next) => {
-    try {
-      const { id } = req.query;
+  generateInvoice: async (req, res) => {
+    const { id } = req.query;
 
-      const [invoiceData] = await getPDFInvoiceData(id);
+    const [invoiceData] = await getPDFInvoiceData(id);
 
-      ejs.renderFile(path.join(__dirname, '../../../../templates/views/generatePDF.ejs'), invoiceData, (err, html) => {
-        if (err) {
-          console.error('Error rendering EJS:', err);
-          return res.status(500).send('Error rendering EJS');
-        }
+    ejs.renderFile(path.join(__dirname, '../../../../templates/views/generatePDF.ejs'), invoiceData, (err, html) => {
+      if (err) {
+        console.error('Error rendering EJS:', err);
+        return res.status(500).send('Error rendering EJS');
+      }
 
-        // Set response headers for download
-        res.setHeader('Content-Disposition', 'attachment; filename="downloaded-file.html"');
-        res.setHeader('Content-Type', 'application/octet-stream');
+      puppeteer.generatePdf(html).then((pdfBuffer) => {
+        res.setHeader('Content-Disposition', 'attachment; filename="downloaded-file.pdf"');
+        res.setHeader('Content-Type', 'application/pdf');
 
-        // Send the rendered EJS file as the response
-        res.send(html);
+        res.send(pdfBuffer);
+      }).catch((error) => {
+        console.error('Error generating PDF:', error);
+        return res.status(500).send('Error generating PDF');
       });
-
-      // const browser = await puppeteer.launch({ headless: 'new' });
-      // const page = await browser.newPage();
-
-      // const ejsFilePath = path.join(__dirname, '../../../../templates/views/generatePDF.ejs');
-      // const ejsContent = fs.readFileSync(ejsFilePath, 'utf-8');
-
-      // const content = ejs.render(ejsContent, invoiceData);
-      // await page.setContent(content);
-      // const pdfBuffer = await page.pdf();
-
-      // res.setHeader('Content-Disposition', 'attachment; filename=generated.pdf');
-      // res.contentType('application/pdf');
-      // res.send(pdfBuffer);
-
-      // await browser.close();
-    } catch (err) {
-      return next(respondError(err.message, StatusCode.INTERNAL_SERVER_ERROR));
-    }
+    });
   },
 };
