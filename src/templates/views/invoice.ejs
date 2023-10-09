@@ -16,6 +16,7 @@
     <title>Getlucky 4</title>
     <meta name="description" content="Getlucky4">
     <meta name="keywords" content="">
+    <meta http-equiv="Content-Security-Policy" content="img-src 'self' https://getlucky-4.s3.me-south-1.amazonaws.com">
     <link rel="icon" type="image/png" href="assets/images/favicon.png" sizes="16x16">
     <style>
         @charset "utf-8";
@@ -233,6 +234,37 @@
             transition: background-color .1s
         }
 
+        .home-button {
+            margin: 55px auto;
+            color: #ffffff;
+            box-shadow: 0 0 5px -1px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            padding: 2px;
+            max-width: 300px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .left-button,
+        .right-button {
+            background-color: #92e426;
+            color: white;
+            border: 1px solid #b9ec5b;
+            text-decoration: none;
+            padding: 5px 20px;
+            border-radius: 15px;
+
+            cursor: pointer;
+        }
+
+        .right-button {
+            background-color: #8cd714;
+            border: 1px solid #a0c222;
+            border-radius: 15px;
+        }
+
+
         td,
         th {
             padding: 8px
@@ -360,9 +392,18 @@
                             </p>
                         </div>
                     </div>
-                    <div class="row text-center">
+                    <div style="margin-top: 20px;" class="row text-center">
                         <div class="terms-footer"><strong>All Other Terms and Conditions Apply</strong></div>
                     </div>
+                    <div class="home-button">
+                        <a class="left-button" href="<%= link %>">Go Home</a>
+                        <a class="right-button" href="<%= link %>">Download Invoice</a>
+                    </div>
+                    
+                    <!-- <div class="home-button">
+                        <div class="order-number-label"><a style ="text-decoration: none; color: black;" href="<%= link %>">Go Home</a></div>
+                        <div class="order-number-label"><a style ="text-decoration: none; color: black;" href="<%= link %>">Download Invoice</a></div>
+                    </div> -->
                 </div>
             </div>
         </div>
