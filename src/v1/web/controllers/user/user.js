@@ -268,23 +268,16 @@ module.exports = {
       }
 
       try {
-        const browser = await puppeteer.launch({ headless: true });
+        const browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox'] });
         const page = await browser.newPage();
 
-        // Set the HTML content of the page
         await page.setContent(html);
-
-        // Generate the PDF from the page
         const pdfBuffer = await page.pdf();
-
-        // Close the browser
         await browser.close();
 
-        // Set response headers for download
-        res.setHeader('Content-Disposition', 'attachment; filename="downloaded-file.pdf"');
+        res.setHeader('Content-Disposition', `attachment; filename=${invoiceData.invoiceId}.pdf`);
         res.setHeader('Content-Type', 'application/pdf');
 
-        // Send the PDF buffer as the response
         res.send(pdfBuffer);
       } catch (error) {
         console.error('Error generating PDF:', error);
