@@ -35,12 +35,10 @@ const expressApp = express();
 
 // middlewares
 expressApp.use(
-  helmet({
-    contentSecurityPolicy: {
-      useDefaults: true,
-      directives: {
-        'img-src': ["'self'", 'https: data:'],
-      },
+  helmet.contentSecurityPolicy({
+    useDefaults: true,
+    directives: {
+      'img-src': ["'self'", 'https: data:'],
     },
   }),
 );
