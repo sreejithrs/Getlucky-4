@@ -243,7 +243,7 @@ module.exports = {
         case 1:
           file = 'views/invoice.ejs';
           dataToSend = {
-            ...bookingData, link, url: process.env.MAIN_URL, pdfDownload,
+            ...bookingData, link, url: process.env.AWS_S3_URL, pdfDownload,
           };
           break;
         case 0:
