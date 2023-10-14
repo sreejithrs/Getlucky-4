@@ -242,7 +242,9 @@ module.exports = {
       switch (paymentStatus) {
         case 1:
           file = 'views/invoice.ejs';
-          dataToSend = { ...bookingData, link, pdfDownload };
+          dataToSend = {
+            ...bookingData, link, url: process.env.MAIN_URL, pdfDownload,
+          };
           break;
         case 0:
           file = 'views/failed.ejs';

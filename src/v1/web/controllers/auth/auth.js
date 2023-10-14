@@ -62,7 +62,7 @@ module.exports = {
         message: constValues.smsContent(verificationCode),
       };
 
-      process.nextTick(() => sendSMS(smsContent));
+      if (process.env.NODE_ENV !== 'test') process.nextTick(() => sendSMS(smsContent));
       const userDetails = await commonService.findOneByFields(User, { email });
       return respondSuccess(
         _res,
