@@ -27,10 +27,10 @@ module.exports = {
         },
       },
       {
-        $unwind: { path: '$winnerData', preserveNullAndEmptyArrays: true },
+        $unwind: { path: '$winnerData', preserveNullAndEmptyArrays: false },
       },
       {
-        $unwind: '$winnerData.ticketNumbers',
+        $unwind: { path: '$winnerData.ticketNumbers', preserveNullAndEmptyArrays: true },
       },
       {
         $group: {
@@ -95,6 +95,12 @@ module.exports = {
         },
       },
     ]);
+
+    if (!drawResult) {
+      return {
+        totalWinners: 0, totalWonPrice: 0, result: [],
+      };
+    }
 
     const order = constValues.drawCategoryArray;
     drawResult.result.sort((a, b) => order.indexOf(a.category) - order.indexOf(b.category));

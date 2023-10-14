@@ -214,6 +214,7 @@ module.exports = {
     {
       $group: {
         _id: '$_id',
+        drawId: { $first: '$drawId' },
         totalCost: { $first: '$totalCost' },
         data: {
           $push: {

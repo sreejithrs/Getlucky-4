@@ -1,12 +1,3 @@
-<!-- <!doctype html>
-<html>
-
-<body style='height: 100%; width: 100%; overflow: hidden; margin:0px; background-color: rgb(82, 86, 89);'>
-    <embed name='myPDF' style='position:absolute; left: 0; top: 0;' width='100%' height='100%'
-        src='https://example.com/path/to/your-pdf-file.pdf' type='application/pdf'>
-</body>
-
-</html> -->
 <!DOCTYPE html>
 <html lang="en" class="">
 
@@ -16,8 +7,6 @@
     <title>Getlucky 4</title>
     <meta name="description" content="Getlucky4">
     <meta name="keywords" content="">
-    <meta http-equiv="Content-Security-Policy" content="img-src 'self' https://getlucky-4.s3.me-south-1.amazonaws.com">
-    <link rel="icon" type="image/png" href="assets/images/favicon.png" sizes="16x16">
     <style>
         @charset "utf-8";
 
@@ -153,6 +142,7 @@
         .label {
             font-size: 12px;
             font-weight: 700;
+            margin-top: 10px;
             line-height: 1.2 !important
         }
 
@@ -236,8 +226,6 @@
 
         .home-button {
             margin: 55px auto;
-            color: #ffffff;
-            box-shadow: 0 0 5px -1px rgba(0, 0, 0, 0.2);
             cursor: pointer;
             padding: 2px;
             max-width: 300px;
@@ -248,9 +236,9 @@
 
         .left-button,
         .right-button {
-            background-color: #92e426;
+            background-color: rgb(7, 163, 7);
             color: white;
-            border: 1px solid #b9ec5b;
+            border: 1px solid #557d0a;
             text-decoration: none;
             padding: 5px 20px;
             border-radius: 15px;
@@ -281,8 +269,8 @@
         <div class="table-cell">
             <div id="ticket">
                 <div class="row perforated first">
-                    <img src="https://getlucky-4.s3.me-south-1.amazonaws.com/logo.jpg"
-                        style="height: 40px; width: 40px;" alt="site-logo">
+                    <img src="https://getlucky4.com/assets/images/logo.jpg" style="height: 40px; width: 40px;"
+                        alt="site-logo">
                     <h2 style="display: inline-block; vertical-align: middle; margin-left: 15px; margin-top: -10px;">
                         Getlucky4</h2>
                 </div>
@@ -300,7 +288,7 @@
                         <div class="right">
                             <div class="label">Mobile No. </div>
                             <div class="city">
-                                <%= phoneNumber %>
+                                +<%= phoneNumber %>
                             </div>
                         </div>
                     </div>
@@ -309,32 +297,32 @@
                             <%= drawName %>
                         </p>
                     </div>
-                    <!-- <div class="row perforated destinations">
+                    <div class="row perforated destinations">
                         <div class="left">
-                            <div class="label">Grand Prize UPTO</div>
-                            <div class="city">AED 1,
-                                000,
-                                000</div>
+                            <div class="label">Grand Prize</div>
+                            <div class="city">AED 10,000.00</div>
                         </div>
                         <div class="right">
-                            <div class="label">Issued On</div>
-                            <div class="city">28 Sep 2023 10:29 pm</div>
+                            <div class="label">Purchase Date</div>
+                            <div class="city">
+                                <%= purchaseDate %>
+                            </div>
                         </div>
-                    </div> -->
+                    </div>
                     <div class="row perforated destinations">
                         <div class="prize-total">
-                            <p>Just3 Draw Prizes</p>
+                            <p>Getlucky4 Prizes</p>
                             <div style="margin-top: 10px;" class="row justify-content-center">
                                 <div class="col-md-4 pd-10">
-                                    <div class="label">1<span style="font-size:9px;">st</span>Prize</div>
-                                    <div class="city">AED 3,000.00</div>
+                                    <div class="label">Straight</div>
+                                    <div class=" city">AED 3,000.00</div>
                                 </div>
                                 <div class="col-md-4 pd-10">
-                                    <div class="label">2<span style="font-size:9px;">nd</span>Prize</div>
+                                    <div class="label">Rumble</div>
                                     <div class="city">AED 1,000.00</div>
                                 </div>
                                 <div class="col-md-4 pd-20">
-                                    <div class="label">3<span style="font-size:9px;">rd</span>Prize</div>
+                                    <div class="label">Chance</div>
                                     <div class="city">AED 100.00</div>
                                 </div>
                             </div>

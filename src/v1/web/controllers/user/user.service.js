@@ -333,6 +333,7 @@ module.exports = {
         name: { $first: '$userData.name' },
         phoneNumber: { $first: '$userData.phoneNumber' },
         paymentStatus: { $first: '$paymentStatus' },
+        purchaseDate: { $first: '$orderData.date' },
         drawName: { $first: { $concat: ['$orderData.drawData.drawName', ' ', '$orderData.drawData.drawNo'] } },
         ticketId: { $first: '$orderData.ticketId' },
         products: {

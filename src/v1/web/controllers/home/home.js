@@ -1,4 +1,5 @@
 // model
+const moment = require('moment');
 const { ObjectId } = require('mongoose').Types;
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 // models
@@ -129,14 +130,23 @@ module.exports = {
 
       const [getUserCart] = await getCartData(id);
       if (!getUserCart) return respondFailure(res, req.__(localeKeys.product.CART_NOT_FOUND), StatusCode.NOT_FOUND);
-      const { totalCost, _id, data } = getUserCart;
+      const {
+        totalCost, _id, data, drawId,
+      } = getUserCart;
+
+      const currentDate = new Date();
+      const getDraw = await commonService.findOneById(Draw, drawId);
+      if (getDraw.date <= currentDate) return respondFailure(res, req.__(localeKeys.product.DRAW_EXPIRED), StatusCode.FORBIDDEN);
 
       const bookingObj = {
         userId: id,
-        date: new Date(),
+        date: currentDate,
         totalPrice: totalCost,
         taxAmount: (5 / 100) * totalCost,
       };
+
+      const expireTime = moment().add(35, 'minutes');
+      const sessionExpireDate = expireTime.unix();
 
       const bookingData = await commonService.save(Booking, bookingObj);
       const { transactionId } = bookingData;
@@ -148,8 +158,10 @@ module.exports = {
           transactionId,
         },
         payment_intent_data: {
+          setup_future_usage: 'off_session',
           receipt_email: email,
         },
+        expires_at: sessionExpireDate,
         success_url: `${protocol}://${req.get('host')}/ticket-view?id=${transactionId}`,
         cancel_url: `${protocol}://${req.get('host')}/ticket-view?id=${transactionId}`,
       });

@@ -2,6 +2,7 @@
 const path = require('path');
 const _ = require('lodash');
 const ejs = require('ejs');
+const moment = require('moment');
 const puppeteer = require('puppeteer');
 // models
 const {
@@ -17,7 +18,7 @@ const commonService = require('../../../services/common.service');
 const localeKeys = require('../../../../locales/keys.json');
 const StatusCode = require('../../../../helpers/statusCodes.json');
 const constValues = require('../../../../helpers/constants');
-const { getMessageFromValidationError } = require('../../../../helpers/utils');
+const { getMessageFromValidationError, generate4DigitOTP } = require('../../../../helpers/utils');
 const { sendMail } = require('../../../../helpers/notification');
 const { changeEmail } = require('../../../../templates/emailTemplate');
 const {
@@ -136,7 +137,7 @@ module.exports = {
       const checkEmail = await commonService.findOneByFields(User, { email });
       if (checkEmail) return respondFailure(res, req.__(localeKeys.user.EMAIL_EXISTS), StatusCode.CONFLICT);
 
-      const otp = 1234;
+      const otp = generate4DigitOTP();
       const emailOptions = {
         email, otp, name,
       };
@@ -235,6 +236,7 @@ module.exports = {
       const [bookingData] = await getTicketDetails(id);
       if (!bookingData) return res.render(path.join(__dirname, `../../../../templates/${file}`), { link });
 
+      bookingData.purchaseDate = moment(bookingData.purchaseDate).format('DD-MMM-YYYY');
       const pdfDownload = `${process.env.MAIN_URL}/invoice?id=${id}`;
       const { paymentStatus } = bookingData;
       switch (paymentStatus) {
@@ -261,6 +263,7 @@ module.exports = {
 
     const [invoiceData] = await getPDFInvoiceData(id);
 
+    // eslint-disable-next-line consistent-return
     ejs.renderFile(path.join(__dirname, '../../../../templates/views/generatePDF.ejs'), invoiceData, async (err, html) => {
       if (err) {
         console.error('Error rendering EJS:', err);
