@@ -34,7 +34,16 @@ const limiter = rateLimit({
 const expressApp = express();
 
 // middlewares
-expressApp.use(helmet());
+expressApp.use(
+  helmet({
+    contentSecurityPolicy: {
+      useDefaults: true,
+      directives: {
+        'img-src': ["'self'", 'https: data:'],
+      },
+    },
+  }),
+);
 expressApp.use(mongoSanitize());
 expressApp.use(hpp());
 expressApp.use(morgan('combined', { stream: winston.stream }));

@@ -13,7 +13,7 @@ module.exports = {
     const file = './emails/en/forgotPassword.ejs';
     const filePath = path.join(__dirname, file);
     const source = fs.readFileSync(filePath, 'utf8');
-    const outputString = ejs.render(source, { name, password, url: process.env.MAIN_URL });
+    const outputString = ejs.render(source, { name, password, url: process.env.AWS_S3_URL });
     return {
       from: process.env.AWS_SES_FROM_EMAIL,
       to: email,
@@ -30,7 +30,7 @@ module.exports = {
 
     const filePath = path.join(__dirname, file);
     const source = fs.readFileSync(filePath, 'utf8');
-    const outputString = ejs.render(source, { name, otp, url: process.env.MAIN_URL });
+    const outputString = ejs.render(source, { name, otp, url: process.env.AWS_S3_URL });
     return {
       from: process.env.AWS_SES_FROM_EMAIL,
       to: email,
