@@ -34,6 +34,7 @@ module.exports = {
       const { drawId } = params;
 
       const getDraw = await commonService.findOneById(Draw, drawId);
+      if (!getDraw) return respondFailure(res, req.__(localeKeys.product.DRAW_NOT_FOUND), StatusCode.NOT_FOUND);
       if (!getDraw.isCompleted) return respondFailure(res, req.__(localeKeys.product.WINNER_NOT_ANNOUNCED), StatusCode.FORBIDDEN);
 
       const drawResults = await drawResult(drawId);

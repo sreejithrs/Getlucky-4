@@ -11,7 +11,7 @@ const {
   validateSignIn, validateRegister, validateResendOtpCode, validateVerificationCode, validateForgotPassword, validateResetPassword,
 } = require('./auth.validator');
 const { sendOtp } = require('./auth.service');
-const { getMessageFromValidationError } = require('../../../../helpers/utils');
+const { getMessageFromValidationError, generate4DigitOTP } = require('../../../../helpers/utils');
 const { getAuthTokens } = require('../../../../helpers/token');
 const commonService = require('../../../services/common.service');
 const constValues = require('../../../../helpers/constants');
@@ -38,12 +38,11 @@ module.exports = {
       const { body } = req;
       const { email, phoneNumber } = body;
       const condition = {};
-      const checkArray = [];
+      const checkArray = [{ phoneNumber }];
 
       const { error } = validateRegister(body);
       if (error) return next(respondError(getMessageFromValidationError(error)));
 
-      checkArray.push({ phoneNumber });
       if (email && email !== '') {
         checkArray.push({ email });
       }
@@ -53,7 +52,7 @@ module.exports = {
       if (userExist && userExist.email !== '' && userExist.email === email) return respondFailure(_res, req.__(localeKeys.auth.EMAIL_ALREADY_EXISTS), StatusCode.CONFLICT);
       if (userExist && userExist.phoneNumber === phoneNumber) return respondFailure(_res, req.__(localeKeys.auth.MOBILE_ALREADY_EXISTS), StatusCode.CONFLICT);
 
-      const verificationCode = 1234;
+      const verificationCode = generate4DigitOTP();
       body.verificationCode = verificationCode;
       body.userType = constValues.userType.USER;
       await commonService.save(User, body);
@@ -63,7 +62,7 @@ module.exports = {
         message: constValues.smsContent(verificationCode),
       };
 
-      process.nextTick(() => sendSMS(smsContent));
+      if (process.env.NODE_ENV !== 'test') process.nextTick(() => sendSMS(smsContent));
       const userDetails = await commonService.findOneByFields(User, { email });
       return respondSuccess(
         _res,
@@ -131,7 +130,7 @@ module.exports = {
       if (userExist.verifyOtpMax === 4) await commonService.updateById(User, userExist._id, { $set: { verifyOtpTime: Date.now() } });
 
       const dateDiff = moment().diff(userExist.verifyOtpTime, 'minutes');
-      const dataToSend = { otp: 1234, dateDiff, api: 'verificationCode' };
+      const dataToSend = { otp: generate4DigitOTP(), dateDiff, api: 'verificationCode' };
 
       const status = await sendOtp(userExist, dataToSend);
       if (!status) return respondFailure(res, req.__(localeKeys.auth.OTP_MAX_REACHED), StatusCode.TOO_MANY_REQUESTS);
@@ -191,7 +190,7 @@ module.exports = {
       const passwordTime = userExist.passwordOtpTime || 5;
       const dateDiff = moment().diff(passwordTime, 'minutes');
       const dataToSend = {
-        otp: 1234, dateDiff, api: 'forgotPassword', key,
+        otp: generate4DigitOTP(), dateDiff, api: 'forgotPassword', key,
       };
 
       const status = await sendOtp(userExist, dataToSend);

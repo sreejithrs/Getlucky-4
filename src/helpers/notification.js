@@ -21,12 +21,11 @@ module.exports = {
       from: options.from, to: options.to, subject: options.subject, html: options.content,
     };
     return new Promise((resolve) => {
-      transporter.sendMail(mailOptions, (err, data) => {
+      transporter.sendMail(mailOptions, (err, _data) => {
         if (err) {
           console.log(err, 'awsSESErr');
           resolve(false);
         } else {
-          console.log(data, 'Email sent successfully');
           resolve(true);
         }
       });
@@ -48,8 +47,7 @@ module.exports = {
 
     try {
       const sns = new AWS.SNS({ apiVersion: '2010-03-31' });
-      const data = await sns.publish(params).promise();
-      console.log(data, 'data');
+      await sns.publish(params).promise();
       return true;
     } catch (e) {
       console.log(e);

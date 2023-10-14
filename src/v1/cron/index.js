@@ -6,7 +6,7 @@ const rule = new schedule.RecurrenceRule();
 rule.tz = 'Etc/UTC';
 
 // models
-const { Draw, Cart } = require('../models/index');
+const { Draw } = require('../models/index');
 // helpers
 const constValues = require('../../helpers/constants');
 const commonService = require('../services/common.service');
@@ -17,14 +17,6 @@ rule.minute = 0;
 
 schedule.scheduleJob(rule, async () => {
   await module.exports.createDraw();
-});
-
-// Execute a cron job every day 9:00:00 pm UTC
-rule.hour = 17;
-rule.minute = 0;
-
-schedule.scheduleJob(rule, async () => {
-  await module.exports.deletePendingCart();
 });
 
 module.exports = {
@@ -63,8 +55,4 @@ module.exports = {
     }
   },
 
-  deletePendingCart: async () => {
-    await commonService.delete(Cart, {});
-    console.log(new Date(), '----Cart Deleted----');
-  },
 };
