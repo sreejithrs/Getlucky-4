@@ -100,7 +100,7 @@
             width: 400px;
             background: #fff;
             height: auto;
-            margin: 0 auto
+            margin: 10px auto
         }
 
         #ticket>.row:first-child:after,
@@ -136,7 +136,7 @@
 
         .row.perforated {
             border-bottom: 1px dashed #ddd;
-            padding: 11px
+            padding: 7px;
         }
 
         .label {
@@ -226,7 +226,6 @@
 
         .home-button {
             margin: 55px auto;
-            cursor: pointer;
             padding: 2px;
             max-width: 300px;
             display: flex;
@@ -236,7 +235,7 @@
 
         .left-button,
         .right-button {
-            background-color: rgb(7, 163, 7);
+            background-color: rgb(18, 179, 18);
             color: white;
             border: 1px solid #557d0a;
             text-decoration: none;
@@ -250,6 +249,14 @@
             border: 1px solid #0056b3;
         }
 
+        .right-button:hover {
+            background-color: #245bc9;
+        }
+
+        .left-button:hover {
+            background-color: rgb(12, 155, 12);
+        }
+
         td,
         th {
             padding: 8px
@@ -257,6 +264,15 @@
 
         .center {
             margin: 0 auto
+        }
+
+        .round-mask {
+            width: 50px;
+            margin-left: 10px;
+            margin-top: 5px;
+            height: auto;
+            background: white;
+            border-radius: 50%;
         }
     </style>
     <link
@@ -269,8 +285,8 @@
         <div class="table-cell">
             <div id="ticket">
                 <div class="row perforated first">
-                    <img src="<%= url %>/logo.jpg" style="height: 40px; width: 40px;" alt="logo">
-                    <h2 style="display: inline-block; vertical-align: middle; margin-left: 15px; margin-top: -10px;">
+                    <img src="<%= url %>/logo.jpg" class="round-mask" alt="logo">
+                    <h2 style="display: inline-block; vertical-align: middle; padding-left: 10px; margin-top: -20px;">
                         Getlucky4</h2>
                 </div>
                 <div class="row text-center perforated destinations">
@@ -356,7 +372,6 @@
                                         <%= products[i].quantity %>
                                     </td>
                                     <td>
-                                        <!-- Use JavaScript to join ticket numbers into a comma-separated string -->
                                         <div class="ticket-numbers">
                                             <% let ticketNumbers=Array.isArray(products[i].tickets) ?
                                                 products[i].tickets.join(', ') : ''; %>
