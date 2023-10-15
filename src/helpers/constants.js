@@ -46,7 +46,8 @@ module.exports = {
     SECOND: 2,
   },
 
-  smsContent: (otp) => `Your OTP for mobile number verification in Getlucky4 is ${otp}. Please use this 4-digit code within the next 3 minutes. For your security, do not share this code with anyone`,
+  smsVerifyContent: (otp) => `Your OTP for mobile number verification in Getlucky4 is ${otp}. Please use this 4-digit code within the next 3 minutes. For your security, do not share this code with anyone`,
+  smsLoginContent: (otp) => `Your OTP for Getlucky4 login is ${otp}. For your security, do not share this code with anyone. If you are not requested, please ignore this message`,
 
   emailSubject: {
 
