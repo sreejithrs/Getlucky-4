@@ -9,7 +9,17 @@ module.exports = {
     const schema = Joi.object().keys({
       phoneNumber: Joi.string().pattern(/^[+]?[0-9]+$/),
       email: Joi.string().email({ minDomainSegments: 2 }).allow(''),
-      password: Joi.string().min(6).required(),
+    }).xor('phoneNumber', 'email').messages({
+      'object.xor': 'Either email or phoneNumber is required, not both',
+    });
+    return schema.validate(input);
+  },
+
+  validateVerifySignIn: (input) => {
+    const schema = Joi.object().keys({
+      phoneNumber: Joi.string().pattern(/^[+]?[0-9]+$/),
+      email: Joi.string().email({ minDomainSegments: 2 }).allow(''),
+      otp: Joi.number().required(),
     }).xor('phoneNumber', 'email').messages({
       'object.xor': 'Either email or phoneNumber is required, not both',
     });
@@ -28,7 +38,6 @@ module.exports = {
       state: Joi.string().required(),
       district: Joi.string().allow('').optional(),
       email: Joi.string().email({ minDomainSegments: 2 }).allow('').optional(),
-      password: Joi.string().min(6).required(),
     });
     return schema.validate(input);
   },

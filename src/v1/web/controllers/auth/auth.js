@@ -8,9 +8,9 @@ const { User } = require('../../../models');
 // helpers
 const { respondSuccess, respondFailure, respondError } = require('../../../../helpers/response');
 const {
-  validateSignIn, validateRegister, validateResendOtpCode, validateVerificationCode, validateForgotPassword, validateResetPassword,
+  validateSignIn, validateRegister, validateVerifySignIn, validateResendOtpCode, validateVerificationCode, validateForgotPassword, validateResetPassword,
 } = require('./auth.validator');
-const { sendOtp } = require('./auth.service');
+const { sendOtp, loginOtp } = require('./auth.service');
 const { getMessageFromValidationError, generate4DigitOTP } = require('../../../../helpers/utils');
 const { getAuthTokens } = require('../../../../helpers/token');
 const commonService = require('../../../services/common.service');
@@ -59,7 +59,7 @@ module.exports = {
 
       const smsContent = {
         phoneNumber,
-        message: constValues.smsContent(verificationCode),
+        message: constValues.smsVerifyContent(verificationCode),
       };
 
       if (process.env.NODE_ENV !== 'test') process.nextTick(() => sendSMS(smsContent));
@@ -80,12 +80,53 @@ module.exports = {
     }
   },
 
-  login: async (req, _res, next) => {
+  login: async (req, res, next) => {
     try {
       const { body } = req;
-      const { email, password } = body;
+      const { phoneNumber } = body;
 
       const { error } = validateSignIn(body);
+      if (error) return next(respondError(getMessageFromValidationError(error)));
+
+      const key = phoneNumber ? 'phoneNumber' : 'email';
+      const value = body[key];
+      const searchData = {};
+      searchData[key] = value;
+      const errMsg = key === 'email' ? localeKeys.auth.INVALID_EMAIL_OR_PASS : localeKeys.auth.INVALID_PHONE_OR_PASS;
+      let successMessage = key === 'email' ? localeKeys.auth.EMAIL_SENT_SUCCESSFULLY : localeKeys.auth.OTP_SENT_SUCCESSFULLY;
+
+      const userExist = await commonService.findOneByFields(User, searchData, constValues.userType.USER);
+      if (!userExist) return respondFailure(res, req.__(errMsg), StatusCode.NOT_FOUND);
+      if (!userExist.status) return respondFailure(res, req.__(localeKeys.auth.USER_DEACTIVE), StatusCode.CONFLICT);
+
+      const otpTIme = {
+        phoneNumber: userExist.phoneOtpTimeLimit,
+        email: userExist.emailOtpTimeLimit,
+      };
+      const otpTime = otpTIme[key] || 5;
+      const dateDiff = Number(moment().diff(otpTime, 'minutes'));
+      const secondsDiff = Number(moment().diff(otpTime, 'seconds'));
+      const dataToSend = {
+        otp: 1234, dateDiff, secondsDiff, key,
+      };
+
+      const response = await loginOtp(userExist, dataToSend);
+      if (!response.status) successMessage = response.message;
+      return respondSuccess(res, req.__(successMessage), StatusCode.OK);
+    } catch (error) {
+      return next(respondError(
+        error,
+        StatusCode.INTERNAL_SERVER_ERROR,
+      ));
+    }
+  },
+
+  verifyLogin: async (req, _res, next) => {
+    try {
+      const { body } = req;
+      const { email, otp } = body;
+
+      const { error } = validateVerifySignIn(body);
       if (error) return next(respondError(getMessageFromValidationError(error)));
 
       const key = email ? 'email' : 'phoneNumber';
@@ -94,12 +135,23 @@ module.exports = {
       searchData[key] = value;
       const errMsg = key === 'email' ? localeKeys.auth.INVALID_EMAIL_OR_PASS : localeKeys.auth.INVALID_PHONE_OR_PASS;
 
-      const userExist = await commonService.includePasswordByEmail(User, searchData, constValues.userType.USER);
+      const userExist = await commonService.findOneByFields(User, searchData, constValues.userType.USER);
       if (!userExist) return respondFailure(_res, req.__(errMsg), StatusCode.NOT_FOUND);
       if (!userExist.status) return respondFailure(_res, req.__(localeKeys.auth.USER_DEACTIVE), StatusCode.CONFLICT);
 
-      const comparePassword = await userExist.comparePassword(password);
-      if (!comparePassword) return respondFailure(_res, req.__(errMsg), StatusCode.UNAUTHORIZED);
+      const checkOtp = {
+        phoneNumber: userExist.phoneOtp,
+        email: userExist.emailOtp,
+      };
+      if (otp !== checkOtp[key]) return respondFailure(_res, req.__(localeKeys.auth.TEMPORARY_PASSWORD_NOT_MATCHED), StatusCode.CONFLICT);
+
+      const setValue = {
+        phoneNumber: 'phoneOtp',
+        email: 'emailOtp',
+      };
+      const setField = setValue[key];
+      userExist[setField] = null;
+      await userExist.save();
 
       const { accessToken, refreshToken } = getAuthTokens(userExist._id);
       return respondSuccess(
@@ -130,7 +182,7 @@ module.exports = {
       if (userExist.verifyOtpMax === 4) await commonService.updateById(User, userExist._id, { $set: { verifyOtpTime: Date.now() } });
 
       const dateDiff = moment().diff(userExist.verifyOtpTime, 'minutes');
-      const dataToSend = { otp: generate4DigitOTP(), dateDiff, api: 'verificationCode' };
+      const dataToSend = { otp: 1234, dateDiff, api: 'verificationCode' };
 
       const status = await sendOtp(userExist, dataToSend);
       if (!status) return respondFailure(res, req.__(localeKeys.auth.OTP_MAX_REACHED), StatusCode.TOO_MANY_REQUESTS);

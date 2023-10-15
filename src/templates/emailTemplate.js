@@ -22,6 +22,23 @@ module.exports = {
     };
   },
 
+  emailLogin: (emailOptions) => {
+    const {
+      email, name, otp,
+    } = emailOptions;
+    const file = './emails/en/emailLogin.ejs';
+
+    const filePath = path.join(__dirname, file);
+    const source = fs.readFileSync(filePath, 'utf8');
+    const outputString = ejs.render(source, { name, otp, url: process.env.AWS_S3_URL });
+    return {
+      from: process.env.AWS_SES_FROM_EMAIL,
+      to: email,
+      subject: emailSubject.changeEmail(),
+      content: outputString,
+    };
+  },
+
   changeEmail: (emailOptions) => {
     const {
       email, name, otp,
