@@ -8,6 +8,7 @@ const userSchema = new Schema(
   {
     name: { type: String, default: '' },
     tempEmail: { type: String, lowercase: true, trim: true },
+    password: { type: String },
     email: {
       type: String, lowercase: true, trim: true,
     },

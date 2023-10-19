@@ -11,7 +11,7 @@ const localeKeys = require('../../../../locales/keys.json');
 const StatusCode = require('../../../../helpers/statusCodes.json');
 const constValues = require('../../../../helpers/constants');
 const { calculateDrawResult } = require('./draw.service');
-const { drawResult } = require('../../../common/common.service');
+const { drawResult, getWinnersList } = require('../../../common/common.service');
 const { getMessageFromValidationError } = require('../../../../helpers/utils');
 
 module.exports = {
@@ -133,6 +133,21 @@ module.exports = {
         },
       });
       return respondSuccess(res, req.__(localeKeys.global.UPDATED_SUCCESSFULLY), StatusCode.OK);
+    } catch (error) {
+      return next(respondError(
+        error,
+        StatusCode.INTERNAL_SERVER_ERROR,
+      ));
+    }
+  },
+
+  getWinners: async (req, res, next) => {
+    try {
+      const { params } = req;
+      const { drawId } = params;
+
+      const [winnersList] = await getWinnersList(drawId);
+      return respondSuccess(res, req.__(localeKeys.global.REQUEST_WAS_SUCCESSFUL), StatusCode.OK, winnersList);
     } catch (error) {
       return next(respondError(
         error,

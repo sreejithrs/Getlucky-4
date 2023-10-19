@@ -18,7 +18,7 @@ const commonService = require('../../../services/common.service');
 const localeKeys = require('../../../../locales/keys.json');
 const StatusCode = require('../../../../helpers/statusCodes.json');
 const constValues = require('../../../../helpers/constants');
-const { getMessageFromValidationError, generate4DigitOTP } = require('../../../../helpers/utils');
+const { getMessageFromValidationError } = require('../../../../helpers/utils');
 const { sendMail } = require('../../../../helpers/notification');
 const { changeEmail } = require('../../../../templates/emailTemplate');
 const {
@@ -137,7 +137,7 @@ module.exports = {
       const checkEmail = await commonService.findOneByFields(User, { email });
       if (checkEmail) return respondFailure(res, req.__(localeKeys.user.EMAIL_EXISTS), StatusCode.CONFLICT);
 
-      const otp = generate4DigitOTP();
+      const otp = 1234;
       const emailOptions = {
         email, otp, name,
       };

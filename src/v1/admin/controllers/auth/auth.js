@@ -80,7 +80,7 @@ module.exports = {
       const usersList = await commonService.findAllBySkipLimit(User, { userType: constValues.userType.USER, isVerified: constValues.status.ACTIVE }, { _id: -1 }, Number(skip), Number(limit), {
         _id: 1, name: 1, email: 1, phoneNumber: 1, country: 1,
       });
-      const totalUsers = await commonService.count(User, { userType: constValues.userType.USER });
+      const totalUsers = await commonService.count(User, { userType: constValues.userType.USER, isVerified: constValues.status.ACTIVE });
       return respondSuccess(
         res,
         req.__(localeKeys.global.REQUEST_WAS_SUCCESSFUL),

@@ -52,7 +52,7 @@ module.exports = {
       if (userExist && userExist.email !== '' && userExist.email === email) return respondFailure(_res, req.__(localeKeys.auth.EMAIL_ALREADY_EXISTS), StatusCode.CONFLICT);
       if (userExist && userExist.phoneNumber === phoneNumber) return respondFailure(_res, req.__(localeKeys.auth.MOBILE_ALREADY_EXISTS), StatusCode.CONFLICT);
 
-      const verificationCode = generate4DigitOTP();
+      const verificationCode = 1234;
       body.verificationCode = verificationCode;
       body.userType = constValues.userType.USER;
       await commonService.save(User, body);

@@ -8,5 +8,6 @@ router.post('/draws', drawController.createDraw);
 router.put('/draws', drawController.updateDraw);
 router.post('/draws/:drawId/publish', drawController.publishDraw);
 router.get('/draws/:drawId/result', drawController.getDrawResult);
+router.get('/draws/:drawId/winners', drawController.getWinners);
 
 module.exports = router;
