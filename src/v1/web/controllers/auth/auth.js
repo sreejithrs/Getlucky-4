@@ -146,7 +146,10 @@ module.exports = {
       if (!checkOtp[key]) return respondFailure(_res, req.__(localeKeys.auth.OTP_EXPIRED), StatusCode.FORBIDDEN);
       if (otp !== checkOtp[key]) return respondFailure(_res, req.__(localeKeys.auth.TEMPORARY_PASSWORD_NOT_MATCHED), StatusCode.CONFLICT);
 
-      if (!userExist.isVerified) userExist.isVerified = constValues.status.ACTIVE;
+      if (!userExist.isVerified) {
+        userExist.isVerified = constValues.status.ACTIVE;
+        userExist.verificationCode = null;
+      }
       const setValue = {
         phoneNumber: 'phoneOtp',
         email: 'emailOtp',
