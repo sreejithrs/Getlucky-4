@@ -44,6 +44,7 @@
 	"USER_ALREADY_EXIST": "User Already Exists",
 	"PROFILE_NOT_COMPLETED": "Profile Not Completed",
 	"INTERNAL_SERVER_ERROR": "Internal Server Error",
+	"OTP_EXPIRED": "Otp is expired, try resend",
 	"OTP_MAX_REACHED": "You have reached maximum attempts to generate otp, try after 5 minutes",
 	"TEMPORARY_PASSWORD_NOT_MATCHED": "Incorrect OTP, try again",
 	"PROFILE_COMPLETED_SUCCESSFULLY": "Profile Completed Successfully",
