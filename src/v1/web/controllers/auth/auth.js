@@ -52,7 +52,7 @@ module.exports = {
       if (userExist && userExist.email !== '' && userExist.email === email) return respondFailure(_res, req.__(localeKeys.auth.EMAIL_ALREADY_EXISTS), StatusCode.CONFLICT);
       if (userExist && userExist.phoneNumber === phoneNumber) return respondFailure(_res, req.__(localeKeys.auth.MOBILE_ALREADY_EXISTS), StatusCode.CONFLICT);
 
-      const verificationCode = 1234;
+      const verificationCode = generate4DigitOTP();
       body.verificationCode = verificationCode;
       body.userType = constValues.userType.USER;
       await commonService.save(User, body);
@@ -107,7 +107,7 @@ module.exports = {
       const dateDiff = Number(moment().diff(otpTime, 'minutes'));
       const secondsDiff = Number(moment().diff(otpTime, 'seconds'));
       const dataToSend = {
-        otp: 1234, dateDiff, secondsDiff, key,
+        otp: generate4DigitOTP(), dateDiff, secondsDiff, key,
       };
 
       const response = await loginOtp(userExist, dataToSend);
@@ -187,7 +187,7 @@ module.exports = {
       if (userExist.verifyOtpMax === 4) await commonService.updateById(User, userExist._id, { $set: { verifyOtpTime: Date.now() } });
 
       const dateDiff = moment().diff(userExist.verifyOtpTime, 'minutes');
-      const dataToSend = { otp: 1234, dateDiff, api: 'verificationCode' };
+      const dataToSend = { otp: generate4DigitOTP(), dateDiff, api: 'verificationCode' };
 
       const status = await sendOtp(userExist, dataToSend);
       if (!status) return respondFailure(res, req.__(localeKeys.auth.OTP_MAX_REACHED), StatusCode.TOO_MANY_REQUESTS);
