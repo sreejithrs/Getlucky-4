@@ -1,7 +1,34 @@
 const allowedLanguages = ['en', 'de'];
+const drawCategoryArray = ['straight', 'rumble', 'chance'];
 
 module.exports = {
   allowedLanguages,
+
+  drawCategoryArray,
+
+  drawDetails: {
+    drawName: 'Getlucky Draw',
+  },
+
+  priceAmount: {
+    straight: 3000,
+    rumble: 1000,
+    chance: 100,
+  },
+
+  priceCategory: {
+    STRAIGHT: 'straight',
+    RUMBLE: 'rumble',
+    CHANCE: 'chance',
+  },
+
+  paymentStatus: {
+    FAILED: 0,
+    SUCCESS: 1,
+    PENDING: 2,
+  },
+
+  months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
 
   status: {
     ACTIVE: true,
@@ -10,7 +37,8 @@ module.exports = {
 
   userType: {
     USER: 1,
-    ADMIN: 2,
+    SALES: 2,
+    ADMIN: 3,
   },
 
   otpMax: {
@@ -18,90 +46,14 @@ module.exports = {
     SECOND: 2,
   },
 
+  smsVerifyContent: (otp) => `Your OTP for mobile number verification in Getlucky4 is ${otp}. Please use this 4-digit code within the next 3 minutes. For your security, do not share this code with anyone`,
+  smsLoginContent: (otp) => `Your OTP for Getlucky4 login is ${otp}. For your security, do not share this code with anyone. If you not requested, please ignore this message`,
+
   emailSubject: {
 
-    emailVerification: (language) => {
-      if (language === 'de') {
-        return 'Bestätigung Code';
-      }
-      return 'Confirmation Code';
-    },
+    changeEmail: () => 'Update your Email',
 
-    forgotPassword: (language) => {
-      if (language === 'de') {
-        return 'Neues Passwort';
-      }
-      return 'New Password';
-    },
-
-    passwordChange: (language) => {
-      if (language === 'de') {
-        return 'Passwortänderung';
-      }
-      return 'Password Change';
-    },
-
-  },
-
-  emailContent: {
-
-    emailVerification: (verificationCode, language) => {
-      if (language === 'de') {
-        return `
-          <p>Hier ist dein Bestätigungs Code: <b>${verificationCode}</b> für Getlucky-4</p>
-          <br/>
-          <p>Grüße,</p>
-          <p><b>Team Getlucky-4</b></p>
-        `;
-      }
-      return `
-          <p>Here is your Verification Code: <b>${verificationCode}</b> for Getlucky-4</p>
-          <br/>
-          <p>Regards,</p>
-          <p><b>Team Getlucky-4</b></p>
-        `;
-    },
-
-    emailPassword: (verificationCode, language) => {
-      if (language === 'de') {
-        return `
-          <p>Hier ist Ihr temporäres Passwort: <b>${verificationCode}</b> für Getlucky-4</p>
-          <br/>
-          <p>Grüße,</p>
-          <p><b>Team Getlucky-4</b></p>
-        `;
-      }
-      return `
-          <p>Here is your Temporary Password: <b>${verificationCode}</b> for Getlucky-4</p>
-          <br/>
-          <p>Regards,</p>
-          <p><b>Team Getlucky-4</b></p>
-        `;
-    },
-
-    forgotPassword: (password, language) => {
-      if (language === 'de') {
-        return `
-          <p>Hier kommt dein neues Passwort: <b>${password}</b>. Es ist nur 1 x zu nutzen.</p>
-          <br/>
-          <p>Grüße,</p>
-          <p><b>Team Getlucky-4</b></p>
-        `;
-      }
-      return `
-          <p>Here is your new password: <b>${password}</b>. It can only be used once.</p>
-          <br/>
-          <p>Regards,</p>
-          <p><b>Team Getlucky-4</b></p>
-        `;
-    },
-
-    passwordChange: (language) => {
-      if (language === 'de') {
-        return '<p>Ihr Passwort wurde erfolgreich geändert.</p><br/><p>Grüße,</p><p><b>Team Getlucky-4</b></p>';
-      }
-      return '<p>Your password has been changed successfully.</p><br/><p>Regards,</p><p><b>Team Getlucky-4</b></p>';
-    },
+    forgotPassword: () => 'New Password',
 
   },
 

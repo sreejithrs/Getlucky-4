@@ -12,7 +12,9 @@ logs
 .env.staging
 .env.production
 package-lock.json
+.vscode
 yarn.lock
+invoice.pdf
 
 # Compiled Java class files
 *.class

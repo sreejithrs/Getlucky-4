@@ -25,10 +25,9 @@ module.exports = {
   },
 
   adminSignUp: async (req, res, next) => {
-    const { body } = req;
-    const { email } = body;
-
     try {
+      const { body } = req;
+      const { email } = body;
       const { error } = validateAccount(body);
       if (error) return next(respondError(getMessageFromValidationError(error)));
 
@@ -47,10 +46,9 @@ module.exports = {
   },
 
   adminSignIn: async (req, res, next) => {
-    const { body } = req;
-    const { email, password } = body;
-
     try {
+      const { body } = req;
+      const { email, password } = body;
       const { error } = validateAccount(body);
       if (error) return next(respondError(getMessageFromValidationError(error)));
 
@@ -66,6 +64,28 @@ module.exports = {
         req.__(localeKeys.auth.LOG_IN_SUCCESSFULLY),
         StatusCode.OK,
         { accessToken, refreshToken },
+      );
+    } catch (error) {
+      return next(respondError(
+        error,
+        StatusCode.INTERNAL_SERVER_ERROR,
+      ));
+    }
+  },
+
+  usersList: async (req, res, next) => {
+    try {
+      const { params } = req;
+      const { skip, limit } = params;
+      const usersList = await commonService.findAllBySkipLimit(User, { userType: constValues.userType.USER, isVerified: constValues.status.ACTIVE }, { _id: -1 }, Number(skip), Number(limit), {
+        _id: 1, name: 1, email: 1, phoneNumber: 1, country: 1,
+      });
+      const totalUsers = await commonService.count(User, { userType: constValues.userType.USER, isVerified: constValues.status.ACTIVE });
+      return respondSuccess(
+        res,
+        req.__(localeKeys.global.REQUEST_WAS_SUCCESSFUL),
+        StatusCode.OK,
+        { totalUsers, usersList },
       );
     } catch (error) {
       return next(respondError(

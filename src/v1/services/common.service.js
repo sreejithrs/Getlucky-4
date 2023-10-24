@@ -16,6 +16,22 @@ const commonService = {
     }
   },
   /**
+  * @Method insertMany
+  * @Description Method for inserting many
+  *
+  */
+  insertMany: async (model, data) => {
+    try {
+      const save = await model.insertMany(data);
+      if (!save) {
+        return null;
+      }
+      return save;
+    } catch (err) {
+      return err;
+    }
+  },
+  /**
   * @Method updateById
   * @Description Method for render reset password page
   *
@@ -78,9 +94,25 @@ const commonService = {
   * @Description Method for render reset password page
   *
   */
-  findAllByFields: async (model, query) => {
+  findAllByFields: async (model, query, select = {}, sort = {}) => {
     try {
-      const getAll = await model.find(query).exec();
+      const getAll = await model.find(query, select).sort(sort).exec();
+      if (!getAll) {
+        return null;
+      }
+      return getAll;
+    } catch (err) {
+      return err;
+    }
+  },
+  /**
+  * @Method findAllByFields
+  * @Description Method for render reset password page
+  *
+  */
+  findAllBySkipLimit: async (model, query, sort, skip, limit, select = {}) => {
+    try {
+      const getAll = await model.find(query, select).sort(sort).skip(skip).limit(limit);
       if (!getAll) {
         return null;
       }
@@ -122,13 +154,29 @@ const commonService = {
     }
   },
   /**
+  * @Method findOneAndDelete
+  * @Description Method for render reset password page
+  *
+  */
+  findOneAndDelete: async (model, query) => {
+    try {
+      const dataDelete = await model.findOneAndDelete(query).exec();
+      if (!dataDelete) {
+        return null;
+      }
+      return dataDelete;
+    } catch (err) {
+      return err;
+    }
+  },
+  /**
   * @Method delete
   * @Description Method for render reset password page
   *
   */
-  delete: async (model, id) => {
+  delete: async (model, query) => {
     try {
-      const dataDelete = await model.remove({ _id: id }).exec();
+      const dataDelete = await model.deleteMany(query).exec();
       if (!dataDelete) {
         return null;
       }
@@ -190,9 +238,9 @@ const commonService = {
   * @Description Method for including password in response
   *
   */
-  includePasswordByEmail: async (model, email, type) => {
+  includePasswordByEmail: async (model, key, type) => {
     try {
-      const data = await model.findOne({ email: email.toLowerCase(), userType: type }).select('+password');
+      const data = await model.findOne({ ...key, userType: type }).select('+password');
       if (!data) {
         return null;
       }

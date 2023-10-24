@@ -1,11 +1,12 @@
+const crypto = require('crypto');
 const AWS = require('aws-sdk');
-
 const passwordGenerator = require('secure-random-password');
 const EmailValidator = require('email-deep-validator');
 
 const emailValidator = new EmailValidator();
 
 const s3bucket = new AWS.S3({
+  region: process.env.AWS_SES_REGION,
   signatureVersion: 'v4',
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
@@ -14,6 +15,12 @@ const s3bucket = new AWS.S3({
 const generateVerificationCode = () => {
   const timeStamp = Date.now();
   return 999999 - Number(timeStamp.toString().slice(7));
+};
+
+const generate4DigitOTP = () => {
+  const min = 1000;
+  const max = 9999;
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
 const generateAccessCode = () => {
@@ -39,25 +46,36 @@ const checkEmailValidOrNot = async (email) => {
 
 const getMessageFromValidationError = (error) => error.details[0].message.replace(/"/g, '');
 
+const generateOrderId = () => {
+  const id = crypto.randomBytes(16).toString('hex');
+  return `T${id}`;
+};
+
 // WORKS ON AWS S3
 const uploadImage = async (file, bucketName, fileName, contentType) => {
   const s3Params = {
     Bucket: process.env.AWS_BUCKET,
     Key: `${bucketName}/${fileName}`,
     ContentType: contentType,
-    Body: file.buffer,
+    Body: file.data,
     ACL: 'public-read',
   };
   return s3bucket
     .upload(s3Params)
     .promise()
-    .then((data) => ({ status: true, data }))
-    .catch((err) => ({ status: false, error: err.message }));
+    .then((data) => {
+      console.log(data);
+      return { status: true, data: data };
+    })
+    .catch((err) => {
+      console.log(err);
+      return { status: false, error: err.message };
+    });
 };
 
 const uploadFileCode = async (mainImage, bucketFolder) => {
   let imageName = '';
-  const refExt = mainImage.originalname && mainImage.originalname.substring(mainImage.originalname.lastIndexOf('.') + 1, mainImage.originalname.length);
+  const refExt = mainImage.name && mainImage.name.substring(mainImage.name.lastIndexOf('.') + 1, mainImage.name.length);
   const filename = `${new Date().getTime()}.${refExt}`;
   try {
     const uploadRes = await module.exports.uploadImage(mainImage, bucketFolder, filename, mainImage.mimetype);
@@ -74,7 +92,7 @@ const deleteFileFromS3 = async (key) => {
   const bucket = new AWS.S3({
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    region: 'eu-central-1',
+    region: process.env.AWS_SES_REGION,
   });
   const s3Params = {
     Bucket: process.env.AWS_BUCKET,
@@ -82,10 +100,47 @@ const deleteFileFromS3 = async (key) => {
   };
   return bucket.deleteObject(s3Params, (err, _data) => {
     if (err) {
-      global.logger('error', err);
+      console.log(err, 'error');
     }
   });
 };
+
+const allCharactersAreSame = (str) => {
+  for (let i = 1; i < str.length; i += 1) {
+    if (str[i] !== str[0]) {
+      return false;
+    }
+  }
+  return true;
+};
+
+const getPermutations = (value) => {
+  const permutations = [];
+  if (allCharactersAreSame(value)) {
+    return [value];
+  }
+
+  function generatePermutations(chars, currentPermutation = '') {
+    if (chars.length === 0) {
+      permutations.push(currentPermutation);
+    } else {
+      const usedChars = new Set();
+      for (let i = 0; i < chars.length; i += 1) {
+        if (!usedChars.has(chars[i])) {
+          usedChars.add(chars[i]);
+          const remainingChars = chars.slice(0, i) + chars.slice(i + 1);
+          generatePermutations(remainingChars, currentPermutation + chars[i]);
+        }
+      }
+    }
+  }
+
+  generatePermutations(value);
+  return permutations.filter((item) => item !== value);
+};
+
+const generate3DigitId = (lastPayoutNumber) => `#${lastPayoutNumber.toString().padStart(3, '0')}`;
+const generate6DigitId = (value, lastPayoutNumber) => `${value}${lastPayoutNumber.toString().padStart(6, '0')}`;
 
 module.exports = {
   generateVerificationCode,
@@ -96,4 +151,9 @@ module.exports = {
   uploadImage,
   deleteFileFromS3,
   uploadFileCode,
+  generate3DigitId,
+  getPermutations,
+  generateOrderId,
+  generate4DigitOTP,
+  generate6DigitId,
 };

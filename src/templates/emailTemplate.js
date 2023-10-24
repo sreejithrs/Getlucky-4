@@ -1,44 +1,59 @@
-const { emailSubject, emailContent } = require('../helpers/constants');
+const fs = require('fs');
+const path = require('path');
+const ejs = require('ejs');
+
+const { emailSubject } = require('../helpers/constants');
 
 module.exports = {
 
-  emailVerifcationTemplate: (emailOptions) => {
-    const { email, verificationCode, language } = emailOptions;
-    return {
-      from: process.env.AWS_SES_FROM_EMAIL,
-      to: email,
-      subject: emailSubject.emailVerification(language),
-      content: emailContent.emailVerification(verificationCode, language),
-    };
-  },
-
-  emailTemporaryPassword: (emailOptions) => {
-    const { email, verificationCode, language } = emailOptions;
-    return {
-      from: process.env.AWS_SES_FROM_EMAIL,
-      to: email,
-      subject: emailSubject.emailVerification(language),
-      content: emailContent.emailPassword(verificationCode, language),
-    };
-  },
-
   forgotPasswordEmail: (emailOptions) => {
-    const { email, password, language } = emailOptions;
+    const {
+      email, name, password,
+    } = emailOptions;
+    const file = './emails/en/forgotPassword.ejs';
+    const filePath = path.join(__dirname, file);
+    const source = fs.readFileSync(filePath, 'utf8');
+    const outputString = ejs.render(source, { name, password, url: process.env.AWS_S3_URL });
     return {
       from: process.env.AWS_SES_FROM_EMAIL,
       to: email,
-      subject: emailSubject.forgotPassword(language),
-      content: emailContent.forgotPassword(password, language),
+      subject: emailSubject.forgotPassword(),
+      content: outputString,
     };
   },
 
-  passwordChangeEmail: (emailOptions) => {
-    const { email, language } = emailOptions;
+  emailLogin: (emailOptions) => {
+    const {
+      email, name, otp,
+    } = emailOptions;
+    const file = './emails/en/emailLogin.ejs';
+
+    const filePath = path.join(__dirname, file);
+    const source = fs.readFileSync(filePath, 'utf8');
+    const outputString = ejs.render(source, { name, otp, url: process.env.AWS_S3_URL });
     return {
       from: process.env.AWS_SES_FROM_EMAIL,
       to: email,
-      subject: emailSubject.passwordChange(language),
-      content: emailContent.passwordChange(language),
+      subject: emailSubject.changeEmail(),
+      content: outputString,
     };
   },
+
+  changeEmail: (emailOptions) => {
+    const {
+      email, name, otp,
+    } = emailOptions;
+    const file = './emails/en/changeEmail.ejs';
+
+    const filePath = path.join(__dirname, file);
+    const source = fs.readFileSync(filePath, 'utf8');
+    const outputString = ejs.render(source, { name, otp, url: process.env.AWS_S3_URL });
+    return {
+      from: process.env.AWS_SES_FROM_EMAIL,
+      to: email,
+      subject: emailSubject.changeEmail(),
+      content: outputString,
+    };
+  },
+
 };

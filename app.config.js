@@ -2,15 +2,18 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const helmet = require('helmet');
-const multer = require('multer');
 const bodyParser = require('body-parser');
+const passport = require('passport');
 const mongoSanitize = require('express-mongo-sanitize');
 const hpp = require('hpp');
 const rateLimit = require('express-rate-limit');
 require('./src/config/env.config');
+const fileUpload = require('express-fileupload');
 const winston = require('./src/config/winston.config');
 const routes = require('./src/routes');
 const i18n = require('./src/config/i18n.config');
+const userController = require('./src/v1/web/controllers/user/user');
+const homeController = require('./src/v1/web/controllers/home/home');
 
 // cors options
 const corsOptions = {
@@ -31,19 +34,34 @@ const limiter = rateLimit({
 const expressApp = express();
 
 // middlewares
-expressApp.use(helmet());
+expressApp.use(
+  helmet.contentSecurityPolicy({
+    useDefaults: true,
+    directives: {
+      'img-src': ["'self'", 'https: data:'],
+    },
+  }),
+);
 expressApp.use(mongoSanitize());
 expressApp.use(hpp());
 expressApp.use(morgan('combined', { stream: winston.stream }));
+expressApp.use(cors(corsOptions));
+expressApp.use(i18n.init);
+
+expressApp.post('/stripe-webhooks', express.raw({ type: '*/*' }), homeController.webhooks);
+expressApp.get('/ticket-view', userController.getTicketView);
+expressApp.get('/invoice', userController.generateInvoice);
+
 expressApp.use(bodyParser.urlencoded({ extended: true }));
 expressApp.use(bodyParser.json());
 expressApp.use(limiter);
-expressApp.use(cors(corsOptions));
-expressApp.use(i18n.init);
-const upload = multer();
+expressApp.use(fileUpload({
+  limits: { fileSize: 50 * 1024 * 1024 },
+}));
+expressApp.use(passport.initialize());
 
 // routes
-expressApp.use('/api/v1', upload.any(), routes);
+expressApp.use('/api/v1', routes);
 
 expressApp.use((err, req, res, _next) => {
   const error = err;
@@ -53,5 +71,7 @@ expressApp.use((err, req, res, _next) => {
     message: error.message ? req.__(error.message.replace('Error: ', '')) : err,
   });
 });
+
+require('./src/v1/cron');
 
 module.exports = expressApp;

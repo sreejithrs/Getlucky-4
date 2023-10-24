@@ -7,12 +7,14 @@ const { Schema } = mongoose;
 const userSchema = new Schema(
   {
     name: { type: String, default: '' },
+    tempEmail: { type: String, lowercase: true, trim: true },
+    password: { type: String },
     email: {
-      type: String, unique: true, lowercase: true, trim: true,
+      type: String, lowercase: true, trim: true,
     },
     phoneNumber: { type: String, default: '' },
-    password: { type: String, min: 8, select: false },
     verificationCode: { type: Number, default: null },
+    otpTimeLimit: { type: Date },
     isVerified: { type: Boolean, default: false },
     temporaryPassword: { type: String },
     forceChangePassword: { type: Boolean, default: false },
@@ -23,11 +25,19 @@ const userSchema = new Schema(
     verifyOtpMax: { type: Number, default: 0 },
     passwordOtpTime: { type: Date },
     passOtpMax: { type: Number, default: 0 },
+    isChangeEmail: { type: Boolean, default: false },
+    emailChangeOtp: { type: Number },
     building: { type: String, default: '' },
     state: { type: String, default: '' },
     district: { type: String, default: '' },
     country: { type: String, default: '' },
-    language: { type: String, enum: ['en', 'de'], default: 'en' },
+    language: { type: String, default: 'en' },
+    phoneOtp: { type: Number },
+    phoneOtpMax: { type: Number, default: 0 },
+    phoneOtpTimeLimit: { type: Date },
+    emailOtp: { type: Number },
+    emailOtpMax: { type: Number, default: 0 },
+    emailOtpTimeLimit: { type: Date },
   },
   {
     timestamps: true,
@@ -57,7 +67,7 @@ userSchema.pre('save', function (next) {
 });
 
 userSchema.methods.comparePassword = async function (candidatePassword) {
-  return bcrypt.compare(candidatePassword, this.password);
+  return bcrypt.compareSync(candidatePassword, this.password);
 };
 
 module.exports = mongoose.model('User', userSchema);

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .invoice {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            position: relative;
+        }
+
+        .invoice-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+
+        .invoice-header img {
+            max-width: 100px;
+            height: auto;
+        }
+
+        .invoice-header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .address {
+            width: 49%;
+        }
+
+        .invoice-details {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .invoice-details .from,
+        .invoice-details .to {
+            width: 48%;
+            border: 1px solid #ddd;
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        .invoice-items {
+            margin-top: 50px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .invoice-total {
+            margin-top: 20px;
+            text-align: right;
+            font-size: 18px;
+        }
+
+        .payment-details {
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .notes {
+            font-size: 12px;
+            margin-top: 70px;
+        }
+
+        .notes ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .notes ul li::before {
+            content: "• ";
+        }
+
+        .top-right {
+            position: absolute;
+            top: 110px;
+            right: 20px;
+            font-size: 14px;
+            text-align: right;
+        }
+
+        .system-msg {
+            position: flex;
+            margin-top: 60px;
+            font-size: 14px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="invoice">
+        <div class="invoice-header">
+            <div style="display: flex; align-items: center;">
+                <h2 style="margin-left: 10px;">Getlucky4</h2>
+            </div>
+            <h2>Invoice</h2>
+        </div>
+        <div class="address from">
+            <h4>From:</h4>
+            <p style="font-size: 12px;">Getlucky4</p>
+            <p style="font-size: 12px;">Aldaayim Aljadid Gifts Trading L.L.C</p>
+            <p style="font-size: 12px;">Aspin commercial tower, Floor 26, Sheikh Zayed Road, Dubai, 12630 </p>
+            <p style="font-size: 12px;">Email: getlucky4you@gmail.com</p>
+        </div>
+        <div class="top-right">
+            <p style="font-size: 12px;">Invoice Number: <%= invoiceId %>
+            </p>
+            <p style="font-size: 12px;">Date: <%= date %>
+            </p><br>
+            <p style="font-size: 12px;">Payment Status: <%= paymentStatus %>
+            </p>
+        </div>
+        <div class="address to">
+            <h4>To:</h4>
+            <p style="font-size: 12px;">
+                <%= name %>
+            </p>
+            <p style="font-size: 12px;">
+                <%= building %>
+            </p>
+            <p style="font-size: 12px;">
+                <%= district %>, <%= state %>, <%= country %>
+            </p>
+            <p style="font-size: 12px;">Email: <%= email %>
+            </p>
+        </div>
+        <div class="invoice-items">
+            <h2>Invoice Items</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>S.No</th>
+                        <th>Description</th>
+                        <th>Tickets</th>
+                        <th>Quantity</th>
+                        <th>Price Per Unit(Inc.VAT 5%)</th>
+                        <th>Amount (AED)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for (let i=0; i < products.length; i++) { %>
+                        <tr>
+                            <td>
+                                <%= products[i].siNo %>
+                            </td>
+                            <td>
+                                <%= products[i].productName %>
+                            </td>
+                            <td>
+                                <%= products[i].tickets %>
+                            </td>
+                            <td>
+                                <%= products[i].quantity %>
+                            </td>
+                            <td>
+                                <%= products[i].cost %>
+                            </td>
+                            <td>
+                                <%= products[i].totalCost %>
+                            </td>
+                        </tr>
+                        <% } %>
+                </tbody>
+            </table>
+        </div>
+        <div class="invoice-total">
+            <strong>Total Amount (AED): <%= totalAmount %></strong>
+        </div>
+        <div class="system-msg">
+            <h6>This is a system generated invoice, no signature is required</h6>
+        </div>
+        <div class="notes">
+            <p>NOTES:</p>
+            <ul>
+                <li>No refund or exchange.</li>
+                <li>For clarifications, call or Whatsapp 04 33 98880 within UAE, +97143398880 from outside UAE or
+                    email
+                    us at
+                    <a href="mailto:getlucky4@gmail.com">getlucky4you@gmail.com</a>
+                </li>
+                <li>For more information and Terms & Conditions, please visit our website <a
+                        href="https://www.littledraw.ae/">www.getlucky4.com</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+
+</html>

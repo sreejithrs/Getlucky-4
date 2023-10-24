@@ -2,10 +2,6 @@
 const AWS = require('aws-sdk');
 const nodemailer = require('nodemailer');
 
-const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
-const client = require('twilio')(accountSid, authToken);
-
 module.exports = {
 
   sendMail: (options) => {
@@ -17,16 +13,17 @@ module.exports = {
       SES: new AWS.SES({
         apiVersion: '2010-12-01',
         region: process.env.AWS_SES_REGION,
-        accessKeyId: process.env.AWS_SES_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SES_SECRET_ACCESS_KEY,
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
       }),
     });
     const mailOptions = {
       from: options.from, to: options.to, subject: options.subject, html: options.content,
     };
     return new Promise((resolve) => {
-      transporter.sendMail(mailOptions, (err) => {
+      transporter.sendMail(mailOptions, (err, _data) => {
         if (err) {
+          console.log(err, 'awsSESErr');
           resolve(false);
         } else {
           resolve(true);
@@ -35,14 +32,26 @@ module.exports = {
     });
   },
 
-  sendSMS: (verificationCode, phoneNumber) => {
-    client.messages
-      .create({
-        body: `Your OTP for Getlucky-4 is ${verificationCode}`,
-        from: '+16184485340',
-        to: phoneNumber,
-      })
-      // eslint-disable-next-line no-console
-      .then((message) => global.logger(message.sid)).catch((err) => global.logger('error', err));
+  sendSMS: async (smsOptions) => {
+    AWS.config.update({
+      region: process.env.AWS_SNS_REGION,
+      accessKeyId: process.env.AWS_SMS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SMS_SECRET_ACCESS_KEY,
+    });
+
+    const { message, phoneNumber } = smsOptions;
+    const params = {
+      Message: message,
+      PhoneNumber: phoneNumber,
+    };
+
+    try {
+      const sns = new AWS.SNS({ apiVersion: '2010-03-31' });
+      await sns.publish(params).promise();
+      return true;
+    } catch (e) {
+      console.log(e);
+      return false;
+    }
   },
 };

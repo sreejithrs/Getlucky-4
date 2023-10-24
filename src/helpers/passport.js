@@ -38,6 +38,7 @@ const localLogin = new LocalStrategy(localOptions, (req, email, password, done) 
       }
       return done(null, user);
     });
+    return null;
   });
 });
 
@@ -56,7 +57,7 @@ const refreshTokenAuthOptions = {
 
 // Create JWT strategy
 const getJWTStrategy = (options) => new JwtStrategy(options, (req, payload, done) => {
-  User.findById(payload.userId, (err, user) => {
+  User.findById(payload.userId, async (err, user) => {
     if (err) {
       return done(respondError(req.__(localesKeys.global.TRY_AGAIN), StatusCode.INTERNAL_SERVER_ERROR), false);
     }
@@ -64,10 +65,9 @@ const getJWTStrategy = (options) => new JwtStrategy(options, (req, payload, done
       if (!user.status) {
         return done(respondError(req.__(localesKeys.auth.USER_DEACTIVE), StatusCode.CONFLICT), false);
       }
-      done(null, user);
-    } else {
-      return done(respondError(req.__(localesKeys.auth.PLEASE_LOGIN), StatusCode.UNAUTHORIZED), false);
+      return done(null, user);
     }
+    return done(respondError(req.__(localesKeys.auth.PLEASE_LOGIN), StatusCode.UNAUTHORIZED), false);
   });
 });
 

@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Payment Failed</title>
+    <link rel="stylesheet" type="text/css"
+        href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css"
+        href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <style type="text/css">
+        body {
+            background: #f2f2f2;
+        }
+
+        .payment_1 {
+            border: 1px solid #f2f2f2;
+            height: 300px;
+            border-radius: 20px;
+            background: #fff;
+        }
+
+        .payment_header_1 {
+            background: #FF0000;
+            padding: 20px;
+            border-radius: 20px 20px 0px 0px;
+
+        }
+
+        .check_1 {
+            margin: 0px auto;
+            width: 50px;
+            height: 50px;
+            border-radius: 100%;
+            background: #fff;
+            text-align: center;
+        }
+
+        .check_1 i {
+            vertical-align: middle;
+            line-height: 50px;
+            font-size: 30px;
+        }
+
+        .content_1 {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            text-align: center;
+        }
+
+        .content_1 h1 {
+            font-size: 25px;
+            padding-top: 25px;
+        }
+
+        .content_1 a {
+            color: #fff;
+            border-radius: 30px;
+            padding: 10px 10px;
+            width: 26%;
+            margin: 0 auto;
+            background: rgb(223, 17, 34);
+            transition: all ease-in-out 0.3s;
+        }
+
+        .content_1 a:hover {
+            text-decoration: none;
+            background: #000;
+        }
+
+        button {
+            display: inline-block;
+            background-color: rgb(135, 71, 252);
+            padding: 9px;
+            width: 155px;
+            color: #ffffff;
+            text-align: center;
+            border: 4px double #cccccc;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin: 25px 0;
+            -webkit-transition: all 0.5s;
+            -moz-transition: all 0.5s;
+            -o-transition: all 0.5s;
+            transition: all 0.5s;
+        }
+
+        button:hover {
+            background-color: green;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 mx-auto mt-5">
+                <div class="payment_1">
+                    <div class="payment_header_1">
+                        <div class="check_1"><i class="fa fa-times-circle" aria-hidden="true"></i></div>
+                    </div>
+                    <div class="content_1">
+                        <h1>Payment Failed!</h1>
+                        <p>Failed to complete payment, try again</p>
+                        <a href="<%= link %>">Go Home</a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</body>
+
+</html>
