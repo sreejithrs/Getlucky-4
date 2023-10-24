@@ -127,6 +127,7 @@ module.exports = {
     try {
       const { protocol, user } = req;
       const { id, email } = user;
+      let stripeEmailObj = {};
 
       const [getUserCart] = await getCartData(id);
       if (!getUserCart) return respondFailure(res, req.__(localeKeys.product.CART_NOT_FOUND), StatusCode.NOT_FOUND);
@@ -138,6 +139,7 @@ module.exports = {
       const getDraw = await commonService.findOneById(Draw, drawId);
       if (getDraw.date <= currentDate) return respondFailure(res, req.__(localeKeys.product.DRAW_EXPIRED), StatusCode.FORBIDDEN);
 
+      if (email !== '') stripeEmailObj = { receipt_email: email };
       const bookingObj = {
         userId: id,
         date: currentDate,
@@ -159,7 +161,7 @@ module.exports = {
         },
         payment_intent_data: {
           setup_future_usage: 'off_session',
-          receipt_email: email,
+          ...stripeEmailObj,
         },
         expires_at: sessionExpireDate,
         success_url: `${protocol}://${req.get('host')}/ticket-view?id=${transactionId}`,
