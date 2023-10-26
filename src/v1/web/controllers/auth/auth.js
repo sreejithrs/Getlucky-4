@@ -92,7 +92,7 @@ module.exports = {
       const value = body[key];
       const searchData = {};
       searchData[key] = value;
-      const errMsg = key === 'email' ? localeKeys.auth.INVALID_EMAIL_OR_PASS : localeKeys.auth.INVALID_PHONE_OR_PASS;
+      const errMsg = key === 'email' ? localeKeys.auth.INVALID_EMAIL : localeKeys.auth.INVALID_PHONE;
       let successMessage = key === 'email' ? localeKeys.auth.EMAIL_SENT_SUCCESSFULLY : localeKeys.auth.OTP_SENT_SUCCESSFULLY;
 
       const userExist = await commonService.findOneByFields(User, searchData, constValues.userType.USER);

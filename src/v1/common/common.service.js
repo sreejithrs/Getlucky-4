@@ -143,7 +143,6 @@ module.exports = {
               name: { $first: '$userData.name' },
               nationality: { $first: '$userData.country' },
               state: { $first: '$userData.state' },
-              tickets: { $push: '$ticketNumbers' },
               matchOrder: { $first: '$matchOrder' },
               wonPrice: { $first: '$priceAmount' },
             },
