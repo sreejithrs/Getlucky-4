@@ -124,8 +124,10 @@ module.exports = {
   verifyLogin: async (req, _res, next) => {
     try {
       const { body } = req;
-      const { email, otp } = body;
+      const { email } = body;
+      let { otp } = body;
 
+      otp = Number(otp);
       const { error } = validateVerifySignIn(body);
       if (error) return next(respondError(getMessageFromValidationError(error)));
 
