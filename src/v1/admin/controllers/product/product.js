@@ -37,6 +37,8 @@ module.exports = {
 
       const product = await commonService.findOneById(Product, id);
       if (!product) return respondFailure(res, req.__(localeKeys.product.PRODUCT_NOT_FOUND), StatusCode.NOT_FOUND);
+
+      product.image = `${process.env.AWS_S3_URL}/${product.image}`;
       return respondSuccess(res, req.__(localeKeys.global.REQUEST_WAS_SUCCESSFUL), StatusCode.OK, _.pick(product, ['_id', 'productNo', 'name', 'cost', 'image']));
     } catch (error) {
       return next(respondError(
