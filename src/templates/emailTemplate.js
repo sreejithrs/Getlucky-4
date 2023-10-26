@@ -34,7 +34,7 @@ module.exports = {
     return {
       from: process.env.AWS_SES_FROM_EMAIL,
       to: email,
-      subject: emailSubject.changeEmail(),
+      subject: emailSubject.emailLogin(),
       content: outputString,
     };
   },

@@ -55,6 +55,8 @@ module.exports = {
 
     forgotPassword: () => 'New Password',
 
+    emailLogin: () => 'Getlucky4 Login OTP',
+
   },
 
 };
