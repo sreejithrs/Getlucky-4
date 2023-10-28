@@ -55,7 +55,7 @@ module.exports = {
       const verificationCode = generate4DigitOTP();
       body.verificationCode = verificationCode;
       body.userType = constValues.userType.USER;
-      await commonService.save(User, body);
+      const userData = await commonService.save(User, body);
 
       const smsContent = {
         phoneNumber,
@@ -63,13 +63,12 @@ module.exports = {
       };
 
       if (process.env.NODE_ENV !== 'test') process.nextTick(() => sendSMS(smsContent));
-      const userDetails = await commonService.findOneByFields(User, { email });
       return respondSuccess(
         _res,
         req.__(localeKeys.user.USER_REGISTERED_SUCCESSFULLY),
         StatusCode.CREATED,
         {
-          userData: _.pick(userDetails, ['_id', 'email', 'name', 'phoneNumber', 'isVerified']),
+          userData: _.pick(userData, ['_id', 'email', 'name', 'phoneNumber', 'isVerified']),
         },
       );
     } catch (error) {

@@ -17,6 +17,7 @@
     "lint:fix": "eslint --fix --ext .mjs,.js,.jsx ."
   },
   "dependencies": {
+    "@joi/date": "^2.1.0",
     "aws-sdk": "^2.1414.0",
     "bcrypt": "^5.1.0",
     "bluebird": "^3.7.2",

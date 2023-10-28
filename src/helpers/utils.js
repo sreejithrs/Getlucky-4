@@ -139,6 +139,14 @@ const getPermutations = (value) => {
   return permutations.filter((item) => item !== value);
 };
 
+const monthDiffFn = (fromDate, toDate) => {
+  let months;
+  months = (toDate.getFullYear() - fromDate.getFullYear()) * 12;
+  months -= fromDate.getUTCMonth();
+  months += toDate.getUTCMonth();
+  return months <= 0 ? 0 : months;
+};
+
 const generate3DigitId = (lastPayoutNumber) => `#${lastPayoutNumber.toString().padStart(3, '0')}`;
 const generate6DigitId = (value, lastPayoutNumber) => `${value}${lastPayoutNumber.toString().padStart(6, '0')}`;
 
@@ -156,4 +164,5 @@ module.exports = {
   generateOrderId,
   generate4DigitOTP,
   generate6DigitId,
+  monthDiffFn,
 };
