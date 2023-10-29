@@ -1,8 +1,9 @@
 // modules
-const csv = require('csv');
+const moment = require('moment');
+const XLSX = require('xlsx');
 
 // helpers
-const { respondSuccess, respondError } = require('../../../../helpers/response');
+const { respondSuccess, respondError, respondFailure } = require('../../../../helpers/response');
 const localeKeys = require('../../../../locales/keys.json');
 const StatusCode = require('../../../../helpers/statusCodes.json');
 
@@ -34,26 +35,43 @@ module.exports = {
   downloadPurchaseReport: async (req, res, next) => {
     try {
       const { query } = req;
-      const { startDate, endDate } = query;
+      let { startDate, endDate } = query;
 
       const { error } = validateStatistics(query);
       if (error) return next(respondError(getMessageFromValidationError(error)));
 
       const report = await getUserReports(query);
+      if (!report.length) return respondFailure(res, req.__(localeKeys.product.NO_REPORT_AVAILABLE), StatusCode.NOT_FOUND);
       const result = report.map((document, index) => ({
-        number: index + 1,
+        'no.': index + 1,
         ...document,
       }));
 
-      res.setHeader('Content-Type', 'text/csv');
-      res.setHeader('Content-Disposition', `attachment; filename=report_${startDate}-${endDate}.csv`);
-      res.flushHeaders();
+      startDate = moment(startDate).format('DD-MM-YYYY');
+      endDate = moment(endDate).format('DD-MM-YYYY');
 
-      const stream = csv.stringify({ header: true });
-      stream.pipe(res);
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename=Report_${startDate}_${endDate}.xlsx`);
 
-      result.forEach((row) => stream.write(row));
-      stream.end();
+      const ws = XLSX.utils.json_to_sheet(result);
+      const wsCols = [
+        { wch: 10 },
+        { wch: 15 },
+        { wch: 20 },
+        { wch: 20 },
+        { wch: 20 },
+        { wch: 20 },
+        { wch: 20 },
+        { wch: 15 },
+      ];
+
+      ws['!cols'] = wsCols;
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+
+      const xlsxBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'buffer' });
+      res.end(Buffer.from(xlsxBuffer));
     } catch (error) {
       return next(respondError(
         error,
