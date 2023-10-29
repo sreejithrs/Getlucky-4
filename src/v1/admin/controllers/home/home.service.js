@@ -18,6 +18,11 @@ module.exports = {
     endDate.setUTCHours(23, 59, 0, 0);
     const [totalData] = await User.aggregate([
       {
+        $match: {
+          userType: constValues.userType.USER,
+        },
+      },
+      {
         $lookup: {
           from: 'winners',
           pipeline: [
@@ -203,71 +208,82 @@ module.exports = {
     startDate = new Date(startDate);
     endDate = new Date(endDate);
     endDate.setUTCHours(23, 59, 0, 0);
-    await Booking.aggregate([
-      {
-        $match: {
-          paymentStatus: constValues.paymentStatus.SUCCESS,
-          date: {
-            $gte: startDate,
-            $lte: endDate,
+    return Booking.aggregate(
+      [
+        {
+          $match: {
+            paymentStatus: constValues.paymentStatus.SUCCESS,
+            date: {
+              $gte: startDate,
+              $lte: endDate,
+            },
           },
         },
-      },
-      {
-        $lookup: {
-          from: 'orders',
-          localField: 'orderId',
-          foreignField: '_id',
-          pipeline: [
-            {
-              $lookup: {
-                from: 'users',
-                localField: 'userId',
-                foreignField: '_id',
-                as: 'user',
+        {
+          $lookup: {
+            from: 'orders',
+            localField: 'orderId',
+            foreignField: '_id',
+            pipeline: [
+              {
+                $lookup: {
+                  from: 'users',
+                  localField: 'userId',
+                  foreignField: '_id',
+                  as: 'user',
+                },
               },
-            },
-            {
-              $unwind: { path: '$user', preserveNullAndEmptyArrays: true },
-            },
-            {
-              $lookup: {
-                from: 'quantities',
-                localField: '_id',
-                foreignField: 'orderId',
-                as: 'tickets',
+              {
+                $unwind: { path: '$user', preserveNullAndEmptyArrays: true },
               },
-            },
-            {
-              $unwind: { path: '$tickets', preserveNullAndEmptyArrays: true },
-            },
-            {
-              $group: {
-                _id: '$_id',
-                ticketId: { $first: '$ticketId' },
-                date: { $first: { $dateToString: { format: '%d-%m-%Y', date: '$date' } } },
-                name: { $first: '$user.name' },
-                state: { $first: '$user.state' },
-                country: { $first: '$user.country' },
-                mobile: { $first: { $concat: ['+', '$user.phoneNumber'] } },
+              {
+                $lookup: {
+                  from: 'quantities',
+                  localField: '_id',
+                  foreignField: 'orderId',
+                  as: 'tickets',
+                },
               },
-            },
-          ],
-          as: 'orders',
+              {
+                $unwind: { path: '$tickets', preserveNullAndEmptyArrays: true },
+              },
+              {
+                $group: {
+                  _id: '$_id',
+                  ticketId: { $first: '$ticketId' },
+                  userId: { $first: '$user._id' },
+                  date: { $first: { $dateToString: { format: '%d-%m-%Y', date: '$date' } } },
+                  name: { $first: '$user.name' },
+                  mobile: { $first: { $concat: ['+', '$user.phoneNumber'] } },
+                  state: { $first: '$user.state' },
+                  country: { $first: '$user.country' },
+                },
+              },
+            ],
+            as: 'orders',
+          },
         },
-      },
-      {
-        $unwind: { path: '$orders', preserveNullAndEmptyArrays: true },
-      },
-      {
-        $replaceRoot: { newRoot: '$orders' }, // Flatten the results
-      },
-      {
-        $project: {
-          _id: 0,
+        {
+          $unwind: { path: '$orders', preserveNullAndEmptyArrays: true },
         },
-      },
-    ]);
+        {
+          $sort: {
+            'orders.userId': 1,
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            ticket_id: '$orders.ticketId',
+            name: '$orders.name',
+            mobile: '$orders.mobile',
+            state: '$orders.state',
+            country: '$orders.country',
+            amount_paid: '$userPaid',
+          },
+        },
+      ],
+    );
   },
 
 };
