@@ -1,3 +1,6 @@
+// modules
+const csv = require('csv');
+
 // helpers
 const { respondSuccess, respondError } = require('../../../../helpers/response');
 const localeKeys = require('../../../../locales/keys.json');
@@ -27,15 +30,30 @@ module.exports = {
     }
   },
 
+  // eslint-disable-next-line consistent-return
   downloadPurchaseReport: async (req, res, next) => {
     try {
       const { query } = req;
+      const { startDate, endDate } = query;
 
       const { error } = validateStatistics(query);
       if (error) return next(respondError(getMessageFromValidationError(error)));
 
-      const adminHome = await getUserReports(query);
-      return respondSuccess(res, req.__(localeKeys.global.REQUEST_WAS_SUCCESSFUL), StatusCode.OK, adminHome);
+      const report = await getUserReports(query);
+      const result = report.map((document, index) => ({
+        number: index + 1,
+        ...document,
+      }));
+
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename=report_${startDate}-${endDate}.csv`);
+      res.flushHeaders();
+
+      const stream = csv.stringify({ header: true });
+      stream.pipe(res);
+
+      result.forEach((row) => stream.write(row));
+      stream.end();
     } catch (error) {
       return next(respondError(
         error,
