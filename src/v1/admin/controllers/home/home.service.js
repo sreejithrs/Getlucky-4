@@ -275,6 +275,7 @@ module.exports = {
           $project: {
             _id: 0,
             ticket_id: '$orders.ticketId',
+            purchase_date: { $dateToString: { format: '%d-%m-%Y', date: '$date' } },
             name: '$orders.name',
             mobile: '$orders.mobile',
             state: '$orders.state',
