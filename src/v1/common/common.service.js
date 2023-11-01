@@ -27,15 +27,23 @@ module.exports = {
         },
       },
       {
-        $unwind: { path: '$winnerData', preserveNullAndEmptyArrays: false },
+        $unwind: { path: '$winnerData', preserveNullAndEmptyArrays: true },
       },
       {
         $unwind: { path: '$winnerData.ticketNumbers', preserveNullAndEmptyArrays: true },
       },
       {
         $group: {
-          _id: '$winnerData.matchOrder',
-          winnersCount: { $sum: 1 },
+          _id: { $ifNull: ['$winnerData', null] },
+          winnersCount: {
+            $sum: {
+              $cond: {
+                if: { $eq: [{ $ifNull: ['$winnerData', null] }, null] },
+                then: 0,
+                else: 1,
+              },
+            },
+          },
           drawName: { $first: '$drawName' },
           drawDate: { $first: '$formattedDate' },
           drawNo: { $first: '$drawNo' },
@@ -73,13 +81,19 @@ module.exports = {
           totalWinners: { $sum: '$winnersCount' },
           result: {
             $push: {
-              category: '$_id',
-              winnersCount: '$winnersCount',
-              prices: '$price',
-              totalPrices: {
-                $multiply: ['$price', { $sum: { $size: '$tickets' } }],
+              $cond: {
+                if: { $eq: ['$winnersCount', 0] },
+                then: '$$REMOVE',
+                else: {
+                  category: '$_id',
+                  winnersCount: '$winnersCount',
+                  prices: '$price',
+                  totalPrices: {
+                    $multiply: ['$price', { $sum: { $size: '$tickets' } }],
+                  },
+                  tickets: '$ticketsToShow',
+                },
               },
-              tickets: '$ticketsToShow',
             },
           },
         },
@@ -98,7 +112,7 @@ module.exports = {
 
     if (!drawResult) {
       return {
-        totalWinners: 0, totalWonPrice: 0, result: [],
+        drawName: '', date: '', drawNo: '', wonTicket: '', totalWinners: 0, totalWonPrice: 0, result: [],
       };
     }
 
@@ -165,6 +179,7 @@ module.exports = {
       $group: {
         _id: '$_id',
         drawName: { $first: { $concat: ['$drawName', ' ', '$drawNo'] } },
+        isTicketAdded: { $first: '$isTicketAdded' },
         date: { $first: '$formattedDate' },
         wonTicket: { $first: '$wonTicket' },
         users: { $first: '$winnerData' },
