@@ -34,6 +34,7 @@ const limiter = rateLimit({
 // express instance
 const expressApp = express();
 
+expressApp.get('/api/v1/admin/home/download-report', adminHome.downloadPurchaseReport);
 // middlewares
 expressApp.use(
   helmet.contentSecurityPolicy({
@@ -52,7 +53,6 @@ expressApp.use(i18n.init);
 expressApp.post('/stripe-webhooks', express.raw({ type: '*/*' }), homeController.webhooks);
 expressApp.get('/ticket-view', userController.getTicketView);
 expressApp.get('/invoice', userController.generateInvoice);
-expressApp.get('/api/v1/admin/home/download-report', adminHome.downloadPurchaseReport);
 
 expressApp.use(bodyParser.urlencoded({ extended: true }));
 expressApp.use(bodyParser.json());

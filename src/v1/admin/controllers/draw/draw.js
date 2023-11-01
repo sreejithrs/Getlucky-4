@@ -1,4 +1,5 @@
 // module
+const _ = require('lodash');
 const moment = require('moment');
 // model
 const { Draw } = require('../../../models');
@@ -45,13 +46,32 @@ module.exports = {
     }
   },
 
+  getADraw: async (req, res, next) => {
+    try {
+      const { params } = req;
+      const { drawId } = params;
+
+      const drawData = await commonService.findOneById(Draw, drawId);
+      if (!drawData) return respondFailure(res, req.__(localeKeys.product.DRAW_NOT_FOUND), StatusCode.NOT_FOUND);
+
+      return respondSuccess(res, req.__(localeKeys.global.REQUEST_WAS_SUCCESSFUL), StatusCode.OK, _.pick(drawData, [
+        '_id', 'drawName', 'drawNo', 'isTicketAdded', 'isCompleted', 'status', 'date', 'link',
+      ]));
+    } catch (error) {
+      return next(respondError(
+        error,
+        StatusCode.INTERNAL_SERVER_ERROR,
+      ));
+    }
+  },
+
   getDrawList: async (req, res, next) => {
     try {
       const drawList = await commonService.findAllByFields(
         Draw,
         {},
         {
-          _id: 1, drawName: 1, drawNo: 1, date: 1, status: 1, isCompleted: 1,
+          _id: 1, drawName: 1, drawNo: 1, date: 1, status: 1, isCompleted: 1, isTicketAdded: 1,
         },
         {
           date: -1,

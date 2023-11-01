@@ -1,6 +1,4 @@
 // modules
-const path = require('path');
-const fs = require('fs');
 const moment = require('moment');
 const XLSX = require('xlsx');
 
@@ -44,6 +42,7 @@ module.exports = {
 
       const report = await getUserReports(query);
       if (!report.length) return respondFailure(res, req.__(localeKeys.product.NO_REPORT_AVAILABLE), StatusCode.NOT_FOUND);
+
       const result = report.map((document, index) => ({
         'no.': index + 1,
         ...document,
@@ -51,8 +50,6 @@ module.exports = {
 
       startDate = moment(startDate).format('DD-MM-YYYY');
       endDate = moment(endDate).format('DD-MM-YYYY');
-      const filename = `Report_${startDate}_${endDate}.xlsx`;
-      const filePath = path.join(__dirname, '../../../../temp', filename);
 
       const ws = XLSX.utils.json_to_sheet(result);
       const wsCols = [
@@ -71,21 +68,12 @@ module.exports = {
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
 
-      XLSX.writeFile(wb, filePath);
+      const xlsxBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'buffer' });
+
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       res.setHeader('Content-Disposition', `attachment; filename=Report_${startDate}_${endDate}.xlsx`);
 
-      res.download(filePath, (err) => {
-        if (err) {
-          console.error('Error while sending the file:', err);
-        }
-
-        fs.unlink(filePath, (unlinkError) => {
-          if (unlinkError) {
-            console.error('Error while deleting the file:', unlinkError);
-          }
-        });
-      });
+      res.end(xlsxBuffer);
     } catch (error) {
       return next(respondError(
         error,
