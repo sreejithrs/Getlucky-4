@@ -334,6 +334,7 @@ module.exports = {
         phoneNumber: { $first: '$userData.phoneNumber' },
         paymentStatus: { $first: '$paymentStatus' },
         purchaseDate: { $first: '$orderData.date' },
+        totalCost: { $first: '$userPaid' },
         drawName: { $first: { $concat: ['$orderData.drawData.drawName', ' ', '$orderData.drawData.drawNo'] } },
         ticketId: { $first: '$orderData.ticketId' },
         products: {
@@ -342,6 +343,7 @@ module.exports = {
             tickets: '$orderData.tickets.ticketNumbers',
             quantity: '$orderData.tickets.quantity',
             raffleId: '$orderData.tickets.raffleId',
+            cost: '$orderData.tickets.cost',
           },
         },
       },

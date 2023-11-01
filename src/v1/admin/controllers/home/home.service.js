@@ -20,6 +20,7 @@ module.exports = {
       {
         $match: {
           userType: constValues.userType.USER,
+          isVerified: constValues.status.ACTIVE,
         },
       },
       {

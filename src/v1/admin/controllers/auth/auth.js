@@ -35,6 +35,7 @@ module.exports = {
       if (userExist) return respondFailure(res, req.__(localeKeys.auth.EMAIL_ALREADY_EXISTS), StatusCode.CONFLICT);
 
       body.userType = constValues.userType.ADMIN;
+      body.isVerified = constValues.status.ACTIVE;
       await commonService.save(User, { ...body });
       return respondSuccess(res, req.__(localeKeys.admin.ADMIN_REGISTERED_SUCCESSFULLY), StatusCode.CREATED);
     } catch (error) {

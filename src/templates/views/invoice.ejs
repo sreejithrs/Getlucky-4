@@ -131,12 +131,12 @@
         }
 
         .row.text-center {
-            padding-top: 7px
+            padding-top: 12px
         }
 
         .row.perforated {
             border-bottom: 1px dashed #ddd;
-            padding: 7px;
+            padding: 8px;
         }
 
         .label {
@@ -350,12 +350,14 @@
                                 <%= totalCount %>
                             </div>
                         </div>
+                        <div class="right">
+                            <div class="label">Total Cost</div>
+                            <div class="city">
+                                <%= totalCost %> AED
+                            </div>
+                        </div>
                     </div>
                     <div class="row perforated destinations">
-                        <div class="col-3"></div>
-                        <div class="col-3"></div>
-                        <div class="col-3"></div>
-                        <div class="col-3"></div>
                         <table>
                             <tr>
                                 <th style="text-align: center;">Products</th>
@@ -372,11 +374,9 @@
                                         <%= products[i].quantity %>
                                     </td>
                                     <td>
-                                        <div class="ticket-numbers">
-                                            <% let ticketNumbers=Array.isArray(products[i].tickets) ?
-                                                products[i].tickets.join(', ') : ''; %>
+                                        <% let ticketNumbers=Array.isArray(products[i].tickets) ?
+                                            products[i].tickets.join(', ') : ''; %>
                                             <%= ticketNumbers %>
-                                        </div>
                                     </td>
                                     <td>
                                         <%= products[i].raffleId %>
@@ -387,7 +387,7 @@
                     </div>
                     <div class="row">
                         <div class="row text-center">
-                            <p>Ticket ID: <%= ticketId %>
+                            <p><b>Ticket ID: </b><%= ticketId %>
                             </p>
                         </div>
                     </div>
