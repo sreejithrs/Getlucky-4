@@ -1,4 +1,6 @@
 // modules
+const path = require('path');
+const fs = require('fs');
 const moment = require('moment');
 const XLSX = require('xlsx');
 
@@ -49,9 +51,8 @@ module.exports = {
 
       startDate = moment(startDate).format('DD-MM-YYYY');
       endDate = moment(endDate).format('DD-MM-YYYY');
-
-      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-      res.setHeader('Content-Disposition', `attachment; filename=Report_${startDate}_${endDate}.xlsx`);
+      const filename = `Report_${startDate}_${endDate}.xlsx`;
+      const filePath = path.join(__dirname, '../../../../temp', filename);
 
       const ws = XLSX.utils.json_to_sheet(result);
       const wsCols = [
@@ -70,8 +71,20 @@ module.exports = {
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
 
-      const xlsxBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'buffer' });
-      res.end(Buffer.from(xlsxBuffer));
+      XLSX.writeFile(wb, filePath);
+      res.setHeader('Content-Disposition', `attachment; filename=Report_${startDate}_${endDate}.xlsx`);
+
+      res.download(filePath, (err) => {
+        if (err) {
+          console.error('Error while sending the file:', err);
+        }
+
+        fs.unlink(filePath, (unlinkError) => {
+          if (unlinkError) {
+            console.error('Error while deleting the file:', unlinkError);
+          }
+        });
+      });
     } catch (error) {
       return next(respondError(
         error,
