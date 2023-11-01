@@ -343,7 +343,6 @@ module.exports = {
             tickets: '$orderData.tickets.ticketNumbers',
             quantity: '$orderData.tickets.quantity',
             raffleId: '$orderData.tickets.raffleId',
-            cost: '$orderData.tickets.cost',
           },
         },
       },

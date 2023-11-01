@@ -17,11 +17,7 @@ const generateVerificationCode = () => {
   return 999999 - Number(timeStamp.toString().slice(7));
 };
 
-const generate4DigitOTP = () => {
-  const min = 1000;
-  const max = 9999;
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-};
+const generate4DigitOTP = () => Math.floor(Math.random() * 9000 + 1000);
 
 const generateAccessCode = () => {
   const timeStamp = Date.now();
