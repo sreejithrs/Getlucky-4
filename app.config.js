@@ -14,6 +14,7 @@ const routes = require('./src/routes');
 const i18n = require('./src/config/i18n.config');
 const userController = require('./src/v1/web/controllers/user/user');
 const homeController = require('./src/v1/web/controllers/home/home');
+const adminHome = require('./src/v1/admin/controllers/home/home');
 
 // cors options
 const corsOptions = {
@@ -51,6 +52,7 @@ expressApp.use(i18n.init);
 expressApp.post('/stripe-webhooks', express.raw({ type: '*/*' }), homeController.webhooks);
 expressApp.get('/ticket-view', userController.getTicketView);
 expressApp.get('/invoice', userController.generateInvoice);
+expressApp.get('/api/v1/admin/home/download-report', adminHome.downloadPurchaseReport);
 
 expressApp.use(bodyParser.urlencoded({ extended: true }));
 expressApp.use(bodyParser.json());

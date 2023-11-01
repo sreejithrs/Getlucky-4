@@ -72,6 +72,7 @@ module.exports = {
       XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
 
       XLSX.writeFile(wb, filePath);
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       res.setHeader('Content-Disposition', `attachment; filename=Report_${startDate}_${endDate}.xlsx`);
 
       res.download(filePath, (err) => {
