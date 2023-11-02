@@ -25,9 +25,7 @@ quantitySchema.pre('insertMany', async (_next, docs) => {
     // eslint-disable-next-line no-await-in-loop
     const counter = await Counter.findOneAndUpdate({ _id: 'raffles' }, { $inc: { seq_value: 1 } }, { returnOriginal: false, upsert: true });
     doc.raffleId = generate6DigitId('#RF', counter.seq_value);
-    console.log(doc);
   }
-  console.log(docs);
 });
 
 module.exports = mongoose.model('Quantity', quantitySchema);

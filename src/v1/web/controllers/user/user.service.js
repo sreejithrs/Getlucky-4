@@ -19,7 +19,6 @@ module.exports = {
       skipLimitQuery = [{ $skip: Number(skip) }, { $limit: Number(limit) }];
     }
     if (year && year !== '') currentYear = Number(year);
-    console.log(skipLimitQuery);
 
     return Order.aggregate([
       {
@@ -33,6 +32,17 @@ module.exports = {
         },
       },
       commonFormatDate,
+      {
+        $lookup: {
+          from: 'bookings',
+          localField: '_id',
+          foreignField: 'orderId',
+          as: 'bookingData',
+        },
+      },
+      {
+        $unwind: { path: '$bookingData', preserveNullAndEmptyArrays: true },
+      },
       {
         $lookup: {
           from: 'draws',
@@ -62,6 +72,7 @@ module.exports = {
         $group: {
           _id: '$_id',
           ticketId: { $first: { $ifNull: ['$ticketId', ''] } },
+          transactionId: { $first: '$bookingData.transactionId' },
           purchaseDate: { $first: '$formattedDate' },
           sortDate: { $first: '$date' },
           drawName: { $first: { $concat: ['$drawDetails.drawName', ' ', '$drawDetails.drawNo', ' ', '(', '$drawDetails.formattedDate', ')'] } },

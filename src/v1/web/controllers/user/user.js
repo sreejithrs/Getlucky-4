@@ -227,8 +227,8 @@ module.exports = {
 
   getTicketView: async (req, res, next) => {
     try {
-      const { query } = req;
-      const { id } = query;
+      const { params } = req;
+      const { id } = params;
       let file = 'views/404.ejs';
       const link = process.env.GETLUCKY_URL;
       let dataToSend = { link };
@@ -237,13 +237,14 @@ module.exports = {
       if (!bookingData) return res.render(path.join(__dirname, `../../../../templates/${file}`), { link });
 
       bookingData.purchaseDate = moment(bookingData.purchaseDate).format('DD-MMM-YYYY');
-      const pdfDownload = `${process.env.MAIN_URL}/invoice?id=${id}`;
+      const pdfDownload = `${req.protocol}://${req.get('host')}/invoice/${id}`;
+      const ticketDownload = `${req.protocol}://${req.get('host')}/download-ticket/${id}`;
       const { paymentStatus } = bookingData;
       switch (paymentStatus) {
         case 1:
           file = 'views/invoice.ejs';
           dataToSend = {
-            ...bookingData, link, url: process.env.AWS_S3_URL, pdfDownload,
+            ...bookingData, link, url: process.env.AWS_S3_URL, pdfDownload, ticketDownload,
           };
           break;
         case 0:
@@ -256,6 +257,46 @@ module.exports = {
       return res.render(path.join(__dirname, `../../../../templates/${file}`), dataToSend);
     } catch (err) {
       return next(respondError(err.message, StatusCode.INTERNAL_SERVER_ERROR));
+    }
+  },
+
+  // eslint-disable-next-line consistent-return
+  downloadTicket: async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const link = process.env.GETLUCKY_URL;
+
+      const [bookingData] = await getTicketDetails(id);
+      if (!bookingData) return res.render(path.join(__dirname, '../../../../templates/views/404.ejs'), { link });
+
+      const dataToSend = {
+        ...bookingData, link, url: process.env.AWS_S3_URL, ticketDownload: '', pdfDownload: '',
+      };
+      const html = await ejs.renderFile(path.join(__dirname, '../../../../templates/views/invoice.ejs'), dataToSend);
+
+      const browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox'] });
+      const page = await browser.newPage();
+      await page.setContent(html);
+
+      const { ticketId } = bookingData;
+      const fileName = ticketId.replace('#', '');
+      const elementHandle = await page.$('#ticket-download');
+      const boundingBox = await elementHandle.boundingBox();
+
+      const screenshot = await page.screenshot({
+        type: 'jpeg',
+        quality: 100,
+        clip: boundingBox,
+      });
+
+      await browser.close();
+      res.writeHead(200, {
+        'Content-Type': 'image/jpeg',
+        'Content-Disposition': `attachment; filename=Getlucky_${fileName}.jpeg`,
+      });
+      res.end(screenshot);
+    } catch (error) {
+      return next(respondError(error.message, StatusCode.INTERNAL_SERVER_ERROR));
     }
   },
 

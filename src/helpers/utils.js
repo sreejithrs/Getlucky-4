@@ -1,4 +1,3 @@
-const crypto = require('crypto');
 const AWS = require('aws-sdk');
 const passwordGenerator = require('secure-random-password');
 const EmailValidator = require('email-deep-validator');
@@ -41,11 +40,6 @@ const checkEmailValidOrNot = async (email) => {
 };
 
 const getMessageFromValidationError = (error) => error.details[0].message.replace(/"/g, '');
-
-const generateOrderId = () => {
-  const id = crypto.randomBytes(16).toString('hex');
-  return `T${id}`;
-};
 
 // WORKS ON AWS S3
 const uploadImage = async (file, bucketName, fileName, contentType) => {
@@ -157,7 +151,6 @@ module.exports = {
   uploadFileCode,
   generate3DigitId,
   getPermutations,
-  generateOrderId,
   generate4DigitOTP,
   generate6DigitId,
   monthDiffFn,
