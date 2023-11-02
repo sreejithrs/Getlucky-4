@@ -126,7 +126,7 @@ module.exports = {
       {
         $group: {
           _id: { $dateToString: { format: '%Y-%m-%d', date: '$date' } },
-          count: { $first: '$orders.totalTickets' },
+          count: { $sum: '$orders.totalTickets' },
           month: { $first: { $month: '$date' } },
           year: { $first: { $year: '$date' } },
           date: { $first: '$date' },
