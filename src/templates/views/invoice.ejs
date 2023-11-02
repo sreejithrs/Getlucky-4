@@ -225,28 +225,41 @@
         }
 
         .home-button {
-            margin: 55px auto;
-            padding: 2px;
-            max-width: 300px;
             display: flex;
-            justify-content: space-between;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            flex-direction: column;
             align-items: center;
         }
 
+        .button-row {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin: 10px;
+        }
+
         .left-button,
+        .down-button,
         .right-button {
-            background-color: rgb(18, 179, 18);
             color: white;
-            border: 1px solid #557d0a;
             text-decoration: none;
-            padding: 5px 20px;
+            padding: 6px 15px;
             border-radius: 15px;
+            margin: 0 10px;
             cursor: pointer;
+        }
+
+        .left-button {
+            background-color: rgb(18, 179, 18);
         }
 
         .right-button {
             background-color: #007bff;
-            border: 1px solid #0056b3;
+        }
+
+        .down-button {
+            background-color: rgb(255, 0, 0);
         }
 
         .right-button:hover {
@@ -255,6 +268,10 @@
 
         .left-button:hover {
             background-color: rgb(12, 155, 12);
+        }
+
+        .down-button:hover {
+            background-color: #ff3333;
         }
 
         td,
@@ -284,98 +301,100 @@
     <div class="table5">
         <div class="table-cell">
             <div id="ticket">
-                <div class="row perforated first">
-                    <img src="<%= url %>/logo.jpg" class="round-mask" alt="logo">
-                    <h2 style="display: inline-block; vertical-align: middle; padding-left: 10px; margin-top: -20px;">
-                        Getlucky4</h2>
-                </div>
-                <div class="row text-center perforated destinations">
-                    <div class="row text-center perforated destinations">
-                        <p style="font-size: 20px !important;">Ticket Details</p>
-                    </div>
-                    <div class="row perforated destinations">
-                        <div class="left">
-                            <div class="label">Customer Name</div>
-                            <div class="city">
-                                <%= name %>
-                            </div>
-                        </div>
-                        <div class="right">
-                            <div class="label">Mobile No. </div>
-                            <div class="city">
-                                +<%= phoneNumber %>
-                            </div>
-                        </div>
+                <div id="ticket-download">
+                    <div class="row perforated first">
+                        <img src="<%= url %>/logo.jpg" class="round-mask" alt="logo">
+                        <h2
+                            style="display: inline-block; vertical-align: middle; padding-left: 10px; margin-top: -20px;">
+                            Getlucky4</h2>
                     </div>
                     <div class="row text-center perforated destinations">
-                        <p style="font-size: 15px !important;">
-                            <%= drawName %>
-                        </p>
-                    </div>
-                    <div class="row perforated destinations">
-                        <div class="left">
-                            <div class="label">Grand Prize</div>
-                            <div class="city">AED 10,000.00</div>
+                        <div class="row text-center perforated destinations">
+                            <p style="font-size: 20px !important;">Ticket Details</p>
                         </div>
-                        <div class="right">
-                            <div class="label">Purchase Date</div>
-                            <div class="city">
-                                <%= purchaseDate %>
+                        <div class="row perforated destinations">
+                            <div class="left">
+                                <div class="label">Customer Name</div>
+                                <div class="city">
+                                    <%= name %>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="row perforated destinations">
-                        <div class="prize-total">
-                            <p>Getlucky4 Prizes</p>
-                            <div style="margin-top: 10px;" class="row justify-content-center">
-                                <div class="col-md-4 pd-10">
-                                    <div class="label">Straight</div>
-                                    <div class=" city">AED 3,000.00</div>
-                                </div>
-                                <div class="col-md-4 pd-10">
-                                    <div class="label">Rumble</div>
-                                    <div class="city">AED 1,000.00</div>
-                                </div>
-                                <div class="col-md-4 pd-20">
-                                    <div class="label">Chance</div>
-                                    <div class="city">AED 100.00</div>
+                            <div class="right">
+                                <div class="label">Mobile No. </div>
+                                <div class="city">
+                                    +<%= phoneNumber %>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="row perforated destinations">
-                        <div class="left">
-                            <div class="label">Total Items</div>
-                            <div class="city">
-                                <%= totalCount %>
+                        <div class="row text-center perforated destinations">
+                            <p style="font-size: 15px !important;">
+                                <%= drawName %>
+                            </p>
+                        </div>
+                        <div class="row perforated destinations">
+                            <div class="left">
+                                <div class="label">Grand Prize</div>
+                                <div class="city">AED 10,000.00</div>
+                            </div>
+                            <div class="right">
+                                <div class="label">Purchase Date</div>
+                                <div class="city">
+                                    <%= purchaseDate %>
+                                </div>
                             </div>
                         </div>
-                        <div class="right">
-                            <div class="label">Total Cost</div>
-                            <div class="city">
-                                <%= totalCost %>.00 AED
+                        <div class="row perforated destinations">
+                            <div class="prize-total">
+                                <p>Getlucky4 Prizes</p>
+                                <div style="margin-top: 10px;" class="row justify-content-center">
+                                    <div class="col-md-4 pd-10">
+                                        <div class="label">Straight</div>
+                                        <div class=" city">AED 3,000.00</div>
+                                    </div>
+                                    <div class="col-md-4 pd-10">
+                                        <div class="label">Rumble</div>
+                                        <div class="city">AED 1,000.00</div>
+                                    </div>
+                                    <div class="col-md-4 pd-20">
+                                        <div class="label">Chance</div>
+                                        <div class="city">AED 100.00</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="row perforated destinations">
-                        <table>
-                            <tr>
-                                <th style="text-align: center;">Products</th>
-                                <th>Quantity</th>
-                                <th>Tickets</th>
-                                <th>Raffle ID</th>
-                            </tr>
-                            <% for (let i=0; i < products.length; i++) { %>
+                        <div class="row perforated destinations">
+                            <div class="left">
+                                <div class="label">Total Items</div>
+                                <div class="city">
+                                    <%= totalCount %>
+                                </div>
+                            </div>
+                            <div class="right">
+                                <div class="label">Total Cost</div>
+                                <div class="city">
+                                    <%= totalCost %>.00 AED
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row perforated destinations">
+                            <table>
                                 <tr>
-                                    <td>
-                                        <%= products[i].productName %>
-                                    </td>
-                                    <td>
-                                        <%= products[i].quantity %>
-                                    </td>
-                                    <td>
-                                        <% let ticketNumbers=Array.isArray(products[i].tickets) ?
-                                            products[i].tickets.join(', ') : ''; %>
+                                    <th style="text-align: center;">Products</th>
+                                    <th>Quantity</th>
+                                    <th>Tickets</th>
+                                    <th>Raffle ID</th>
+                                </tr>
+                                <% for (let i=0; i < products.length; i++) { %>
+                                    <tr>
+                                        <td>
+                                            <%= products[i].productName %>
+                                        </td>
+                                        <td>
+                                            <%= products[i].quantity %>
+                                        </td>
+                                        <td>
+                                            <% let ticketNumbers=Array.isArray(products[i].tickets) ?
+                                                products[i].tickets.join(', ') : ''; %>
                                             <%= ticketNumbers %>
                                     </td>
                                     <td>
@@ -391,18 +410,18 @@
                             </p>
                         </div>
                     </div>
-                    <div style="margin-top: 20px;" class="row text-center">
+                    <div style="margin-top: 10px; margin-bottom: 15px;" class="row text-center">
                         <div class="terms-footer"><strong>All Other Terms and Conditions Apply</strong></div>
                     </div>
-                    <div class="home-button">
-                        <a class="left-button" href="<%= link %>">Go Home</a>
-                        <a class="right-button" href="<%= pdfDownload %>">Download Invoice</a>
-                    </div>
-                    
-                    <!-- <div class="home-button">
-                        <div class="order-number-label"><a style ="text-decoration: none; color: black;" href="<%= link %>">Go Home</a></div>
-                        <div class="order-number-label"><a style ="text-decoration: none; color: black;" href="<%= link %>">Download Invoice</a></div>
-                    </div> -->
+                </div>
+            </div>
+            <div class="home-button">
+                <div class="button-row">
+                    <a class="left-button" href="<%= link %>">Go Home</a>
+                    <a class="right-button" href="<%= ticketDownload %>">Download Ticket</a>
+                </div>
+                <div class="button-row">
+                    <a class="down-button" href="<%= pdfDownload %>">Download Invoice</a>
                 </div>
             </div>
         </div>
