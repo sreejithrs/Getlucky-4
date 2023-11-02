@@ -52,7 +52,7 @@ expressApp.use(i18n.init);
 expressApp.post('/stripe-webhooks', express.raw({ type: '*/*' }), homeController.webhooks);
 expressApp.get('/ticket-view/:id', userController.getTicketView);
 expressApp.get('/download-ticket/:id', userController.downloadTicket);
-expressApp.get('/invoice', userController.generateInvoice);
+expressApp.get('/invoice/:id', userController.generateInvoice);
 expressApp.get('/api/v1/admin/home/download-report', adminHome.downloadPurchaseReport);
 
 expressApp.use(bodyParser.urlencoded({ extended: true }));
