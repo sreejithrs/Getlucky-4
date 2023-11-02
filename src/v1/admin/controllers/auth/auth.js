@@ -76,11 +76,46 @@ module.exports = {
 
   usersList: async (req, res, next) => {
     try {
-      const { params } = req;
+      const { params, query } = req;
       const { skip, limit } = params;
-      const usersList = await commonService.findAllBySkipLimit(User, { userType: constValues.userType.USER, isVerified: constValues.status.ACTIVE }, { _id: -1 }, Number(skip), Number(limit), {
-        _id: 1, name: 1, email: 1, phoneNumber: 1, country: 1,
-      });
+      const { search } = query;
+      const condition = {};
+      const filterData = [{ userType: constValues.userType.USER }, { isVerified: constValues.status.ACTIVE }];
+      if (search && search !== '') {
+        filterData.push({
+          $or: [
+            { name: { $regex: search.trim(), $options: 'i' } },
+            { country: { $regex: search.trim(), $options: 'i' } },
+          ],
+        });
+      }
+      condition.$and = filterData;
+
+      const usersList = await User.aggregate([
+        {
+          $match: condition,
+        },
+        {
+          $sort: {
+            _id: -1,
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            name: 1,
+            email: 1,
+            phoneNumber: 1,
+            country: 1,
+          },
+        },
+        {
+          $skip: Number(skip),
+        },
+        {
+          $limit: Number(limit),
+        },
+      ]);
       const totalUsers = await commonService.count(User, { userType: constValues.userType.USER, isVerified: constValues.status.ACTIVE });
       return respondSuccess(
         res,

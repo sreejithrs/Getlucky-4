@@ -302,7 +302,7 @@ module.exports = {
 
   // eslint-disable-next-line consistent-return
   generateInvoice: async (req, res) => {
-    const { id } = req.query;
+    const { id } = req.params;
 
     const [invoiceData] = await getPDFInvoiceData(id);
 
