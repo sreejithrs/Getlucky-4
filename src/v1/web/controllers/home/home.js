@@ -164,8 +164,8 @@ module.exports = {
           ...stripeEmailObj,
         },
         expires_at: sessionExpireDate,
-        success_url: `${protocol}://${req.get('host')}/ticket-view?id=${transactionId}`,
-        cancel_url: `${protocol}://${req.get('host')}/ticket-view?id=${transactionId}`,
+        success_url: `${protocol}://${req.get('host')}/ticket-view/${transactionId}`,
+        cancel_url: `${protocol}://${req.get('host')}/ticket-view/${transactionId}`,
       });
       if (!session) return respondFailure(res, req.__(localeKeys.product.PAYMENT_ERROR), StatusCode.INTERNAL_SERVER_ERROR);
       await commonService.updateById(Booking, bookingData._id, { $set: { paymentIntent: session.id } });
