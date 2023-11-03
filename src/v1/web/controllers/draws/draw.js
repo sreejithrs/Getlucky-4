@@ -13,7 +13,21 @@ module.exports = {
 
   getDrawList: async (req, res, next) => {
     try {
-      const drawList = await commonService.findAllByFields(Draw, { isCompleted: constValues.status.ACTIVE }, { _id: 1, name: { $concat: ['$drawName', ' ', '$drawNo'] } }, { date: -1 });
+      const drawList = await Draw.aggregate([
+        {
+          $match: { isCompleted: constValues.status.ACTIVE },
+        },
+        {
+          $sort: { date: -1 },
+        },
+        {
+          $project: {
+            _id: 1,
+            name: { $concat: ['$drawName', ' ', '$drawNo'] },
+            date: { $dateToString: { format: '%d-%m-%Y', date: '$date' } },
+          },
+        },
+      ]);
       return respondSuccess(
         res,
         req.__(localeKeys.global.REQUEST_WAS_SUCCESSFUL),

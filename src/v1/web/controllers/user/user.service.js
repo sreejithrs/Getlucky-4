@@ -1,4 +1,7 @@
 // modules
+const path = require('path');
+const ejs = require('ejs');
+const puppeteer = require('puppeteer');
 const { ObjectId } = require('mongoose').Types;
 // models
 const { Order, Booking } = require('../../../models/index');
@@ -342,6 +345,7 @@ module.exports = {
       $group: {
         _id: '$_id',
         name: { $first: '$userData.name' },
+        drawDate: { $first: { $dateToString: { format: '%d-%m-%Y', date: '$orderData.drawData.date' } } },
         phoneNumber: { $first: '$userData.phoneNumber' },
         paymentStatus: { $first: '$paymentStatus' },
         purchaseDate: { $first: '$orderData.date' },
@@ -365,4 +369,26 @@ module.exports = {
     },
   ]),
 
+  takeScreenShot: async (data) => {
+    try {
+      const html = await ejs.renderFile(path.join(__dirname, '../../../../templates/views/invoice.ejs'), data);
+
+      const browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox'] });
+      const page = await browser.newPage();
+      await page.setContent(html);
+      const elementHandle = await page.$('#ticket-download');
+      const boundingBox = await elementHandle.boundingBox();
+
+      const screenshot = await page.screenshot({
+        type: 'jpeg',
+        quality: 100,
+        clip: boundingBox,
+      });
+
+      await browser.close();
+      return screenshot;
+    } catch (err) {
+      return null;
+    }
+  },
 };

@@ -22,7 +22,7 @@ const { getMessageFromValidationError, generate4DigitOTP } = require('../../../.
 const { sendMail } = require('../../../../helpers/notification');
 const { changeEmail } = require('../../../../templates/emailTemplate');
 const {
-  getUserTickets, getUserTransactions, getPDFInvoiceData, getTicketDetails,
+  getUserTickets, getUserTransactions, getPDFInvoiceData, getTicketDetails, takeScreenShot,
 } = require('./user.service');
 
 module.exports = {
@@ -272,24 +272,11 @@ module.exports = {
       const dataToSend = {
         ...bookingData, link, url: process.env.AWS_S3_URL, ticketDownload: '', pdfDownload: '',
       };
-      const html = await ejs.renderFile(path.join(__dirname, '../../../../templates/views/invoice.ejs'), dataToSend);
-
-      const browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox'] });
-      const page = await browser.newPage();
-      await page.setContent(html);
-
       const { ticketId } = bookingData;
       const fileName = ticketId.replace('#', '');
-      const elementHandle = await page.$('#ticket-download');
-      const boundingBox = await elementHandle.boundingBox();
 
-      const screenshot = await page.screenshot({
-        type: 'jpeg',
-        quality: 100,
-        clip: boundingBox,
-      });
-
-      await browser.close();
+      const screenshot = await takeScreenShot(dataToSend);
+      if (!screenshot) res.send(500, 'Failed to download');
       res.writeHead(200, {
         'Content-Type': 'image/jpeg',
         'Content-Disposition': `attachment; filename=Getlucky_${fileName}.jpeg`,
