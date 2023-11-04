@@ -249,10 +249,14 @@ module.exports = {
                 $unwind: { path: '$tickets', preserveNullAndEmptyArrays: true },
               },
               {
+                $unwind: { path: '$tickets.ticketNumbers', preserveNullAndEmptyArrays: true },
+              },
+              {
                 $group: {
                   _id: '$_id',
                   ticketId: { $first: '$ticketId' },
                   userId: { $first: '$user._id' },
+                  tickets: { $push: '$tickets.ticketNumbers' },
                   date: { $first: { $dateToString: { format: '%d-%m-%Y', date: '$date' } } },
                   name: { $first: '$user.name' },
                   mobile: { $first: { $concat: ['+', '$user.phoneNumber'] } },
@@ -281,6 +285,7 @@ module.exports = {
             mobile: '$orders.mobile',
             state: '$orders.state',
             country: '$orders.country',
+            tickets: '$orders.tickets',
             amount_paid: '$userPaid',
           },
         },

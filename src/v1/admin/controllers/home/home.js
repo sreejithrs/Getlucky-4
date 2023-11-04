@@ -43,7 +43,7 @@ module.exports = {
       const report = await getUserReports(query);
       if (!report.length) return respondFailure(res, req.__(localeKeys.product.NO_REPORT_AVAILABLE), StatusCode.NOT_FOUND);
 
-      const result = report.map((document, index) => ({
+      const updatedReport = report.map((document, index) => ({
         'no.': index + 1,
         ...document,
       }));
@@ -51,6 +51,15 @@ module.exports = {
       startDate = moment(startDate).format('DD-MM-YYYY');
       endDate = moment(endDate).format('DD-MM-YYYY');
 
+      let maxTicketWidth = 0;
+      updatedReport.forEach((row) => {
+        const ticketWidth = row.tickets.length;
+        if (ticketWidth >= maxTicketWidth) {
+          maxTicketWidth = ticketWidth;
+        }
+      });
+
+      const result = updatedReport.map((row) => Object.fromEntries(Object.entries(row).map(([k, v]) => ([k, Array.isArray(v) ? v.join(',') : v]))));
       const ws = XLSX.utils.json_to_sheet(result);
       const wsCols = [
         { wch: 10 },
@@ -60,6 +69,7 @@ module.exports = {
         { wch: 20 },
         { wch: 20 },
         { wch: 20 },
+        { wch: maxTicketWidth * 5 },
         { wch: 15 },
       ];
 
