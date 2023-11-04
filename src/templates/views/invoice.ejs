@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Getlucky 4</title>
+    <title>Getlucky4</title>
     <meta name="description" content="Getlucky4">
     <meta name="keywords" content="">
     <style>
@@ -55,7 +55,7 @@
         }
 
         .tickets-bg {
-            background-image: -webkit-linear-gradient(-45deg, #0e3b69 0, #0270bf 100%);
+            background-image: -webkit-linear-gradient(-45deg, #0e3b69 0, #0268b0 100%);
             min-height: auto;
             font-family: Poppins, sans-serif !important
         }
@@ -97,10 +97,27 @@
         }
 
         #ticket {
-            width: 400px;
             background: #fff;
             height: auto;
-            margin: 10px auto
+            margin: 0 auto
+        }
+
+        @media (max-width: 768px) {
+            #ticket {
+                width: 100%;
+            }
+        }
+
+        @media(max-width: 320px) {
+            #ticket {
+                width: 290px;
+            }
+        }
+
+        @media (min-width: 769px) {
+            #ticket {
+                width: 400px;
+            }
         }
 
         #ticket>.row:first-child:after,
@@ -376,7 +393,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="row perforated destinations">
+                        <div class="row perforated destinations justify-content-center">
                             <table>
                                 <tr>
                                     <th style="text-align: center;">Products</th>
