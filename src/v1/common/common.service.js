@@ -34,7 +34,7 @@ module.exports = {
       },
       {
         $group: {
-          _id: { $ifNull: ['$winnerData', null] },
+          _id: { $ifNull: ['$winnerData.matchOrder', null] },
           winnersCount: {
             $sum: {
               $cond: {
@@ -49,7 +49,6 @@ module.exports = {
           drawNo: { $first: '$drawNo' },
           wonTicket: { $first: '$wonTicket' },
           tickets: { $push: '$winnerData.ticketNumbers' },
-          ticketsToShow: { $addToSet: '$winnerData.ticketNumbers' },
           price: {
             $first: {
               $let: {
@@ -91,7 +90,6 @@ module.exports = {
                   totalPrices: {
                     $multiply: ['$price', { $sum: { $size: '$tickets' } }],
                   },
-                  tickets: '$ticketsToShow',
                 },
               },
             },

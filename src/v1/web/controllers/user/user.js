@@ -1,9 +1,7 @@
 // modules
 const path = require('path');
 const _ = require('lodash');
-const ejs = require('ejs');
 const moment = require('moment');
-const puppeteer = require('puppeteer');
 // models
 const {
   User, Cart, Booking, Quantity, Order, Winner,
@@ -22,7 +20,7 @@ const { getMessageFromValidationError, generate4DigitOTP } = require('../../../.
 const { sendMail } = require('../../../../helpers/notification');
 const { changeEmail } = require('../../../../templates/emailTemplate');
 const {
-  getUserTickets, getUserTransactions, getPDFInvoiceData, getTicketDetails, takeScreenShot,
+  getUserTickets, getUserTransactions, getPDFInvoiceData, getTicketDetails, takeScreenShot, generateInvoicePDF,
 } = require('./user.service');
 
 module.exports = {
@@ -261,7 +259,7 @@ module.exports = {
   },
 
   // eslint-disable-next-line consistent-return
-  downloadTicket: async (req, res, next) => {
+  downloadTicket: async (req, res) => {
     try {
       const { id } = req.params;
       const link = process.env.GETLUCKY_URL;
@@ -276,46 +274,35 @@ module.exports = {
       const fileName = ticketId.replace('#', '');
 
       const screenshot = await takeScreenShot(dataToSend);
-      if (!screenshot) res.send(500, 'Failed to download');
+      if (!screenshot) {
+        console.error('Failed to download ticket, try again');
+        return res.status(500).send('Failed to download ticket, try again');
+      }
       res.writeHead(200, {
         'Content-Type': 'image/jpeg',
         'Content-Disposition': `attachment; filename=Getlucky_${fileName}.jpeg`,
       });
       res.end(screenshot);
     } catch (error) {
-      return next(respondError(error.message, StatusCode.INTERNAL_SERVER_ERROR));
+      return res.status(500).send('Failed to download ticket, try again');
     }
   },
 
   // eslint-disable-next-line consistent-return
   generateInvoice: async (req, res) => {
-    const { id } = req.params;
+    try {
+      const { id } = req.params;
 
-    const [invoiceData] = await getPDFInvoiceData(id);
+      const [invoiceData] = await getPDFInvoiceData(id);
+      const pdfBuffer = await generateInvoicePDF(invoiceData);
 
-    // eslint-disable-next-line consistent-return
-    ejs.renderFile(path.join(__dirname, '../../../../templates/views/generatePDF.ejs'), invoiceData, async (err, html) => {
-      if (err) {
-        console.error('Error rendering EJS:', err);
-        return res.status(500).send('Error rendering EJS');
-      }
+      res.setHeader('Content-Disposition', `attachment; filename=${invoiceData.invoiceId}.pdf`);
+      res.setHeader('Content-Type', 'application/pdf');
 
-      try {
-        const browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox'] });
-        const page = await browser.newPage();
-
-        await page.setContent(html);
-        const pdfBuffer = await page.pdf();
-        await browser.close();
-
-        res.setHeader('Content-Disposition', `attachment; filename=${invoiceData.invoiceId}.pdf`);
-        res.setHeader('Content-Type', 'application/pdf');
-
-        res.send(pdfBuffer);
-      } catch (error) {
-        console.error('Error generating PDF:', error);
-        return res.status(500).send('Error generating PDF');
-      }
-    });
+      res.send(pdfBuffer);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      return res.status(500).send('Failed to download invoice, try again');
+    }
   },
 };

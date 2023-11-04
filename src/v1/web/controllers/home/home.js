@@ -14,10 +14,11 @@ const commonService = require('../../../services/common.service');
 const localeKeys = require('../../../../locales/keys.json');
 const StatusCode = require('../../../../helpers/statusCodes.json');
 const constValues = require('../../../../helpers/constants');
-const { getMessageFromValidationError } = require('../../../../helpers/utils');
+const { getMessageFromValidationError, uploadPDF } = require('../../../../helpers/utils');
 const {
   getHomePage, getAllProducts, getOrderData, getCartData,
 } = require('./home.service');
+const { getPDFInvoiceData, generateInvoicePDF } = require('../user/user.service');
 
 module.exports = {
 
@@ -243,6 +244,12 @@ module.exports = {
 
           await Booking.updateOne({ userId, transactionId }, { $set: bookingData });
           await Cart.deleteMany({ userId: cartData.userId });
+
+          const [invoiceData] = await getPDFInvoiceData(transactionId);
+          const pdfBuffer = await generateInvoicePDF(invoiceData);
+          const date = moment().format('MM-YYYY');
+          const fileName = `invoice-${date}/${invoiceData.invoiceId}`;
+          await uploadPDF(pdfBuffer, date, fileName);
         }
         break;
       }

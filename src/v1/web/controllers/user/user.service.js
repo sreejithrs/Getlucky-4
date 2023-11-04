@@ -266,7 +266,7 @@ module.exports = {
           $push: {
             siNo: '$orderData.sequenceNumber',
             productName: '$orderData.tickets.productData.name',
-            tickets: { $first: '$orderData.tickets.ticketNumbers' },
+            tickets: '$orderData.tickets.ticketNumbers',
             quantity: '$orderData.tickets.quantity',
             cost: '$orderData.tickets.productData.cost',
             totalCost: '$orderData.tickets.cost',
@@ -390,5 +390,20 @@ module.exports = {
     } catch (err) {
       return null;
     }
+  },
+
+  generateInvoicePDF: async (data) => {
+    const html = await ejs.renderFile(path.join(__dirname, '../../../../templates/views/generatePDF.ejs'), data);
+
+    const browser = await puppeteer.launch({
+      headless: 'new',
+      args: ['--no-sandbox'],
+    });
+    const page = await browser.newPage();
+
+    await page.setContent(html, { waitUntil: 'domcontentloaded' });
+    const pdfBuffer = await page.pdf();
+    await browser.close();
+    return pdfBuffer;
   },
 };
