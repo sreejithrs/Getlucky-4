@@ -15,9 +15,8 @@
 
         .invoice {
             max-width: 800px;
-            margin: 20px auto;
+            margin: 0px auto;
             background-color: #fff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             padding: 20px;
             position: relative;
         }
@@ -177,7 +176,9 @@
                                 <%= products[i].productName %>
                             </td>
                             <td>
-                                <%= products[i].tickets %>
+                                <% let ticketNumbers=Array.isArray(products[i].tickets) ?
+                                    products[i].tickets.join(', ') : ''; %>
+                            <%= ticketNumbers %>
                             </td>
                             <td>
                                 <%= products[i].quantity %>

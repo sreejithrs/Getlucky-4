@@ -63,6 +63,27 @@ const uploadImage = async (file, bucketName, fileName, contentType) => {
     });
 };
 
+const uploadPDF = async (pdfBuffer, date, fileName) => {
+  const s3Params = {
+    Bucket: process.env.AWS_BUCKET,
+    Key: fileName,
+    ContentType: 'application/pdf',
+    Body: pdfBuffer,
+    ACL: 'public-read',
+  };
+  return s3bucket
+    .upload(s3Params)
+    .promise()
+    .then((data) => {
+      console.log(data);
+      return { status: true, data: data };
+    })
+    .catch((err) => {
+      console.log(err);
+      return { status: false, error: err.message };
+    });
+};
+
 const uploadFileCode = async (mainImage, bucketFolder) => {
   let imageName = '';
   const refExt = mainImage.name && mainImage.name.substring(mainImage.name.lastIndexOf('.') + 1, mainImage.name.length);
@@ -153,5 +174,6 @@ module.exports = {
   getPermutations,
   generate4DigitOTP,
   generate6DigitId,
+  uploadPDF,
   monthDiffFn,
 };
