@@ -77,9 +77,11 @@ module.exports = {
   usersList: async (req, res, next) => {
     try {
       const { params, query } = req;
-      const { skip, limit } = params;
+      const { page, limit } = params;
       const { search } = query;
+      const skipIndex = (Number(page)) * Number(limit);
       const condition = {};
+
       const filterData = [{ userType: constValues.userType.USER }, { isVerified: constValues.status.ACTIVE }];
       if (search && search !== '') {
         filterData.push({
@@ -110,7 +112,7 @@ module.exports = {
           },
         },
         {
-          $skip: Number(skip),
+          $skip: skipIndex,
         },
         {
           $limit: Number(limit),
