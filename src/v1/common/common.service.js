@@ -177,7 +177,7 @@ module.exports = {
       $group: {
         _id: '$_id',
         drawName: { $first: { $concat: ['$drawName', ' ', '$drawNo'] } },
-        isTicketAdded: { $first: '$isTicketAdded' },
+        isCompleted: { $first: '$isCompleted' },
         date: { $first: '$formattedDate' },
         wonTicket: { $first: '$wonTicket' },
         users: { $first: '$winnerData' },
