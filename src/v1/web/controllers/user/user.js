@@ -267,6 +267,7 @@ module.exports = {
       const [bookingData] = await getTicketDetails(id);
       if (!bookingData) return res.render(path.join(__dirname, '../../../../templates/views/404.ejs'), { link });
 
+      bookingData.purchaseDate = moment(bookingData.purchaseDate).format('DD-MMM-YYYY');
       const dataToSend = {
         ...bookingData, link, url: process.env.AWS_S3_URL, ticketDownload: '', pdfDownload: '',
       };
