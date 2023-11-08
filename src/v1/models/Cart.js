@@ -15,8 +15,10 @@ const cartSchema = new Schema(
         stripeQuantity: { type: Number },
         ticketNumbers: [{ type: String }],
         cost: { type: Number },
+        actualCost: { type: Number },
       },
     ],
+    totalActualCost: { type: Number },
     totalCost: { type: Number },
   },
   {

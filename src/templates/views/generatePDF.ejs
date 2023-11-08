@@ -77,7 +77,7 @@
         .invoice-total {
             margin-top: 20px;
             text-align: right;
-            font-size: 18px;
+            font-size: 14px;
         }
 
         .payment-details {
@@ -113,6 +113,16 @@
             font-size: 14px;
             text-align: center;
         }
+
+        .right-border {
+            /* background: black;
+            margin-top: 10px; */
+            width: 20%;
+            border-bottom: 1px solid #cecece;
+            padding-bottom: 10px;
+            /* height: 1px; */
+            float: right;
+        }
     </style>
 </head>
 
@@ -132,11 +142,17 @@
             <p style="font-size: 12px;">Email: getlucky4you@gmail.com</p>
         </div>
         <div class="top-right">
-            <p style="font-size: 12px;">Invoice Number: <%= invoiceId %>
+            <p style="font-size: 12px;">
+                <b>Invoice Number: </b>
+                <%= invoiceId %>
             </p>
-            <p style="font-size: 12px;">Date: <%= date %>
+            <p style="font-size: 12px;">
+                <b>Date: </b>
+                <%=date %>
             </p><br>
-            <p style="font-size: 12px;">Payment Status: <%= paymentStatus %>
+            <p style="font-size: 12px;">
+                <b>Payment Status: </b>
+                <%= paymentStatus %>
             </p>
         </div>
         <div class="address to">
@@ -162,7 +178,7 @@
                         <th>Description</th>
                         <th>Tickets</th>
                         <th>Quantity</th>
-                        <th>Price Per Unit(Inc.VAT 5%)</th>
+                        <th>Price/Unit (Inc.VAT 5%)</th>
                         <th>Amount (AED)</th>
                     </tr>
                 </thead>
@@ -195,7 +211,14 @@
             </table>
         </div>
         <div class="invoice-total">
-            <strong>Total Amount (AED): <%= totalAmount %></strong>
+            <b>Subtotal:&nbsp;&nbsp;&nbsp;&nbsp;</b><%= subtotal %> AED
+        </div>
+        <div class="invoice-total">
+            <b>Discount:&nbsp;&nbsp;&nbsp;</b>-<%= discount %> AED
+        </div>
+        <div class="right-border"></div>
+        <div class="invoice-total">
+            <b>Total Amount:&nbsp;&nbsp;&nbsp;</b> <%= finalCost %> AED
         </div>
         <div class="system-msg">
             <h6>This is a system generated invoice, no signature is required</h6>
@@ -204,13 +227,15 @@
             <p>NOTES:</p>
             <ul>
                 <li>No refund or exchange.</li>
-                <li>For clarifications, call or Whatsapp 04 33 98880 within UAE, +97143398880 from outside UAE or
+                <li>For clarifications, call or Whatsapp
+                    <a href="https://wa.me/+971544818155">+971 544818155</a>
+                    within UAE, +97143398880 from outside UAE or
                     email
                     us at
                     <a href="mailto:getlucky4@gmail.com">getlucky4you@gmail.com</a>
                 </li>
                 <li>For more information and Terms & Conditions, please visit our website <a
-                        href="https://www.littledraw.ae/">www.getlucky4.com</a></li>
+                        href="https://www.getlucky4.com/">www.getlucky4.com</a></li>
             </ul>
         </div>
     </div>

@@ -261,7 +261,9 @@ module.exports = {
         district: { $first: { $ifNull: ['$userData.district', ''] } },
         state: { $first: '$userData.state' },
         country: { $first: '$userData.country' },
-        totalAmount: { $first: '$userPaid' },
+        subtotal: { $first: '$totalPrice' },
+        discount: { $first: '$discount' },
+        finalCost: { $first: '$userPaid' },
         products: {
           $push: {
             siNo: '$orderData.sequenceNumber',
@@ -269,7 +271,7 @@ module.exports = {
             tickets: '$orderData.tickets.ticketNumbers',
             quantity: '$orderData.tickets.quantity',
             cost: '$orderData.tickets.productData.cost',
-            totalCost: '$orderData.tickets.cost',
+            totalCost: '$orderData.tickets.actualCost',
           },
         },
       },
