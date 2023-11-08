@@ -178,7 +178,7 @@ module.exports = {
             ticketNumbers: '$products.ticketNumbers',
             quantity: '$products.quantity',
             productCost: '$productData.cost',
-            actualCost: { $multiply: ['$productData.cost', { $size: '$products.ticketNumbers' }] },
+            actualCost: '$products.actualCost',
             finalCost: '$products.cost',
           },
         },
@@ -215,7 +215,9 @@ module.exports = {
       $group: {
         _id: '$_id',
         drawId: { $first: '$drawId' },
+        totalActualCost: { $first: '$totalActualCost' },
         totalCost: { $first: '$totalCost' },
+        discount: { $first: { $subtract: ['$totalActualCost', '$totalCost'] } },
         data: {
           $push: {
             price: '$productData.stripe_price',

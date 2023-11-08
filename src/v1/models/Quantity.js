@@ -12,6 +12,7 @@ const quantitySchema = new Schema(
     productId: { type: mongoose.Types.ObjectId, ref: 'Product' },
     quantity: { type: Number },
     cost: { type: Number },
+    actualCost: { type: Number },
     ticketNumbers: [{ type: String }],
   },
   {

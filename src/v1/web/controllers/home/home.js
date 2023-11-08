@@ -81,6 +81,7 @@ module.exports = {
 
       const result = data.map((item) => {
         const productCost = productCostMap.get(item.productId);
+        const actualItems = item.items.length;
         const itemsToCalculate = Math.floor(item.items.length / 3) * 2 + (item.items.length % 3); // Calculate price for 2 out of every 3 items
         return {
           productId: item.productId,
@@ -88,11 +89,17 @@ module.exports = {
           stripeQuantity: itemsToCalculate,
           ticketNumbers: item.items,
           cost: productCost * itemsToCalculate,
+          actualCost: productCost * actualItems,
         };
       });
 
       const totalCost = result.reduce((accumulator, item) => accumulator + item.cost, 0);
-      await commonService.insertIfNotExists(Cart, { userId: id }, { $set: { drawId, products: result, totalCost } });
+      const totalActualCost = result.reduce((accumulator, item) => accumulator + item.actualCost, 0);
+      await commonService.insertIfNotExists(Cart, { userId: id }, {
+        $set: {
+          drawId, products: result, totalCost, totalActualCost,
+        },
+      });
       return respondSuccess(
         res,
         req.__(localeKeys.product.ORDER_CREATED_SUCCESSFULLY),
@@ -127,24 +134,23 @@ module.exports = {
   purchaseOrder: async (req, res, next) => {
     try {
       const { protocol, user } = req;
-      const { id, email } = user;
-      let stripeEmailObj = {};
+      const { id } = user;
 
       const [getUserCart] = await getCartData(id);
       if (!getUserCart) return respondFailure(res, req.__(localeKeys.product.CART_NOT_FOUND), StatusCode.NOT_FOUND);
       const {
-        totalCost, _id, data, drawId,
+        totalCost, totalActualCost, discount, _id, data, drawId,
       } = getUserCart;
 
       const currentDate = new Date();
       const getDraw = await commonService.findOneById(Draw, drawId);
       if (getDraw.date <= currentDate) return respondFailure(res, req.__(localeKeys.product.DRAW_EXPIRED), StatusCode.FORBIDDEN);
 
-      if (email !== '') stripeEmailObj = { receipt_email: email };
       const bookingObj = {
         userId: id,
         date: currentDate,
-        totalPrice: totalCost,
+        totalPrice: totalActualCost,
+        discount,
         taxAmount: (5 / 100) * totalCost,
       };
 
@@ -162,7 +168,6 @@ module.exports = {
         },
         payment_intent_data: {
           setup_future_usage: 'off_session',
-          ...stripeEmailObj,
         },
         expires_at: sessionExpireDate,
         success_url: `${protocol}://${req.get('host')}/ticket-view/${transactionId}`,
@@ -234,6 +239,7 @@ module.exports = {
             productId: elem.productId,
             quantity: elem.quantity,
             cost: elem.cost,
+            actualCost: elem.actualCost,
             ticketNumbers: elem.ticketNumbers,
           }));
           await Quantity.insertMany(quantityData);

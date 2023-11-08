@@ -93,32 +93,43 @@ module.exports = {
       }
       condition.$and = filterData;
 
-      const usersList = await User.aggregate([
+      const [result] = await User.aggregate([
         {
           $match: condition,
         },
         {
-          $sort: {
-            _id: -1,
+          $facet: {
+            totalCount: [
+              { $count: 'total' },
+            ],
+            usersList: [
+              {
+                $sort: {
+                  _id: -1,
+                },
+              },
+              {
+                $project: {
+                  _id: 1,
+                  name: 1,
+                  email: 1,
+                  phoneNumber: 1,
+                  country: 1,
+                },
+              },
+              {
+                $skip: skipIndex,
+              },
+              {
+                $limit: Number(limit),
+              },
+            ],
           },
-        },
-        {
-          $project: {
-            _id: 1,
-            name: 1,
-            email: 1,
-            phoneNumber: 1,
-            country: 1,
-          },
-        },
-        {
-          $skip: skipIndex,
-        },
-        {
-          $limit: Number(limit),
         },
       ]);
-      const totalUsers = await commonService.count(User, { userType: constValues.userType.USER, isVerified: constValues.status.ACTIVE });
+
+      const totalUsers = result.totalCount[0] ? result.totalCount[0].total : 0;
+      const { usersList } = result;
       return respondSuccess(
         res,
         req.__(localeKeys.global.REQUEST_WAS_SUCCESSFUL),

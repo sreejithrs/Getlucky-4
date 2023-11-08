@@ -13,6 +13,7 @@ const bookingSchema = new Schema(
     transactionId: { type: String, default: '' },
     invoiceId: { type: String, default: '' },
     totalPrice: { type: Number, default: 0 },
+    discount: { type: Number, default: 0 },
     taxAmount: { type: Number, default: 0 },
     userPaid: { type: Number, default: 0 },
     date: { type: Date, default: new Date() },
