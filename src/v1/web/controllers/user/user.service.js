@@ -404,7 +404,7 @@ module.exports = {
     const page = await browser.newPage();
 
     await page.setContent(html, { waitUntil: 'domcontentloaded' });
-    const pdfBuffer = await page.pdf();
+    const pdfBuffer = await page.pdf({ height: 1150 });
     await browser.close();
     return pdfBuffer;
   },
