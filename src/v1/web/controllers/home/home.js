@@ -4,7 +4,7 @@ const { ObjectId } = require('mongoose').Types;
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 // models
 const {
-  Product, Cart, Draw, Booking, Order, Quantity,
+  Product, User, Cart, Draw, Booking, Order, Quantity,
 } = require('../../../models');
 
 // helpers
@@ -19,6 +19,8 @@ const {
   getHomePage, getAllProducts, getOrderData, getCartData,
 } = require('./home.service');
 const { getPDFInvoiceData, generateInvoicePDF } = require('../user/user.service');
+const { sendMail } = require('../../../../helpers/notification');
+const { sendTicket } = require('../../../../templates/emailTemplate');
 
 module.exports = {
 
@@ -221,7 +223,6 @@ module.exports = {
 
         const cartData = await Cart.findOne({ _id: cartId }).lean();
         if (!cartData) return true;
-        console.log(cartData);
         const { products } = cartData;
 
         if (dataObject.payment_status === 'paid') {
@@ -232,7 +233,7 @@ module.exports = {
             totalCost: cartData.totalCost,
           };
           const orderDetails = await new Order(orderData).save();
-          const { _id, userId } = orderDetails;
+          const { _id, userId, ticketId } = orderDetails;
 
           const quantityData = products.map((elem) => ({
             orderId: _id,
@@ -251,11 +252,18 @@ module.exports = {
           await Booking.updateOne({ userId, transactionId }, { $set: bookingData });
           await Cart.deleteMany({ userId: cartData.userId });
 
-          const [invoiceData] = await getPDFInvoiceData(transactionId);
-          const pdfBuffer = await generateInvoicePDF(invoiceData);
-          const date = moment().format('MM-YYYY');
-          const fileName = `invoice-${date}/${invoiceData.invoiceId}`;
-          await uploadPDF(pdfBuffer, date, fileName);
+          const userData = await User.findById(userId);
+          const drawData = await Draw.findById(cartData.drawId);
+          const dataToSend = {
+            ...bookingData, link: process.env.GETLUCKY_URL, url: process.env.AWS_S3_URL, ticketDownload: '', pdfDownload: '',
+          };
+          const emailOptions = {
+            email: userData.email,
+            ticketId,
+            drawDate: moment(drawData.date).format('DD-MMM-YYYY'),
+            dataToSend,
+          };
+          if (userData.email !== '') sendMail(sendTicket(emailOptions));
         }
         break;
       }
@@ -263,6 +271,15 @@ module.exports = {
         const failedIntent = dataObject.id;
         if (!failedIntent) break;
         await Booking.updateOne({ paymentIntent: failedIntent }, { paymentStatus: constValues.paymentStatus.FAILED });
+        break;
+      }
+      case 'payment_intent.succeeded': {
+        const { transactionId } = dataObject.metadata;
+        const [invoiceData] = await getPDFInvoiceData(transactionId);
+        const pdfBuffer = await generateInvoicePDF(invoiceData);
+        const date = moment().format('MM-YYYY');
+        const fileName = `invoice-${date}/${invoiceData.invoiceId}`;
+        await uploadPDF(pdfBuffer, date, fileName);
         break;
       }
       default:
