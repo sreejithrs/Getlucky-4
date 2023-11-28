@@ -58,15 +58,15 @@ module.exports = {
 
   sendTicket: (emailOptions) => {
     const {
-      email, ticketId, date, ...dataToSend
+      email, ticketId, drawDate, dataToSend,
     } = emailOptions;
-    const filePath = path.join(__dirname, './templates/views/invoice.ejs');
+    const filePath = path.join(__dirname, '../templates/views/invoice.ejs');
     const source = fs.readFileSync(filePath, 'utf8');
     const outputString = ejs.render(source, dataToSend);
     return {
       from: process.env.AWS_SES_FROM_EMAIL,
       to: email,
-      subject: emailSubject.sendTicket(ticketId, date),
+      subject: emailSubject.sendTicket(ticketId, drawDate),
       content: outputString,
     };
   },

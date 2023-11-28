@@ -18,7 +18,7 @@ const { getMessageFromValidationError, uploadPDF } = require('../../../../helper
 const {
   getHomePage, getAllProducts, getOrderData, getCartData,
 } = require('./home.service');
-const { getPDFInvoiceData, generateInvoicePDF } = require('../user/user.service');
+const { getPDFInvoiceData, generateInvoicePDF, getTicketDetails } = require('../user/user.service');
 const { sendMail } = require('../../../../helpers/notification');
 const { sendTicket } = require('../../../../templates/emailTemplate');
 
@@ -254,8 +254,10 @@ module.exports = {
 
           const userData = await User.findById(userId);
           const drawData = await Draw.findById(cartData.drawId);
+          const [bookingDetails] = await getTicketDetails(transactionId);
+          bookingDetails.purchaseDate = moment(bookingDetails.purchaseDate).format('DD-MMM-YYYY');
           const dataToSend = {
-            ...bookingData, link: process.env.GETLUCKY_URL, url: process.env.AWS_S3_URL, ticketDownload: '', pdfDownload: '',
+            ...bookingDetails, link: process.env.GETLUCKY_URL, url: process.env.AWS_S3_URL, ticketDownload: '', pdfDownload: '',
           };
           const emailOptions = {
             email: userData.email,
