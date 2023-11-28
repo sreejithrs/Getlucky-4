@@ -57,6 +57,7 @@ module.exports = {
 
     emailLogin: () => 'Getlucky4 Login OTP',
 
+    sendTicket: (ticketId, date) => `Ticket ${ticketId} for draw ${date}`,
   },
 
 };
