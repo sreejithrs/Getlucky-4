@@ -7,7 +7,6 @@
     <meta name="description" content="Getlucky4">
     <meta name="keywords" content="">
 
-
 </head>
 
 <body class="tickets-bg"
@@ -175,21 +174,25 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="home-button"
-                                        style="display: flex;margin-top: 10px;margin-bottom: 10px;flex-direction: column;justify-content: center;">
-                                        <div class="button-row"
-                                            style="display: flex;justify-content: center;width: 100%;margin: 10px;">
-                                            <a class="left-button" href="<%= link %>"
-                                                style="color: white;text-decoration: none;padding: 6px 15px;border-radius: 15px;margin: 0 10px;cursor: pointer;background-color: rgb(18, 179, 18); text-align: center;">Go
-                                                to Website</a>
-                                            <a class="right-button" href="<%= ticketDownload %>"
-                                                style="color: white;text-decoration: none;padding: 6px 15px;border-radius: 15px;margin: 0 10px;cursor: pointer;background-color: #007bff; text-align: center;">Download
-                                                Ticket</a>
-                                                <a class="down-button" href="<%= pdfDownload %>"
-                                                    style="color: white;text-decoration: none;padding: 6px 15px;border-radius: 15px;margin: 0 10px;cursor: pointer;background-color: rgb(255, 0, 0); text-align: center;">Download
-                                                    Invoice</a>
-                                        </div>
-                                    </div>
+                                    <table cellspacing="0" cellpadding="0" border="0" align="center" style="width: 100%; max-width: 600px;">
+                                        <tr>
+                                            <td align="center" style="padding: 15px;">
+                                                <table cellspacing="0" cellpadding="0" border="0" style="width: 100%;">
+                                                    <tr>
+                                                        <td align="center">
+                                                            <a href="<%= link %>" style="color: white;text-decoration: none;display: inline-block;border-radius: 15px;background-color: rgb(18, 179, 18);padding: 8px 20px;margin-right: 10px;">Go to Website</a>
+                                                        </td>
+                                                        <td align="center">
+                                                            <a href="<%= ticketDownload %>" style="color: white;text-decoration: none;display: inline-block;border-radius: 15px;background-color: #007bff;padding: 8px 20px;margin-right: 10px;">Download Ticket</a>
+                                                        </td>
+                                                        <td align="center">
+                                                            <a href="<%= pdfDownload %>" style="color: white;text-decoration: none;display: inline-block;border-radius: 15px;background-color: rgb(255, 0, 0);padding: 8px 20px;">Download Invoice</a>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    </table>                           
                                 </div>
                             </div>
                         </div>
