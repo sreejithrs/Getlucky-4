@@ -128,34 +128,34 @@
                         <div class="row perforated destinations justify-content-center"
                             style="position: relative;display: inline-flex;border-bottom: 1px dashed #ddd;padding: 8px;">
 
-                            <% for (let i=0; i < products.length; i++) { %>
-                                <% } %>
-                                    <table style="font-size: 12px;">
-                                        <tbody>
-                                            <tr>
-                                                <th style="text-align: center;padding: 8px;">Products</th>
-                                                <th style="padding: 8px;">Quantity</th>
-                                                <th style="padding: 8px;">Tickets</th>
-                                                <th style="padding: 8px;">Raffle ID</th>
-                                            </tr>
-                                            <tr>
-                                                <td style="text-align: center;padding: 8px;">
-                                                    <%= products[i].productName %>
-                                                </td>
-                                                <td style="text-align: center;padding: 8px;">
-                                                    <%= products[i].quantity %>
-                                                </td>
-                                                <td style="text-align: center;padding: 8px;">
-                                                    <% let ticketNumbers=Array.isArray(products[i].tickets) ?
-                                                        products[i].tickets.join(', ') : ''; %>
-                                                                <%= ticketNumbers %>
-                                                            </td>
-                                                            <td style="text-align: center;padding: 8px;">
+                            <table style="font-size: 12px;">
+                                <tbody>
+                                    <tr>
+                                        <th style="text-align: center;padding: 8px;">Products</th>
+                                        <th style="padding: 8px;">Quantity</th>
+                                        <th style="padding: 8px;">Tickets</th>
+                                        <th style="padding: 8px;">Raffle ID</th>
+                                    </tr>
+                                    <% for (let i=0; i < products.length; i++) { %>
+                                        <tr>
+                                            <td style="text-align: center;padding: 8px;">
+                                                <%= products[i].productName %>
+                                            </td>
+                                            <td style="text-align: center;padding: 8px;">
+                                                <%= products[i].quantity %>
+                                            </td>
+                                            <td style="text-align: center;padding: 8px;">
+                                                <% let ticketNumbers=Array.isArray(products[i].tickets) ?
+                                                    products[i].tickets.join(', ') : ''; %>
+                                                <%= ticketNumbers %>
+                                            </td>
+                                            <td style="text-align: center;padding: 8px;">
                                                                 <%= products[i].raffleId %>
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                    </table>
+                                            </td>
+                                        </tr>
+                                    <% } %>
+                                </tbody>
+                            </table>
                                             </div>
                                             <div class="row">
                                                 <div class="row text-center"
