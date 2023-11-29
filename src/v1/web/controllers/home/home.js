@@ -271,7 +271,7 @@ module.exports = {
             drawDate: moment(drawData.date).format('DD-MMM-YYYY'),
             dataToSend,
           };
-          if (userData.email !== '') sendMail(sendTicket(emailOptions));
+          if (userData.email !== '') process.nextTick(() => sendMail(sendTicket(emailOptions)));
         }
 
         const [invoiceData] = await getPDFInvoiceData(transactionId);
