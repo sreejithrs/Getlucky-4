@@ -63,7 +63,7 @@ const uploadImage = async (file, bucketName, fileName, contentType) => {
     });
 };
 
-const uploadPDF = async (pdfBuffer, date, fileName) => {
+const uploadPDF = async (pdfBuffer, fileName) => {
   const s3Params = {
     Bucket: process.env.AWS_BUCKET,
     Key: fileName,

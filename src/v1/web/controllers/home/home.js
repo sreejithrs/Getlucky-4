@@ -256,9 +256,15 @@ module.exports = {
           const drawData = await Draw.findById(cartData.drawId);
           const [bookingDetails] = await getTicketDetails(transactionId);
           bookingDetails.purchaseDate = moment(bookingDetails.purchaseDate).format('DD-MMM-YYYY');
+
           const dataToSend = {
-            ...bookingDetails, link: process.env.GETLUCKY_URL, url: process.env.AWS_S3_URL, ticketDownload: '', pdfDownload: '',
+            ...bookingDetails,
+            link: process.env.GETLUCKY_URL,
+            url: process.env.AWS_S3_URL,
+            ticketDownload: `${process.env.MAIN_URL}/download-ticket/${transactionId}`,
+            pdfDownload: `${process.env.MAIN_URL}/invoice/${transactionId}`,
           };
+
           const emailOptions = {
             email: userData.email,
             ticketId,
@@ -267,21 +273,18 @@ module.exports = {
           };
           if (userData.email !== '') sendMail(sendTicket(emailOptions));
         }
+
+        const [invoiceData] = await getPDFInvoiceData(transactionId);
+        const pdfBuffer = await generateInvoicePDF(invoiceData);
+        const date = moment().format('MM-YYYY');
+        const fileName = `invoice-${date}/${invoiceData.invoiceId}`;
+        uploadPDF(pdfBuffer, fileName);
         break;
       }
       case 'checkout.session.expired': {
         const failedIntent = dataObject.id;
         if (!failedIntent) break;
         await Booking.updateOne({ paymentIntent: failedIntent }, { paymentStatus: constValues.paymentStatus.FAILED });
-        break;
-      }
-      case 'payment_intent.succeeded': {
-        const { transactionId } = dataObject.metadata;
-        const [invoiceData] = await getPDFInvoiceData(transactionId);
-        const pdfBuffer = await generateInvoicePDF(invoiceData);
-        const date = moment().format('MM-YYYY');
-        const fileName = `invoice-${date}/${invoiceData.invoiceId}`;
-        await uploadPDF(pdfBuffer, date, fileName);
         break;
       }
       default:

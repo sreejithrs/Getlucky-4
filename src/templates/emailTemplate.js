@@ -60,7 +60,7 @@ module.exports = {
     const {
       email, ticketId, drawDate, dataToSend,
     } = emailOptions;
-    const filePath = path.join(__dirname, '../templates/views/invoice.ejs');
+    const filePath = path.join(__dirname, '../templates/views/invoiceEmail.ejs');
     const source = fs.readFileSync(filePath, 'utf8');
     const outputString = ejs.render(source, dataToSend);
     return {
