@@ -16,8 +16,15 @@ const userController = require('./src/v1/web/controllers/user/user');
 const homeController = require('./src/v1/web/controllers/home/home');
 
 // cors options
+const whitelist = ['http://localhost:7000', '157.241.71.196', 'https://api.getlucky4.com', 'https://getlucky4.com'];
 const corsOptions = {
-  origin: '*',
+  origin: function (origin, callback) {
+    if (whitelist.indexOf(origin) !== -1 || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   exposedHeaders: 'Content-Type, X-Auth-Token',
   methods: 'GET, HEAD, PUT, PATCH, POST, DELETE',
   preflightContinue: false,
