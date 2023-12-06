@@ -135,7 +135,7 @@ module.exports = {
 
   purchaseOrder: async (req, res, next) => {
     try {
-      const { protocol, user } = req;
+      const { user } = req;
       const { id } = user;
 
       const [getUserCart] = await getCartData(id);
@@ -172,8 +172,8 @@ module.exports = {
           setup_future_usage: 'off_session',
         },
         expires_at: sessionExpireDate,
-        success_url: `${protocol}://${req.get('host')}/ticket-view/${transactionId}`,
-        cancel_url: `${protocol}://${req.get('host')}/ticket-view/${transactionId}`,
+        success_url: `${process.env.GETLUCKY_URL}/ticket-view/${transactionId}`,
+        cancel_url: `${process.env.GETLUCKY_URL}/ticket-view/${transactionId}`,
       });
       if (!session) return respondFailure(res, req.__(localeKeys.product.PAYMENT_ERROR), StatusCode.INTERNAL_SERVER_ERROR);
       await commonService.updateById(Booking, bookingData._id, { $set: { paymentIntent: session.id } });
