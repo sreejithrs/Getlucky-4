@@ -235,8 +235,8 @@ module.exports = {
       if (!bookingData) return res.render(path.join(__dirname, `../../../../templates/${file}`), { link });
 
       bookingData.purchaseDate = moment(bookingData.purchaseDate).format('DD-MMM-YYYY');
-      const pdfDownload = `${process.env.MAIN_URL}/invoice/${id}`;
-      const ticketDownload = `${process.env.MAIN_URL}/download-ticket/${id}`;
+      const pdfDownload = `${process.env.GETLUCKY_URL}/invoice/${id}`;
+      const ticketDownload = `${process.env.GETLUCKY_URL}/download-ticket/${id}`;
       const { paymentStatus } = bookingData;
       switch (paymentStatus) {
         case 1:
