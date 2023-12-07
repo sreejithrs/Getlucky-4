@@ -246,9 +246,11 @@ module.exports = {
           };
           break;
         case 0:
+          dataToSend.url = `${process.env.AWS_S3_URL}`;
           file = 'views/failed.ejs';
           break;
         default:
+          dataToSend.url = `${process.env.AWS_S3_URL}`;
           file = 'views/failed.ejs';
       }
 

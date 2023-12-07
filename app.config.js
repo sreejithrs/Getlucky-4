@@ -16,15 +16,8 @@ const userController = require('./src/v1/web/controllers/user/user');
 const homeController = require('./src/v1/web/controllers/home/home');
 
 // cors options
-const whitelist = ['http://localhost:7000', '157.241.71.196', 'https://api.getlucky4.com', 'https://getlucky4.com'];
 const corsOptions = {
-  origin: function (origin, callback) {
-    if (whitelist.indexOf(origin) !== -1 || !origin) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: '*',
   exposedHeaders: 'Content-Type, X-Auth-Token',
   methods: 'GET, HEAD, PUT, PATCH, POST, DELETE',
   preflightContinue: false,
@@ -54,6 +47,7 @@ expressApp.use(hpp());
 expressApp.use(morgan('combined', { stream: winston.stream }));
 expressApp.use(cors(corsOptions));
 expressApp.use(i18n.init);
+expressApp.enable('trust proxy');
 
 expressApp.post('/stripe-webhooks', express.raw({ type: '*/*' }), homeController.webhooks);
 expressApp.get('/ticket-view/:id', userController.getTicketView);
