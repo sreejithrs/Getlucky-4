@@ -261,8 +261,8 @@ module.exports = {
             ...bookingDetails,
             link: process.env.GETLUCKY_URL,
             url: process.env.AWS_S3_URL,
-            ticketDownload: `${process.env.MAIN_URL}/download-ticket/${transactionId}`,
-            pdfDownload: `${process.env.MAIN_URL}/invoice/${transactionId}`,
+            ticketDownload: `${process.env.GETLUCKY_URL}/download-ticket/${transactionId}`,
+            pdfDownload: `${process.env.GETLUCKY_URL}/invoice/${transactionId}`,
           };
 
           const emailOptions = {
