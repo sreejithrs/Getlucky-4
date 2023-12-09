@@ -157,7 +157,7 @@ module.exports = {
       },
       {
         $sort: {
-          date: -1,
+          _id: -1,
         },
       },
     ]);

@@ -152,7 +152,7 @@ module.exports = {
 
     const graphData = [];
     const monthsCount = monthDiffFn(startDate, endDate);
-    const monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
     if (monthsCount === 0) {
       const existingData = {};
@@ -193,7 +193,7 @@ module.exports = {
 
       if (month) {
         graphData.push({
-          date: `${monthNames[month]} ${year}`,
+          date: `${monthNames[month - 1]} ${year}`,
           totalTickets: countValue,
         });
       }
