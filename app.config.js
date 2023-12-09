@@ -47,7 +47,6 @@ expressApp.use(hpp());
 expressApp.use(morgan('combined', { stream: winston.stream }));
 expressApp.use(cors(corsOptions));
 expressApp.use(i18n.init);
-expressApp.enable('trust proxy');
 
 expressApp.post('/stripe-webhooks', express.raw({ type: '*/*' }), homeController.webhooks);
 expressApp.get('/ticket-view/:id', userController.getTicketView);
