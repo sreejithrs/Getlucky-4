@@ -228,11 +228,6 @@ module.exports = {
             {
               $match: {
                 $and: [
-                  {
-                    $expr: {
-                      $ne: [{ $dayOfWeek: { date: '$date' } }, 1],
-                    },
-                  },
                   { status: constValues.status.ACTIVE },
                   {
                     $or: [

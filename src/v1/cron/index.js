@@ -22,35 +22,34 @@ schedule.scheduleJob(rule, async () => {
 module.exports = {
 
   createDraw: async () => {
-    const currentDate = new Date();
-    let nextDay = moment(currentDate).add(1, 'd').format('YYYY-MM-DD');
-    let twoDaysAfter = moment(currentDate).add(2, 'd').format('YYYY-MM-DD');
-    const getNextDayValues = moment(nextDay).day();
-    const getTwoDayValue = moment(twoDaysAfter).day();
+    let dataToSave;
+    console.log('----Cron Executed----');
 
-    const checkDraw = await commonService.findAllByFields(
-      Draw,
-      {
-        $or: [
-          { $expr: { $eq: [{ $dateToString: { format: '%Y-%m-%d', date: '$date' } }, nextDay] } },
-          { $expr: { $eq: [{ $dateToString: { format: '%Y-%m-%d', date: '$date' } }, twoDaysAfter] } },
-        ],
-      },
-    );
-    console.log('----Cron Executed----', checkDraw);
+    const today = moment().startOf('day');
+    // Calculate the days remaining until Wednesday and Saturday
+    const daysUntilWednesday = (3 - today.isoWeekday() + 7) % 7;
+    const daysUntilSaturday = (6 - today.isoWeekday() + 7) % 7;
 
-    nextDay = new Date(new Date(nextDay).setUTCHours(17, 0, 0, 0));
-    twoDaysAfter = new Date(new Date(twoDaysAfter).setUTCHours(17, 0, 0, 0));
+    // Schedule draws for the upcoming Wednesday and Saturday
+    let nextWednesday = moment(today).add(daysUntilWednesday, 'days').format('YYYY-MM-DD');
+    let nextSaturday = moment(today).add(daysUntilSaturday, 'days').format('YYYY-MM-DD');
+    const checkWednesdayDraw = await commonService.findOneByFields(Draw, { $expr: { $eq: [{ $dateToString: { format: '%Y-%m-%d', date: '$date' } }, nextWednesday] } });
+    const checkSaturdayDraw = await commonService.findOneByFields(Draw, { $expr: { $eq: [{ $dateToString: { format: '%Y-%m-%d', date: '$date' } }, nextSaturday] } });
 
-    const dataToSave = {
-      drawName: constValues.drawDetails.drawName,
-      date: nextDay,
-    };
-    if (!checkDraw.length && getNextDayValues !== 0) await commonService.save(Draw, dataToSave);
-
-    const getTwoDaysAfter = checkDraw.filter((elem) => String(elem.date) === String(twoDaysAfter));
-    if (!getTwoDaysAfter.length && getTwoDayValue !== 0) {
-      dataToSave.date = twoDaysAfter;
+    nextWednesday = new Date(new Date(nextWednesday).setUTCHours(17, 0, 0, 0));
+    nextSaturday = new Date(new Date(nextSaturday).setUTCHours(17, 0, 0, 0));
+    if (!checkSaturdayDraw) {
+      dataToSave = {
+        drawName: constValues.drawDetails.drawName,
+        date: nextSaturday,
+      };
+      await commonService.save(Draw, dataToSave);
+    }
+    if (!checkWednesdayDraw) {
+      dataToSave = {
+        drawName: constValues.drawDetails.drawName,
+        date: nextWednesday,
+      };
       await commonService.save(Draw, dataToSave);
     }
   },
