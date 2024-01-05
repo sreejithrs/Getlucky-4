@@ -15,7 +15,7 @@ const commonService = require('../services/common.service');
 rule.hour = 3; // 7 am at UAE
 rule.minute = 0;
 
-schedule.scheduleJob('* * * * *', async () => {
+schedule.scheduleJob(rule, async () => {
   await module.exports.createDraw();
 });
 
