@@ -62,7 +62,7 @@ module.exports = {
         message: constValues.smsVerifyContent(verificationCode),
       };
 
-      await sendSMS(smsContent));
+      await sendSMS(smsContent);
       return respondSuccess(
         _res,
         req.__(localeKeys.user.USER_REGISTERED_SUCCESSFULLY),
