@@ -168,9 +168,6 @@ module.exports = {
           cartId: String(_id),
           transactionId,
         },
-        payment_intent_data: {
-          setup_future_usage: 'off_session',
-        },
         expires_at: sessionExpireDate,
         success_url: `${process.env.GETLUCKY_URL}/ticket-view/${transactionId}`,
         cancel_url: `${process.env.GETLUCKY_URL}/ticket-view/${transactionId}`,
