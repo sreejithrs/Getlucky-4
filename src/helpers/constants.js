@@ -46,7 +46,7 @@ module.exports = {
     SECOND: 2,
   },
 
-  smsVerifyContent: (otp) => `Your OTP for mobile number verification in Getlucky4 is ${otp}. Please use this 4-digit code within the next 3 minutes. For your security, do not share this code with anyone`,
+  smsVerifyContent: (otp) => `Your OTP for account verification in Getlucky4 is ${otp}. Please use this 4-digit code within the next 3 minutes. For your security, do not share this code with anyone`,
   smsLoginContent: (otp) => `Your OTP for Getlucky4 login is ${otp}. For your security, do not share this code with anyone. If you not requested, please ignore this message`,
 
   emailSubject: {
@@ -56,6 +56,8 @@ module.exports = {
     forgotPassword: () => 'New Password',
 
     emailLogin: () => 'Getlucky4 Login OTP',
+
+    emailRegister: () => 'Getlucky4 Account Verification',
 
     sendTicket: (ticketId, date) => `Getlucky4 ticket ${ticketId} for ${date} draw`,
   },
