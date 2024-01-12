@@ -17,7 +17,8 @@ const commonService = require('../../../services/common.service');
 const constValues = require('../../../../helpers/constants');
 const localeKeys = require('../../../../locales/keys.json');
 const StatusCode = require('../../../../helpers/statusCodes.json');
-const { sendSMS } = require('../../../../helpers/notification');
+const { sendSMS, sendMail } = require('../../../../helpers/notification');
+const { sendRegisterEmail } = require('../../../../templates/emailTemplate');
 
 module.exports = {
 
@@ -62,7 +63,12 @@ module.exports = {
         message: constValues.smsVerifyContent(verificationCode),
       };
 
-      await sendSMS(smsContent);
+      const emailOptions = {
+        email, otp: verificationCode,
+      };
+
+      sendSMS(smsContent);
+      sendMail(sendRegisterEmail(emailOptions));
       return respondSuccess(
         _res,
         req.__(localeKeys.user.USER_REGISTERED_SUCCESSFULLY),

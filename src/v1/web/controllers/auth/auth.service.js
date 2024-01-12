@@ -126,16 +126,14 @@ module.exports = {
     const {
       phoneNumber, email, name,
     } = userData;
-    if (process.env.NODE_ENV !== 'test') {
-      const otpMethod = {
-        phoneNumber: sendSMS,
-        email: sendMail,
-      };
-      const sendObj = {
-        phoneNumber: { phoneNumber, message: constValues.smsLoginContent(otp) },
-        email: emailLogin({ email, otp, name }),
-      };
-      process.nextTick(() => otpMethod[key](sendObj[key]));
-    }
+    const otpMethod = {
+      phoneNumber: sendSMS,
+      email: sendMail,
+    };
+    const sendObj = {
+      phoneNumber: { phoneNumber, message: constValues.smsLoginContent(otp) },
+      email: emailLogin({ email, otp, name }),
+    };
+    process.nextTick(() => otpMethod[key](sendObj[key]));
   },
 };

@@ -19,6 +19,7 @@
   "dependencies": {
     "@joi/date": "^2.1.0",
     "aws-sdk": "^2.1414.0",
+    "axios": "^1.6.5",
     "bcrypt": "^5.1.0",
     "bluebird": "^3.7.2",
     "body-parser": "^1.20.2",
