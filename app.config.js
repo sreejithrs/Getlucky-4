@@ -48,7 +48,8 @@ expressApp.use(morgan('combined', { stream: winston.stream }));
 expressApp.use(cors(corsOptions));
 expressApp.use(i18n.init);
 
-expressApp.post('/stripe-webhooks', express.raw({ type: '*/*' }), homeController.webhooks);
+// expressApp.post('/stripe-webhooks', express.raw({ type: '*/*' }), homeController.stripeWebhooks);
+expressApp.post('/network-webhooks', express.raw({ type: '*/*' }), homeController.networkWebhooks);
 expressApp.get('/ticket-view/:id', userController.getTicketView);
 expressApp.get('/download-ticket/:id', userController.downloadTicket);
 expressApp.get('/invoice/:id', userController.generateInvoice);

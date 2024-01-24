@@ -1,8 +1,11 @@
 const AWS = require('aws-sdk');
+const axios = require('axios');
 const passwordGenerator = require('secure-random-password');
 const EmailValidator = require('email-deep-validator');
 
 const emailValidator = new EmailValidator();
+
+const logger = require('../config/winston.config');
 
 const s3bucket = new AWS.S3({
   region: process.env.AWS_SES_REGION,
@@ -161,6 +164,60 @@ const monthDiffFn = (fromDate, toDate) => {
 const generate3DigitId = (lastPayoutNumber) => `#${lastPayoutNumber.toString().padStart(3, '0')}`;
 const generate6DigitId = (value, lastPayoutNumber) => `${value}${lastPayoutNumber.toString().padStart(6, '0')}`;
 
+const makeRequest = (apiUrl, data, headers) => new Promise((resolve, reject) => {
+  axios.post(apiUrl, JSON.stringify(data), {
+    headers,
+  })
+    .then((response) => {
+      console.log('API call successful', response.data);
+      resolve(response.data);
+    })
+    .catch((error) => {
+      console.error('Error making API request:', error);
+      reject(error.message);
+    });
+});
+
+const getNetworkAccessToken = async () => {
+  const apiUrl = 'https://api-gateway.sandbox.ngenius-payments.com/identity/auth/access-token';
+  const data = { realmName: 'ni' };
+  const headers = {
+    accept: 'application/vnd.ni-identity.v1+json',
+    authorization: `Basic ${process.env.NETWORK_API_KEY}`,
+    'content-type': 'application/vnd.ni-identity.v1+json',
+  };
+
+  return module.exports.makeRequest(apiUrl, data, headers)
+    .then((response) => {
+      if (response.access_token) {
+        const token = response.access_token;
+        return { status: true, token };
+      }
+      logger.log('error', `Failed to generate access token: ${response.errors[0].message}`);
+      return { status: false };
+    }).catch(() => ({ status: false }));
+};
+
+const createNetworkOrder = async (token, data) => {
+  const apiUrl = `https://api-gateway.sandbox.ngenius-payments.com/transactions/outlets/${process.env.NETWORK_OUTLET}/orders`;
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    'Content-Type': 'application/vnd.ni-payment.v2+json',
+    Accept: 'application/vnd.ni-payment.v2+json',
+  };
+
+  return module.exports.makeRequest(apiUrl, data, headers)
+    .then((response) => {
+      if (response._id) {
+        console.log(response);
+        // eslint-disable-next-line no-underscore-dangle
+        return { status: true, link: response._links.payment.href };
+      }
+      logger.log('error', `Failed to create order: ${response.errors[0].message}`);
+      return { status: false };
+    }).catch(() => ({ status: false }));
+};
+
 module.exports = {
   generateVerificationCode,
   generateAccessCode,
@@ -176,4 +233,7 @@ module.exports = {
   generate6DigitId,
   uploadPDF,
   monthDiffFn,
+  makeRequest,
+  getNetworkAccessToken,
+  createNetworkOrder,
 };

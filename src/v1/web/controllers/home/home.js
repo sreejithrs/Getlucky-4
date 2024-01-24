@@ -1,7 +1,7 @@
 // model
 const moment = require('moment');
 const { ObjectId } = require('mongoose').Types;
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+// const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 // models
 const {
   Product, User, Cart, Draw, Booking, Order, Quantity,
@@ -14,7 +14,9 @@ const commonService = require('../../../services/common.service');
 const localeKeys = require('../../../../locales/keys.json');
 const StatusCode = require('../../../../helpers/statusCodes.json');
 const constValues = require('../../../../helpers/constants');
-const { getMessageFromValidationError, uploadPDF } = require('../../../../helpers/utils');
+const {
+  getMessageFromValidationError, uploadPDF, getNetworkAccessToken, createNetworkOrder,
+} = require('../../../../helpers/utils');
 const {
   getHomePage, getAllProducts, getOrderData, getCartData,
 } = require('./home.service');
@@ -141,7 +143,7 @@ module.exports = {
       const [getUserCart] = await getCartData(id);
       if (!getUserCart) return respondFailure(res, req.__(localeKeys.product.CART_NOT_FOUND), StatusCode.NOT_FOUND);
       const {
-        totalCost, totalActualCost, discount, _id, data, drawId,
+        totalCost, totalActualCost, discount, _id, drawId,
       } = getUserCart;
 
       const currentDate = new Date();
@@ -156,26 +158,35 @@ module.exports = {
         taxAmount: (5 / 100) * totalCost,
       };
 
-      const expireTime = moment().add(35, 'minutes');
-      const sessionExpireDate = expireTime.unix();
-
       const bookingData = await commonService.save(Booking, bookingObj);
       const { transactionId } = bookingData;
-      const session = await stripe.checkout.sessions.create({
-        line_items: data,
-        mode: 'payment',
-        metadata: {
+
+      const tokenData = await getNetworkAccessToken();
+      if (!tokenData.status) return respondFailure(res, req.__(localeKeys.product.PAYMENT_ERROR), StatusCode.INTERNAL_SERVER_ERROR);
+      const { token } = tokenData;
+
+      const purchaseObj = {
+        action: 'PURCHASE',
+        amount: {
+          currencyCode: 'AED',
+          value: totalCost * 100,
+        },
+        merchantAttributes: {
+          cancelText: 'Return to Getlucky4',
+          redirectUrl: `${process.env.GETLUCKY_URL}/ticket-view/${transactionId}`,
+          cancelUrl: process.env.GETLUCKY_URL,
+        },
+        merchantDefinedData: {
           cartId: String(_id),
           transactionId,
         },
-        expires_at: sessionExpireDate,
-        success_url: `${process.env.GETLUCKY_URL}/ticket-view/${transactionId}`,
-        cancel_url: `${process.env.GETLUCKY_URL}/ticket-view/${transactionId}`,
-      });
-      if (!session) return respondFailure(res, req.__(localeKeys.product.PAYMENT_ERROR), StatusCode.INTERNAL_SERVER_ERROR);
-      await commonService.updateById(Booking, bookingData._id, { $set: { paymentIntent: session.id } });
-      const redirectUrl = session.url;
+      };
 
+      const paymentData = await createNetworkOrder(token, purchaseObj);
+      if (!paymentData.status) return respondFailure(res, req.__(localeKeys.product.PAYMENT_ERROR), StatusCode.INTERNAL_SERVER_ERROR);
+
+      await commonService.updateById(Booking, bookingData._id, { $set: { paymentIntent: paymentData.id } });
+      const redirectUrl = paymentData.link;
       return respondSuccess(
         res,
         req.__(localeKeys.global.REQUEST_WAS_SUCCESSFUL),
@@ -190,102 +201,187 @@ module.exports = {
     }
   },
 
-  webhooks: async (req, res) => {
-    let event;
-    const payload = req.body;
-    const sig = req.headers['stripe-signature'];
+  // stripeWebhooks: async (req, res) => {
+  //   let event;
+  //   const payload = req.body;
+  //   const sig = req.headers['stripe-signature'];
 
-    try {
-      event = stripe.webhooks.constructEvent(payload, sig, process.env.STRIPE_WEBHOOK_SECRET);
-    } catch (err) {
-      console.log(err, '⚠️  Webhook signature verification failed.');
-      return respondFailure(res, '', constValues.StatusCode.BAD_REQUEST);
-    }
+  //   try {
+  //     event = stripe.webhooks.constructEvent(payload, sig, process.env.STRIPE_WEBHOOK_SECRET);
+  //   } catch (err) {
+  //     console.log(err, '⚠️  Webhook signature verification failed.');
+  //     return respondFailure(res, '', constValues.StatusCode.BAD_REQUEST);
+  //   }
 
-    const dataObject = event.data.object;
-    console.log('===========', event.type, '==============');
+  //   const dataObject = event.data.object;
+  //   console.log('===========', event.type, '==============');
+  //   console.log(dataObject);
+  //   console.log('=========================================');
+
+  //   switch (event.type) {
+  //     case 'checkout.session.completed': {
+  //       const bookingData = {};
+  //       let { cartId } = dataObject.metadata;
+  //       const { transactionId } = dataObject.metadata;
+  //       const totalAmount = dataObject.amount_total;
+  //       const paymentStatus = dataObject.status;
+  //       if (paymentStatus !== 'complete') return true;
+  //       cartId = ObjectId(cartId);
+  //       console.log(cartId, transactionId);
+
+  //       const cartData = await Cart.findOne({ _id: cartId }).lean();
+  //       if (!cartData) return true;
+  //       const { products } = cartData;
+
+  //       if (dataObject.payment_status === 'paid') {
+  //         const orderData = {
+  //           userId: cartData.userId,
+  //           drawId: cartData.drawId,
+  //           date: new Date(),
+  //           totalCost: cartData.totalCost,
+  //         };
+  //         const orderDetails = await new Order(orderData).save();
+  //         const { _id, userId, ticketId } = orderDetails;
+
+  //         const quantityData = products.map((elem) => ({
+  //           orderId: _id,
+  //           productId: elem.productId,
+  //           quantity: elem.quantity,
+  //           cost: elem.cost,
+  //           actualCost: elem.actualCost,
+  //           ticketNumbers: elem.ticketNumbers,
+  //         }));
+  //         await Quantity.insertMany(quantityData);
+
+  //         bookingData.orderId = _id;
+  //         bookingData.userPaid = totalAmount / 100;
+  //         bookingData.paymentStatus = constValues.paymentStatus.SUCCESS;
+
+  //         await Booking.updateOne({ userId, transactionId }, { $set: bookingData });
+  //         await Cart.deleteMany({ userId: cartData.userId });
+
+  //         const userData = await User.findById(userId);
+  //         const drawData = await Draw.findById(cartData.drawId);
+  //         const [bookingDetails] = await getTicketDetails(transactionId);
+  //         bookingDetails.purchaseDate = moment(bookingDetails.purchaseDate).format('DD-MMM-YYYY');
+
+  //         const dataToSend = {
+  //           ...bookingDetails,
+  //           link: process.env.GETLUCKY_URL,
+  //           url: process.env.AWS_S3_URL,
+  //           ticketDownload: `${process.env.GETLUCKY_URL}/download-ticket/${transactionId}`,
+  //           pdfDownload: `${process.env.GETLUCKY_URL}/invoice/${transactionId}`,
+  //         };
+
+  //         const emailOptions = {
+  //           email: userData.email,
+  //           ticketId,
+  //           drawDate: moment(drawData.date).format('DD-MMM-YYYY'),
+  //           dataToSend,
+  //         };
+  //         if (userData.email !== '') process.nextTick(() => sendMail(sendTicket(emailOptions)));
+  //       }
+
+  //       const [invoiceData] = await getPDFInvoiceData(transactionId);
+  //       const pdfBuffer = await generateInvoicePDF(invoiceData);
+  //       const date = moment().format('MM-YYYY');
+  //       const fileName = `invoice-${date}/${invoiceData.invoiceId}`;
+  //       uploadPDF(pdfBuffer, fileName);
+  //       break;
+  //     }
+  //     case 'checkout.session.expired': {
+  //       const failedIntent = dataObject.id;
+  //       if (!failedIntent) break;
+  //       await Booking.updateOne({ paymentIntent: failedIntent }, { paymentStatus: constValues.paymentStatus.FAILED });
+  //       break;
+  //     }
+  //     default:
+  //       console.log('unhandled event...');
+  //   }
+  //   return respondSuccess(res, '', StatusCode.OK);
+  // },
+
+  networkWebhooks: async (req, res) => {
+    const order = req.body;
+    const buffer = Buffer.from(order, 'hex');
+    const bufferString = buffer.toString('utf-8');
+
+    const jsonData = JSON.parse(bufferString);
+    const dataObject = jsonData.order;
+
+    const eventType = jsonData.eventName;
+    console.log('===========', eventType, '==============');
     console.log(dataObject);
     console.log('=========================================');
 
-    switch (event.type) {
-      case 'checkout.session.completed': {
-        const bookingData = {};
-        let { cartId } = dataObject.metadata;
-        const { transactionId } = dataObject.metadata;
-        const totalAmount = dataObject.amount_total;
-        const paymentStatus = dataObject.status;
-        if (paymentStatus !== 'complete') return true;
-        cartId = ObjectId(cartId);
-        console.log(cartId, transactionId);
+    if (eventType === 'PURCHASED') {
+      const bookingData = {};
+      let { cartId } = dataObject.merchantDefinedData;
+      const { transactionId } = dataObject.merchantDefinedData;
+      const totalAmount = dataObject.amount.value;
+      cartId = ObjectId(cartId);
+      console.log(cartId, transactionId);
 
-        const cartData = await Cart.findOne({ _id: cartId }).lean();
-        if (!cartData) return true;
-        const { products } = cartData;
+      const cartData = await Cart.findOne({ _id: cartId }).lean();
+      if (!cartData) return true;
+      const { products } = cartData;
 
-        if (dataObject.payment_status === 'paid') {
-          const orderData = {
-            userId: cartData.userId,
-            drawId: cartData.drawId,
-            date: new Date(),
-            totalCost: cartData.totalCost,
-          };
-          const orderDetails = await new Order(orderData).save();
-          const { _id, userId, ticketId } = orderDetails;
+      const orderData = {
+        userId: cartData.userId,
+        drawId: cartData.drawId,
+        date: new Date(),
+        totalCost: cartData.totalCost,
+      };
+      const orderDetails = await new Order(orderData).save();
+      const { _id, userId, ticketId } = orderDetails;
 
-          const quantityData = products.map((elem) => ({
-            orderId: _id,
-            productId: elem.productId,
-            quantity: elem.quantity,
-            cost: elem.cost,
-            actualCost: elem.actualCost,
-            ticketNumbers: elem.ticketNumbers,
-          }));
-          await Quantity.insertMany(quantityData);
+      const quantityData = products.map((elem) => ({
+        orderId: _id,
+        productId: elem.productId,
+        quantity: elem.quantity,
+        cost: elem.cost,
+        actualCost: elem.actualCost,
+        ticketNumbers: elem.ticketNumbers,
+      }));
+      await Quantity.insertMany(quantityData);
 
-          bookingData.orderId = _id;
-          bookingData.userPaid = totalAmount / 100;
-          bookingData.paymentStatus = constValues.paymentStatus.SUCCESS;
+      bookingData.orderId = _id;
+      bookingData.userPaid = totalAmount / 100;
+      bookingData.paymentStatus = constValues.paymentStatus.SUCCESS;
 
-          await Booking.updateOne({ userId, transactionId }, { $set: bookingData });
-          await Cart.deleteMany({ userId: cartData.userId });
+      await Booking.updateOne({ userId, transactionId }, { $set: bookingData });
+      await Cart.deleteMany({ userId: cartData.userId });
 
-          const userData = await User.findById(userId);
-          const drawData = await Draw.findById(cartData.drawId);
-          const [bookingDetails] = await getTicketDetails(transactionId);
-          bookingDetails.purchaseDate = moment(bookingDetails.purchaseDate).format('DD-MMM-YYYY');
+      const userData = await User.findById(userId);
+      const drawData = await Draw.findById(cartData.drawId);
+      const [bookingDetails] = await getTicketDetails(transactionId);
+      bookingDetails.purchaseDate = moment(bookingDetails.purchaseDate).format('DD-MMM-YYYY');
 
-          const dataToSend = {
-            ...bookingDetails,
-            link: process.env.GETLUCKY_URL,
-            url: process.env.AWS_S3_URL,
-            ticketDownload: `${process.env.GETLUCKY_URL}/download-ticket/${transactionId}`,
-            pdfDownload: `${process.env.GETLUCKY_URL}/invoice/${transactionId}`,
-          };
+      const dataToSend = {
+        ...bookingDetails,
+        link: process.env.GETLUCKY_URL,
+        url: process.env.AWS_S3_URL,
+        ticketDownload: `${process.env.GETLUCKY_URL}/download-ticket/${transactionId}`,
+        pdfDownload: `${process.env.GETLUCKY_URL}/invoice/${transactionId}`,
+      };
 
-          const emailOptions = {
-            email: userData.email,
-            ticketId,
-            drawDate: moment(drawData.date).format('DD-MMM-YYYY'),
-            dataToSend,
-          };
-          if (userData.email !== '') process.nextTick(() => sendMail(sendTicket(emailOptions)));
-        }
+      const emailOptions = {
+        email: userData.email,
+        ticketId,
+        drawDate: moment(drawData.date).format('DD-MMM-YYYY'),
+        dataToSend,
+      };
+      if (userData.email !== '') process.nextTick(() => sendMail(sendTicket(emailOptions)));
 
-        const [invoiceData] = await getPDFInvoiceData(transactionId);
-        const pdfBuffer = await generateInvoicePDF(invoiceData);
-        const date = moment().format('MM-YYYY');
-        const fileName = `invoice-${date}/${invoiceData.invoiceId}`;
-        uploadPDF(pdfBuffer, fileName);
-        break;
-      }
-      case 'checkout.session.expired': {
-        const failedIntent = dataObject.id;
-        if (!failedIntent) break;
-        await Booking.updateOne({ paymentIntent: failedIntent }, { paymentStatus: constValues.paymentStatus.FAILED });
-        break;
-      }
-      default:
-        console.log('unhandled event...');
+      const [invoiceData] = await getPDFInvoiceData(transactionId);
+      const pdfBuffer = await generateInvoicePDF(invoiceData);
+      const date = moment().format('MM-YYYY');
+      const fileName = `invoice-${date}/${invoiceData.invoiceId}`;
+      uploadPDF(pdfBuffer, fileName);
+    } else if (constValues.networkEvents.includes(eventType)) {
+      const failedIntent = dataObject.id;
+      if (!failedIntent) return true;
+      await Booking.updateOne({ paymentIntent: failedIntent }, { paymentStatus: constValues.paymentStatus.FAILED });
     }
     return respondSuccess(res, '', StatusCode.OK);
   },

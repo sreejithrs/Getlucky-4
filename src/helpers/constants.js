@@ -6,6 +6,8 @@ module.exports = {
 
   drawCategoryArray,
 
+  networkEvents: ['DECLINED', 'PURCHASE_DECLINED', 'PURCHASE_FAILED', 'CAPTURE_FAILED', 'CAPTURE_VOID_FAILED', 'CANCELLED', 'GATEWAY_RISK_PRE_AUTH_REJECTED', 'PRE_AUTH_FRAUD_CHECK_REJECTED', 'POST_AUTH_FRAUD_CHECK_REJECTED'],
+
   drawDetails: {
     drawName: 'Getlucky Draw',
   },
