@@ -37,7 +37,7 @@ module.exports = {
       country: Joi.string().required(),
       state: Joi.string().required(),
       district: Joi.string().allow('').optional(),
-      email: Joi.string().email({ minDomainSegments: 2 }).required(),
+      email: Joi.string().email({ minDomainSegments: 2 }).allow('').optional(),
     });
     return schema.validate(input);
   },
