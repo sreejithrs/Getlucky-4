@@ -164,7 +164,7 @@ const monthDiffFn = (fromDate, toDate) => {
 const generate3DigitId = (lastPayoutNumber) => `#${lastPayoutNumber.toString().padStart(3, '0')}`;
 const generate6DigitId = (value, lastPayoutNumber) => `${value}${lastPayoutNumber.toString().padStart(6, '0')}`;
 
-const makeRequest = (apiUrl, data, headers) => new Promise((resolve, reject) => {
+const makeRequest = (apiUrl, headers, data = {}) => new Promise((resolve, reject) => {
   axios.post(apiUrl, JSON.stringify(data), {
     headers,
   })
@@ -173,21 +173,20 @@ const makeRequest = (apiUrl, data, headers) => new Promise((resolve, reject) => 
       resolve(response.data);
     })
     .catch((error) => {
-      console.error('Error making API request:', error);
+      console.error('Error making API request:', error.response.data);
       reject(error.message);
     });
 });
 
 const getNetworkAccessToken = async () => {
-  const apiUrl = 'https://api-gateway.sandbox.ngenius-payments.com/identity/auth/access-token';
-  const data = { realmName: 'ni' };
+  const apiUrl = 'https://api-gateway.ngenius-payments.com/identity/auth/access-token';
   const headers = {
     accept: 'application/vnd.ni-identity.v1+json',
     authorization: `Basic ${process.env.NETWORK_API_KEY}`,
     'content-type': 'application/vnd.ni-identity.v1+json',
   };
 
-  return module.exports.makeRequest(apiUrl, data, headers)
+  return module.exports.makeRequest(apiUrl, headers)
     .then((response) => {
       if (response.access_token) {
         const token = response.access_token;
@@ -199,14 +198,14 @@ const getNetworkAccessToken = async () => {
 };
 
 const createNetworkOrder = async (token, data) => {
-  const apiUrl = `https://api-gateway.sandbox.ngenius-payments.com/transactions/outlets/${process.env.NETWORK_OUTLET}/orders`;
+  const apiUrl = `https://api-gateway.ngenius-payments.com/transactions/outlets/${process.env.NETWORK_OUTLET}/orders`;
   const headers = {
     Authorization: `Bearer ${token}`,
     'Content-Type': 'application/vnd.ni-payment.v2+json',
     Accept: 'application/vnd.ni-payment.v2+json',
   };
 
-  return module.exports.makeRequest(apiUrl, data, headers)
+  return module.exports.makeRequest(apiUrl, headers, data)
     .then((response) => {
       if (response._id) {
         console.log(response);

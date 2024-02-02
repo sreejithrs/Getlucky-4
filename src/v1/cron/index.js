@@ -1,6 +1,7 @@
 // modules
 const moment = require('moment');
 const schedule = require('node-schedule');
+const logger = require('../../config/winston.config');
 
 const rule = new schedule.RecurrenceRule();
 rule.tz = 'Etc/UTC';
@@ -23,7 +24,6 @@ module.exports = {
 
   createDraw: async () => {
     let dataToSave;
-    console.log('----Cron Executed----');
 
     const today = moment().startOf('day');
     // Calculate the days remaining until Wednesday and Saturday
@@ -52,6 +52,7 @@ module.exports = {
       };
       await commonService.save(Draw, dataToSave);
     }
+    logger.log('info', '----Cron Executed----');
   },
 
 };

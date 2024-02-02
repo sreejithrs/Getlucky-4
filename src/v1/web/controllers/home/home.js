@@ -138,7 +138,7 @@ module.exports = {
   purchaseOrder: async (req, res, next) => {
     try {
       const { user } = req;
-      const { id } = user;
+      const { id, email } = user;
 
       const [getUserCart] = await getCartData(id);
       if (!getUserCart) return respondFailure(res, req.__(localeKeys.product.CART_NOT_FOUND), StatusCode.NOT_FOUND);
@@ -181,6 +181,7 @@ module.exports = {
           transactionId,
         },
       };
+      if (email && email !== '') purchaseObj.emailAddress = email;
 
       const paymentData = await createNetworkOrder(token, purchaseObj);
       if (!paymentData.status) return respondFailure(res, req.__(localeKeys.product.PAYMENT_ERROR), StatusCode.INTERNAL_SERVER_ERROR);
