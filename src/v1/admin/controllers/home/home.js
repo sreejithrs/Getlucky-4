@@ -64,6 +64,7 @@ module.exports = {
       const wsCols = [
         { wch: 10 },
         { wch: 15 },
+        { wch: 15 },
         { wch: 20 },
         { wch: 20 },
         { wch: 20 },

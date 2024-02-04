@@ -169,7 +169,7 @@ const makeRequest = (apiUrl, headers, data = {}) => new Promise((resolve, reject
     headers,
   })
     .then((response) => {
-      console.log('API call successful', response.data);
+      console.log('API call successful');
       resolve(response.data);
     })
     .catch((error) => {
