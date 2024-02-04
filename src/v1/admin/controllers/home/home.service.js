@@ -228,6 +228,17 @@ module.exports = {
             pipeline: [
               {
                 $lookup: {
+                  from: 'draws',
+                  localField: 'drawId',
+                  foreignField: '_id',
+                  as: 'drawData',
+                },
+              },
+              {
+                $unwind: { path: '$drawData', preserveNullAndEmptyArrays: true },
+              },
+              {
+                $lookup: {
                   from: 'users',
                   localField: 'userId',
                   foreignField: '_id',
@@ -254,6 +265,7 @@ module.exports = {
               {
                 $group: {
                   _id: '$_id',
+                  drawNo: { $first: '$drawData.drawNo' },
                   ticketId: { $first: '$ticketId' },
                   userId: { $first: '$user._id' },
                   tickets: { $push: '$tickets.ticketNumbers' },
@@ -273,12 +285,13 @@ module.exports = {
         },
         {
           $sort: {
-            'orders.userId': 1,
+            'orders.drawNo': 1,
           },
         },
         {
           $project: {
             _id: 0,
+            drawNo: '$orders.drawNo',
             ticket_id: '$orders.ticketId',
             purchase_date: { $dateToString: { format: '%d-%m-%Y', date: '$date' } },
             name: '$orders.name',
