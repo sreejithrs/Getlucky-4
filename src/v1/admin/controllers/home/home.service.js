@@ -16,6 +16,13 @@ module.exports = {
     startDate = new Date(startDate);
     endDate = new Date(endDate);
     endDate.setUTCHours(23, 59, 0, 0);
+    
+    const todayStart = new Date();
+    todayStart.setUTCHours(0, 0, 0, 0);
+
+    const todayEnd = new Date();
+    todayEnd.setUTCHours(23, 59, 59, 999);
+
     const [totalData] = await User.aggregate([
       {
         $match: {
@@ -46,8 +53,27 @@ module.exports = {
           from: 'bookings',
           pipeline: [
             {
+              $addFields: {
+                convertedDate: {
+                  $dateFromString: {
+                    dateString: {
+                      $dateToString: {
+                        format: "%Y-%m-%dT%H:%M:%S.%LZ",
+                        date: "$date", // Replace with your actual date field name
+                        timezone: 'Asia/Dubai',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            {
               $match: {
                 paymentStatus: { $eq: constValues.paymentStatus.SUCCESS },
+                convertedDate: {
+                  $gte: todayStart,
+                  $lte: todayEnd,
+                },
               },
             },
             {

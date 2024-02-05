@@ -186,8 +186,8 @@ module.exports = {
       const paymentData = await createNetworkOrder(token, purchaseObj);
       if (!paymentData.status) return respondFailure(res, req.__(localeKeys.product.PAYMENT_ERROR), StatusCode.INTERNAL_SERVER_ERROR);
 
-      await commonService.updateById(Booking, bookingData._id, { $set: { paymentIntent: paymentData.id } });
-      const redirectUrl = paymentData.link;
+      await commonService.updateById(Booking, bookingData._id, { $set: { paymentIntent: paymentData.data._id } });
+      const redirectUrl = paymentData.data._links.payment.href;
       return respondSuccess(
         res,
         req.__(localeKeys.global.REQUEST_WAS_SUCCESSFUL),
@@ -321,7 +321,6 @@ module.exports = {
       const { transactionId } = dataObject.merchantDefinedData;
       const totalAmount = dataObject.amount.value;
       cartId = ObjectId(cartId);
-      console.log(cartId, transactionId);
 
       const cartData = await Cart.findOne({ _id: cartId }).lean();
       if (!cartData) return true;
@@ -380,7 +379,7 @@ module.exports = {
       const fileName = `invoice-${date}/${invoiceData.invoiceId}`;
       uploadPDF(pdfBuffer, fileName);
     } else if (constValues.networkEvents.includes(eventType)) {
-      const failedIntent = dataObject.id;
+      const failedIntent = dataObject._id;
       if (!failedIntent) return true;
       await Booking.updateOne({ paymentIntent: failedIntent }, { paymentStatus: constValues.paymentStatus.FAILED });
     }
