@@ -208,9 +208,8 @@ const createNetworkOrder = async (token, data) => {
   return module.exports.makeRequest(apiUrl, headers, data)
     .then((response) => {
       if (response._id) {
-        console.log(response);
         // eslint-disable-next-line no-underscore-dangle
-        return { status: true, link: response._links.payment.href };
+        return { status: true, data: response };
       }
       logger.log('error', `Failed to create order: ${response.errors[0].message}`);
       return { status: false };
