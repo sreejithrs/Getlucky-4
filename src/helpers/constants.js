@@ -13,8 +13,8 @@ module.exports = {
   },
 
   priceAmount: {
-    straight: 3000,
-    rumble: 1000,
+    straight: 10000,
+    rumble: 2500,
     chance: 100,
   },
 
