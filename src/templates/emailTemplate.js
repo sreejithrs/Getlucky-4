@@ -56,6 +56,23 @@ module.exports = {
     };
   },
 
+  sendRegisterEmail: (emailOptions) => {
+    const {
+      email, otp,
+    } = emailOptions;
+    const file = './emails/en/emailRegister.ejs';
+
+    const filePath = path.join(__dirname, file);
+    const source = fs.readFileSync(filePath, 'utf8');
+    const outputString = ejs.render(source, { otp, url: process.env.AWS_S3_URL });
+    return {
+      from: process.env.AWS_SES_FROM_EMAIL,
+      to: email,
+      subject: emailSubject.emailRegister(),
+      content: outputString,
+    };
+  },
+
   sendTicket: (emailOptions) => {
     const {
       email, ticketId, drawDate, dataToSend,
