@@ -75,5 +75,6 @@
 	"PAYMENT_ERROR": "Currently not accepting payments, try after some time",
 	"SAME_PASSWORD": "New password cannot be the same as the old password",
 	"OTP_NOT_MATCHED": "OTP does not match",
-	"NO_REPORT_AVAILABLE": "No reports available for this date range"
+	"NO_REPORT_AVAILABLE": "No reports available for this date range",
+	"INVALID_EMAIL_OR_PHONE": "Incorrect email or phone number, try again"
 }

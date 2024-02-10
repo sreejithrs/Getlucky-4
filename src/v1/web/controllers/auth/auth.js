@@ -129,40 +129,28 @@ module.exports = {
   verifyLogin: async (req, _res, next) => {
     try {
       const { body } = req;
-      const { email } = body;
+      const { email, phoneNumber } = body;
       let { otp } = body;
 
       otp = Number(otp);
       const { error } = validateVerifySignIn(body);
       if (error) return next(respondError(getMessageFromValidationError(error)));
 
-      const key = email ? 'email' : 'phoneNumber';
-      const value = body[key];
-      const searchData = {};
-      searchData[key] = value;
-      const errMsg = key === 'email' ? localeKeys.auth.INVALID_EMAIL_OR_PASS : localeKeys.auth.INVALID_PHONE_OR_PASS;
-
-      const userExist = await commonService.findOneByFields(User, searchData, constValues.userType.USER);
-      if (!userExist) return respondFailure(_res, req.__(errMsg), StatusCode.NOT_FOUND);
+      const userExist = await commonService.findOneByFields(User, { $or: [{ email: email.toLowerCase() }, { phoneNumber }]}, constValues.userType.USER);
+      if (!userExist) return respondFailure(_res, req.__(localeKeys.auth.INVALID_EMAIL_OR_PHONE), StatusCode.NOT_FOUND);
       if (!userExist.status) return respondFailure(_res, req.__(localeKeys.auth.USER_DEACTIVE), StatusCode.CONFLICT);
 
-      const checkOtp = {
-        phoneNumber: userExist.phoneOtp,
-        email: userExist.emailOtp,
-      };
-      if (!checkOtp[key]) return respondFailure(_res, req.__(localeKeys.auth.OTP_EXPIRED), StatusCode.FORBIDDEN);
-      if (otp !== checkOtp[key]) return respondFailure(_res, req.__(localeKeys.auth.TEMPORARY_PASSWORD_NOT_MATCHED), StatusCode.CONFLICT);
+      const otpData = userExist.phoneOtp || userExist.emailOtp;
+      if (!otpData) return respondFailure(_res, req.__(localeKeys.auth.OTP_EXPIRED), StatusCode.FORBIDDEN);
+      if (otp !== userExist.emailOtp && otp !== userExist.phoneOtp) return respondFailure(_res, req.__(localeKeys.auth.TEMPORARY_PASSWORD_NOT_MATCHED), StatusCode.CONFLICT);
 
       if (!userExist.isVerified) {
         userExist.isVerified = constValues.status.ACTIVE;
         userExist.verificationCode = null;
       }
-      const setValue = {
-        phoneNumber: 'phoneOtp',
-        email: 'emailOtp',
-      };
-      const setField = setValue[key];
-      userExist[setField] = null;
+
+      userExist['phoneOtp'] = null;
+      userExist['emailOtp'] = null;
       await userExist.save();
 
       const { accessToken, refreshToken } = getAuthTokens(userExist._id);
