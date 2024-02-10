@@ -176,8 +176,6 @@ module.exports = {
       },
     ]);
 
-    console.log(graphAggregate)
-
     const graphData = [];
     const monthsCount = monthDiffFn(startDate, endDate);
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -186,18 +184,15 @@ module.exports = {
       const existingData = {};
       graphAggregate.forEach((elem) => {
         const formattedDate = moment.utc(elem.date).format('DD-MM-YYYY');
-        console.log(formattedDate)
         existingData[formattedDate] = elem.count;
       });
 
       const filterStart = moment.utc(startDate);
       const filterEnd = moment.utc(endDate);
-      console.log(filterStart, filterEnd)
       while (filterStart.isSameOrBefore(filterEnd)) {
         const formattedDate = filterStart.format('DD-MM-YYYY');
         const day = filterStart.date();
         const month = filterStart.month();
-        console.log(day)
 
         const totalTickets = existingData[formattedDate] || 0;
         graphData.push({
