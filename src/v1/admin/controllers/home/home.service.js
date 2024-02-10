@@ -16,7 +16,7 @@ module.exports = {
     startDate = new Date(startDate);
     endDate = new Date(endDate);
     endDate.setUTCHours(23, 59, 0, 0);
-    
+
     const todayStart = new Date();
     todayStart.setUTCHours(0, 0, 0, 0);
 
@@ -59,7 +59,7 @@ module.exports = {
                     dateString: {
                       $dateToString: {
                         format: "%Y-%m-%dT%H:%M:%S.%LZ",
-                        date: "$date", // Replace with your actual date field name
+                        date: "$date",
                         timezone: 'Asia/Dubai',
                       },
                     },
@@ -151,7 +151,7 @@ module.exports = {
       },
       {
         $group: {
-          _id: { $dateToString: { format: '%Y-%m-%d', date: '$date' } },
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$date', timezone: 'Asia/Dubai' } },
           count: { $sum: '$orders.totalTickets' },
           month: { $first: { $month: '$date' } },
           year: { $first: { $year: '$date' } },
