@@ -136,7 +136,7 @@ module.exports = {
       const { error } = validateVerifySignIn(body);
       if (error) return next(respondError(getMessageFromValidationError(error)));
 
-      const userExist = await commonService.findOneByFields(User, { $or: [{ email: email.toLowerCase() }, { phoneNumber }]}, constValues.userType.USER);
+      const userExist = await commonService.findOneByFields(User, { $or: [{ email }, { phoneNumber }]}, constValues.userType.USER);
       if (!userExist) return respondFailure(_res, req.__(localeKeys.auth.INVALID_EMAIL_OR_PHONE), StatusCode.NOT_FOUND);
       if (!userExist.status) return respondFailure(_res, req.__(localeKeys.auth.USER_DEACTIVE), StatusCode.CONFLICT);
 
