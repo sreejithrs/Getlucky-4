@@ -140,9 +140,9 @@ module.exports = {
       if (!userExist) return respondFailure(_res, req.__(localeKeys.auth.INVALID_EMAIL_OR_PHONE), StatusCode.NOT_FOUND);
       if (!userExist.status) return respondFailure(_res, req.__(localeKeys.auth.USER_DEACTIVE), StatusCode.CONFLICT);
 
-      const otpData = userExist.phoneOtp || userExist.emailOtp;
+      const otpData = userExist.phoneOtp || userExist.emailOtp || userExist.verificationCode;
       if (!otpData) return respondFailure(_res, req.__(localeKeys.auth.OTP_EXPIRED), StatusCode.FORBIDDEN);
-      if (otp !== userExist.emailOtp && otp !== userExist.phoneOtp) return respondFailure(_res, req.__(localeKeys.auth.TEMPORARY_PASSWORD_NOT_MATCHED), StatusCode.CONFLICT);
+      if (otp !== userExist.emailOtp && otp !== userExist.phoneOtp && otp !== userExist.verificationCode) return respondFailure(_res, req.__(localeKeys.auth.TEMPORARY_PASSWORD_NOT_MATCHED), StatusCode.CONFLICT);
 
       if (!userExist.isVerified) {
         userExist.isVerified = constValues.status.ACTIVE;

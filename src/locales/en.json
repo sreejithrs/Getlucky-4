@@ -65,7 +65,7 @@
 	"ORDER_CREATED_SUCCESSFULLY": "Order created successfully",
 	"DRAW_NOT_FOUND": "Currently no draws available",
 	"DRAW_EXPIRED": "This draw is expired",
-	"DRAW_COMPLETED": "Updated not allowed as this draw is completed",
+	"DRAW_COMPLETED": "Update not allowed as this draw is already published",
 	"DRAW_INACTIVE": "This draw is currently inactive, please update the draw status and publish",
 	"WINNER_NOT_ANNOUNCED": "Please update the winning ticket and publish result",
 	"INVALID_DRAW_ID": "Draw not found",
@@ -76,5 +76,6 @@
 	"SAME_PASSWORD": "New password cannot be the same as the old password",
 	"OTP_NOT_MATCHED": "OTP does not match",
 	"NO_REPORT_AVAILABLE": "No reports available for this date range",
-	"INVALID_EMAIL_OR_PHONE": "Incorrect email or phone number, try again"
+	"INVALID_EMAIL_OR_PHONE": "Incorrect email or phone number, try again",
+	"CANNOT_CHANGE_TICKET": "Cannot change won ticket"
 }

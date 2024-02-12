@@ -12,6 +12,7 @@ const drawSchema = new Schema(
     status: { type: Boolean, default: true },
     isCompleted: { type: Boolean, default: false },
     isTicketAdded: { type: Boolean, default: false },
+    isPublished: { type: Boolean, default: false },
     date: { type: Date },
     link: { type: String, default: '' },
     totalWonPrice: { type: Number, default: 0 },
