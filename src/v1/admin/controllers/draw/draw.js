@@ -96,6 +96,7 @@ module.exports = {
 
       const getDraw = await commonService.findOneById(Draw, drawId);
       if (!getDraw) return respondFailure(res, req.__(localeKeys.product.INVALID_DRAW_ID), StatusCode.NOT_FOUND);
+      if (getDraw.wonTicket !== '' && ticketNumber) return respondFailure(res, req.__(localeKeys.product.CANNOT_CHANGE_TICKET), StatusCode.BAD_REQUEST);
       if (getDraw.isCompleted) return respondFailure(res, req.__(localeKeys.product.DRAW_COMPLETED), StatusCode.FORBIDDEN);
 
       const dataToSet = {
@@ -110,6 +111,9 @@ module.exports = {
       }
 
       await commonService.updateById(Draw, drawId, { $set: dataToSet });
+      const drawDetails = await commonService.findOneById(Draw, drawId);
+      if (drawDetails.isPublished && drawDetails.link !== '') await commonService.updateById(Draw, drawId, { $set: { isCompleted: constValues.status.ACTIVE } });
+      
       return respondSuccess(res, req.__(localeKeys.global.UPDATED_SUCCESSFULLY), StatusCode.OK);
     } catch (error) {
       return next(respondError(
@@ -143,15 +147,15 @@ module.exports = {
       if (!drawData) return respondFailure(res, req.__(localeKeys.product.INVALID_DRAW_ID), StatusCode.NOT_FOUND);
       if (!drawData.status) return respondFailure(res, req.__(localeKeys.product.DRAW_INACTIVE), StatusCode.FORBIDDEN);
       if (!drawData.isTicketAdded) return respondFailure(res, req.__(localeKeys.product.WINNER_NOT_ANNOUNCED), StatusCode.FORBIDDEN);
-      if (drawData.isCompleted) return respondFailure(res, req.__(localeKeys.product.DRAW_COMPLETED), StatusCode.FORBIDDEN);
+      if (drawData.isCompleted || drawData.isPublished) return respondFailure(res, req.__(localeKeys.product.DRAW_COMPLETED), StatusCode.FORBIDDEN);
 
       const drawDetails = await drawResult(drawId);
       const { totalWinners, totalWonPrice, result } = drawDetails;
-      await commonService.updateById(Draw, drawId, {
-        $set: {
-          isCompleted: constValues.status.ACTIVE, totalWinners, totalWonPrice, result,
-        },
-      });
+
+      const setObj = { isPublished: constValues.status.ACTIVE, totalWinners, totalWonPrice, result };
+      if (drawData.link !== '') setObj.isCompleted = constValues.status.ACTIVE;
+      await commonService.updateById(Draw, drawId, { $set: setObj });
+
       return respondSuccess(res, req.__(localeKeys.global.UPDATED_SUCCESSFULLY), StatusCode.OK);
     } catch (error) {
       return next(respondError(
