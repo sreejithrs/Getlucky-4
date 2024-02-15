@@ -48,8 +48,8 @@ module.exports = {
 
     const winnersChance = await module.exports.findWinner(drawId, chanceObj);
     const winnersRumble = await module.exports.findWinner(drawId, rumbleObj);
-    const straightRumble = await module.exports.findWinner(drawId, straightObj);
-    const dateToSave = [...winnersChance, ...winnersRumble, ...straightRumble];
+    const winnersStraight = await module.exports.findWinner(drawId, straightObj);
+    const dateToSave = [...winnersChance, ...winnersRumble, ...winnersStraight];
 
     const getWinners = await commonService.findAllByFields(Winner, { drawId });
     if (getWinners.length) await commonService.delete(Winner, { drawId });
@@ -109,7 +109,7 @@ module.exports = {
       },
       {
         $group: {
-          _id: '$_id',
+          _id: '$userId',
           drawId: { $first: '$drawId' },
           userId: { $first: '$userId' },
           productId: { $first: '$product._id' },

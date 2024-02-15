@@ -15,7 +15,7 @@ module.exports = {
     try {
       const drawList = await Draw.aggregate([
         {
-          $match: { isCompleted: constValues.status.ACTIVE },
+          $match: { isPublished: constValues.status.ACTIVE },
         },
         {
           $sort: { date: -1 },
@@ -49,7 +49,7 @@ module.exports = {
 
       const getDraw = await commonService.findOneById(Draw, drawId);
       if (!getDraw) return respondFailure(res, req.__(localeKeys.product.DRAW_NOT_FOUND), StatusCode.NOT_FOUND);
-      if (!getDraw.isCompleted) return respondFailure(res, req.__(localeKeys.product.WINNER_NOT_ANNOUNCED), StatusCode.FORBIDDEN);
+      if (!getDraw.isPublished) return respondFailure(res, req.__(localeKeys.product.WINNER_NOT_ANNOUNCED), StatusCode.FORBIDDEN);
 
       const drawResults = await drawResult(drawId);
       return respondSuccess(res, req.__(localeKeys.global.REQUEST_WAS_SUCCESSFUL), StatusCode.OK, drawResults);
