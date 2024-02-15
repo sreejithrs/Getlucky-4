@@ -29,9 +29,15 @@ module.exports = {
   validateRegister: (input) => {
     const schema = Joi.object().keys({
       name: Joi.string().required(),
-      phoneNumber: Joi.string().pattern(/^[+]?[0-9]+$/).required().messages({
+      phoneNumber: Joi.string()
+      .pattern(/^[+]?[0-9]+$/)
+      .min(10)
+      .max(15)
+      .required().messages({
         'any.required': mobileValidationMessage,
         'string.pattern.base': mobileValidationMessage,
+        'string.min': 'Mobile number must be at least 10 digits long',
+        'string.max': 'Mobile number must be less than 16 digits long',
       }),
       building: Joi.string().allow('').optional(),
       country: Joi.string().required(),

@@ -19,7 +19,7 @@ module.exports = {
         pipeline: [
           {
             $match: {
-              isCompleted: constValues.status.ACTIVE,
+              isPublished: constValues.status.ACTIVE,
             },
           },
           commonFormatDate,
