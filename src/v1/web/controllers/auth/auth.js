@@ -38,20 +38,17 @@ module.exports = {
     try {
       const { body } = req;
       const { email, phoneNumber } = body;
-      const condition = {};
-      const checkArray = [{ phoneNumber }];
 
       const { error } = validateRegister(body);
       if (error) return next(respondError(getMessageFromValidationError(error)));
 
       if (email && email !== '') {
-        checkArray.push({ email });
+        const userEmailExists = await commonService.findOneByFields(User, { email: email.toLowerCase() });
+        if (userEmailExists) return respondFailure(_res, req.__(localeKeys.auth.EMAIL_ALREADY_EXISTS), StatusCode.CONFLICT);
       }
-      condition.$or = checkArray;
 
-      const userExist = await commonService.findOneByFields(User, condition);
-      if (userExist && userExist.email !== '' && userExist.email === email) return respondFailure(_res, req.__(localeKeys.auth.EMAIL_ALREADY_EXISTS), StatusCode.CONFLICT);
-      if (userExist && userExist.phoneNumber === phoneNumber) return respondFailure(_res, req.__(localeKeys.auth.MOBILE_ALREADY_EXISTS), StatusCode.CONFLICT);
+      const userPhoneExists = await commonService.findOneByFields(User, { phoneNumber });
+      if (userPhoneExists) return respondFailure(_res, req.__(localeKeys.auth.MOBILE_ALREADY_EXISTS), StatusCode.CONFLICT);
 
       const verificationCode = generate4DigitOTP();
       body.verificationCode = verificationCode;
@@ -136,7 +133,7 @@ module.exports = {
       const { error } = validateVerifySignIn(body);
       if (error) return next(respondError(getMessageFromValidationError(error)));
 
-      const userExist = await commonService.findOneByFields(User, { $or: [{ email }, { phoneNumber }]}, constValues.userType.USER);
+      const userExist = await commonService.findOneByFields(User, { $or: [{ email }, { phoneNumber }] }, constValues.userType.USER);
       if (!userExist) return respondFailure(_res, req.__(localeKeys.auth.INVALID_EMAIL_OR_PHONE), StatusCode.NOT_FOUND);
       if (!userExist.status) return respondFailure(_res, req.__(localeKeys.auth.USER_DEACTIVE), StatusCode.CONFLICT);
 
@@ -149,8 +146,8 @@ module.exports = {
         userExist.verificationCode = null;
       }
 
-      userExist['phoneOtp'] = null;
-      userExist['emailOtp'] = null;
+      userExist.phoneOtp = null;
+      userExist.emailOtp = null;
       await userExist.save();
 
       const { accessToken, refreshToken } = getAuthTokens(userExist._id);

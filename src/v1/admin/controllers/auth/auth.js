@@ -88,6 +88,8 @@ module.exports = {
           $or: [
             { name: { $regex: search.trim(), $options: 'i' } },
             { country: { $regex: search.trim(), $options: 'i' } },
+            { email: { $regex: search.trim(), $options: 'i' } },
+            { phoneNumber: search },
           ],
         });
       }

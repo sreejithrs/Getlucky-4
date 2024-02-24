@@ -6,13 +6,13 @@ const { Schema } = mongoose;
 
 const userSchema = new Schema(
   {
-    name: { type: String, default: '' },
+    name: { type: String, trim: true, default: '' },
     tempEmail: { type: String, lowercase: true, trim: true },
     password: { type: String },
     email: {
       type: String, lowercase: true, trim: true,
     },
-    phoneNumber: { type: String, default: '' },
+    phoneNumber: { type: String, trim: true, default: '' },
     verificationCode: { type: Number, default: null },
     otpTimeLimit: { type: Date },
     isVerified: { type: Boolean, default: false },
@@ -27,9 +27,9 @@ const userSchema = new Schema(
     passOtpMax: { type: Number, default: 0 },
     isChangeEmail: { type: Boolean, default: false },
     emailChangeOtp: { type: Number },
-    building: { type: String, default: '' },
+    building: { type: String, trim: true, default: '' },
     state: { type: String, default: '' },
-    district: { type: String, default: '' },
+    district: { type: String, trim: true, default: '' },
     country: { type: String, default: '' },
     language: { type: String, default: 'en' },
     phoneOtp: { type: Number },

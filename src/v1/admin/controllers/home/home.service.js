@@ -58,8 +58,8 @@ module.exports = {
                   $dateFromString: {
                     dateString: {
                       $dateToString: {
-                        format: "%Y-%m-%dT%H:%M:%S.%LZ",
-                        date: "$date",
+                        format: '%Y-%m-%dT%H:%M:%S.%LZ',
+                        date: '$date',
                         timezone: 'Asia/Dubai',
                       },
                     },

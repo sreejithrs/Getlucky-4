@@ -23,35 +23,23 @@ schedule.scheduleJob(rule, async () => {
 module.exports = {
 
   createDraw: async () => {
-    let dataToSave;
+    const scheduleDraw = async (dayOfWeek) => {
+      const today = moment().startOf('day');
+      const daysUntilDraw = (dayOfWeek - today.isoWeekday() + 7) % 7;
 
-    const today = moment().startOf('day');
-    // Calculate the days remaining until Wednesday and Saturday
-    const daysUntilWednesday = (3 - today.isoWeekday() + 7) % 7;
-    const daysUntilSaturday = (6 - today.isoWeekday() + 7) % 7;
+      let nextDrawDate = moment(today).add(daysUntilDraw, 'days').format('YYYY-MM-DD');
+      const checkDraw = await commonService.findOneByFields(Draw, { $expr: { $eq: [{ $dateToString: { format: '%Y-%m-%d', date: '$date' } }, nextDrawDate] } });
+      if (!checkDraw) {
+        nextDrawDate = new Date(new Date(nextDrawDate).setUTCHours(17, 0, 0, 0));
+        await commonService.save(Draw, {
+          drawName: constValues.drawDetails.drawName,
+          date: nextDrawDate,
+        });
+      }
+    };
 
-    // Schedule draws for the upcoming Wednesday and Saturday
-    let nextWednesday = moment(today).add(daysUntilWednesday, 'days').format('YYYY-MM-DD');
-    let nextSaturday = moment(today).add(daysUntilSaturday, 'days').format('YYYY-MM-DD');
-    const checkWednesdayDraw = await commonService.findOneByFields(Draw, { $expr: { $eq: [{ $dateToString: { format: '%Y-%m-%d', date: '$date' } }, nextWednesday] } });
-    const checkSaturdayDraw = await commonService.findOneByFields(Draw, { $expr: { $eq: [{ $dateToString: { format: '%Y-%m-%d', date: '$date' } }, nextSaturday] } });
-
-    nextWednesday = new Date(new Date(nextWednesday).setUTCHours(17, 0, 0, 0));
-    nextSaturday = new Date(new Date(nextSaturday).setUTCHours(17, 0, 0, 0));
-    if (!checkSaturdayDraw) {
-      dataToSave = {
-        drawName: constValues.drawDetails.drawName,
-        date: nextSaturday,
-      };
-      await commonService.save(Draw, dataToSave);
-    }
-    if (!checkWednesdayDraw) {
-      dataToSave = {
-        drawName: constValues.drawDetails.drawName,
-        date: nextWednesday,
-      };
-      await commonService.save(Draw, dataToSave);
-    }
+    // 3 corresponds to Wednesday, 6 corresponds to Saturday
+    await Promise.all([3, 6].map(scheduleDraw));
     logger.log('info', '----Cron Executed----');
   },
 

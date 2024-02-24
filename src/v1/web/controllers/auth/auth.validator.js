@@ -28,22 +28,25 @@ module.exports = {
 
   validateRegister: (input) => {
     const schema = Joi.object().keys({
-      name: Joi.string().required(),
+      name: Joi.string().trim().required(),
       phoneNumber: Joi.string()
-      .pattern(/^[+]?[0-9]+$/)
-      .min(10)
-      .max(15)
-      .required().messages({
-        'any.required': mobileValidationMessage,
-        'string.pattern.base': mobileValidationMessage,
-        'string.min': 'Mobile number must be at least 10 digits long',
-        'string.max': 'Mobile number must be less than 16 digits long',
-      }),
-      building: Joi.string().allow('').optional(),
+        .pattern(/^[+]?[0-9]+$/)
+        .min(10)
+        .max(15)
+        .trim()
+        .required()
+        .messages({
+          'any.required': mobileValidationMessage,
+          'string.pattern.base': mobileValidationMessage,
+          'string.min': 'Mobile number must be at least 10 digits long',
+          'string.max': 'Mobile number must be less than 16 digits long',
+        }),
+      building: Joi.string().allow('').trim().optional(),
       country: Joi.string().required(),
       state: Joi.string().required(),
       district: Joi.string().allow('').optional(),
-      email: Joi.string().email({ minDomainSegments: 2 }).allow('').optional(),
+      email: Joi.string().email({ minDomainSegments: 2 }).allow('').trim()
+        .optional(),
     });
     return schema.validate(input);
   },
