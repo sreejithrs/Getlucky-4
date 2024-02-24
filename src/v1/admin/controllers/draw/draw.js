@@ -113,7 +113,7 @@ module.exports = {
       await commonService.updateById(Draw, drawId, { $set: dataToSet });
       const drawDetails = await commonService.findOneById(Draw, drawId);
       if (drawDetails.isPublished && drawDetails.link !== '') await commonService.updateById(Draw, drawId, { $set: { isCompleted: constValues.status.ACTIVE } });
-      
+
       return respondSuccess(res, req.__(localeKeys.global.UPDATED_SUCCESSFULLY), StatusCode.OK);
     } catch (error) {
       return next(respondError(
@@ -152,7 +152,9 @@ module.exports = {
       const drawDetails = await drawResult(drawId);
       const { totalWinners, totalWonPrice, result } = drawDetails;
 
-      const setObj = { isPublished: constValues.status.ACTIVE, totalWinners, totalWonPrice, result };
+      const setObj = {
+        isPublished: constValues.status.ACTIVE, totalWinners, totalWonPrice, result,
+      };
       if (drawData.link !== '') setObj.isCompleted = constValues.status.ACTIVE;
       await commonService.updateById(Draw, drawId, { $set: setObj });
 
