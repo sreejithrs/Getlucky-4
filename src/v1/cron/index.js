@@ -1,3 +1,5 @@
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-restricted-syntax */
 // modules
 const moment = require('moment');
 const schedule = require('node-schedule');
@@ -38,8 +40,11 @@ module.exports = {
       }
     };
 
-    // 3 corresponds to Wednesday, 6 corresponds to Saturday
-    await Promise.all([3, 6].map(scheduleDraw));
+    // 1- Monday, 3 - Wednesday, 6 - Saturday
+    const drawDays = [1, 3, 6];
+    for (const dayOfWeek of drawDays) {
+      await scheduleDraw(dayOfWeek);
+    }
     logger.log('info', '----Cron Executed----');
   },
 

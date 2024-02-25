@@ -11,5 +11,8 @@ router.post('/user/email/send-otp', userController.changeEmailRequest);
 router.patch('/user/email/change-email', userController.updateEmail);
 router.get('/user/transactions', userController.userTransactions);
 router.get('/user/my-tickets', userController.userTickets);
+router.post('/user/banks', userController.addBankAccount);
+router.get('/user/banks', userController.getBankAccounts);
+router.get('/user/banks/:bankId', userController.getABankAccount);
 
 module.exports = router;

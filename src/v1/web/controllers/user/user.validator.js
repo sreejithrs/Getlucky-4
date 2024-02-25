@@ -35,4 +35,36 @@ module.exports = {
     return schema.validate(input);
   },
 
+  validateAddBank: (input) => {
+    const schema = Joi.object().keys({
+      country: Joi.string().valid('United Arab Emirates', 'India', 'Philippines', 'Qatar', 'Saudi Arabia', 'Oman', 'Kuwait').required(),
+      accountHolder: Joi.string().trim().required(),
+      bankName: Joi.string().trim().required(),
+      iBan: Joi.when('country', {
+        is: ['India'],
+        then: Joi.forbidden(),
+        otherwise: Joi.string().trim().min(15).max(34)
+          .required(),
+      }),
+      bic: Joi.when('country', {
+        is: ['India'],
+        then: Joi.forbidden(),
+        otherwise: Joi.string().trim().required(),
+      }),
+      accountNumber: Joi.when('country', {
+        is: ['India'],
+        then: Joi.string().min(9).max(18).trim()
+          .required(),
+        otherwise: Joi.forbidden(),
+      }),
+      ifsc: Joi.string().trim()
+        .when('country', {
+          is: ['India'],
+          then: Joi.string().trim().required(),
+          otherwise: Joi.forbidden(),
+        }),
+    });
+    return schema.validate(input);
+  },
+
 };

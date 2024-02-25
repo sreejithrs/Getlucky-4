@@ -77,5 +77,8 @@
 	"OTP_NOT_MATCHED": "OTP does not match",
 	"NO_REPORT_AVAILABLE": "No reports available for this date range",
 	"INVALID_EMAIL_OR_PHONE": "Incorrect email or phone number, try again",
-	"CANNOT_CHANGE_TICKET": "Cannot change won ticket"
+	"CANNOT_CHANGE_TICKET": "Cannot change won ticket",
+	"BANK_ADDED_SUCCESSFULLY": "Bank added successfully",
+	"BANK_NOT_FOUND": "Bank not found",
+	"MAXIMUM_BANKS_ADDED": "Cannot add more than three banks"
 }

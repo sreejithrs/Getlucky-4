@@ -4,12 +4,12 @@ const _ = require('lodash');
 const moment = require('moment');
 // models
 const {
-  User, Cart, Booking, Quantity, Order, Winner,
+  User, Cart, Booking, Quantity, Order, Winner, Bank,
 } = require('../../../models');
 
 // helpers
 const {
-  validateUpdateProfile, validateUpdatePassword, validateChangeEmail, validateUpdateEmail,
+  validateUpdateProfile, validateUpdatePassword, validateChangeEmail, validateUpdateEmail, validateAddBank,
 } = require('./user.validator');
 const { respondSuccess, respondError, respondFailure } = require('../../../../helpers/response');
 const commonService = require('../../../services/common.service');
@@ -306,6 +306,74 @@ module.exports = {
     } catch (error) {
       console.error('Error generating PDF:', error);
       return res.status(500).send('Failed to download invoice, try again');
+    }
+  },
+
+  addBankAccount: async (req, res, next) => {
+    try {
+      const { body, user } = req;
+      const { id } = user;
+
+      const { error } = validateAddBank(body);
+      if (error) return next(respondError(getMessageFromValidationError(error)));
+
+      const getBanks = await commonService.findAllByFields(Bank, { userId: id });
+      if (getBanks.length === 3) return respondSuccess(res, req.__(localeKeys.user.MAXIMUM_BANKS_ADDED), StatusCode.NOT_FOUND);
+
+      body.userId = id;
+      await commonService.save(Bank, body);
+      return respondSuccess(
+        res,
+        req.__(localeKeys.user.BANK_ADDED_SUCCESSFULLY),
+        StatusCode.OK,
+      );
+    } catch (error) {
+      return next(respondError(
+        error,
+        StatusCode.INTERNAL_SERVER_ERROR,
+      ));
+    }
+  },
+
+  getBankAccounts: async (req, res, next) => {
+    try {
+      const { user } = req;
+      const { id } = user;
+
+      const banks = await commonService.findAllByFields(Bank, { userId: id });
+      return respondSuccess(
+        res,
+        req.__(localeKeys.global.REQUEST_WAS_SUCCESSFUL),
+        StatusCode.OK,
+        banks,
+      );
+    } catch (error) {
+      return next(respondError(
+        error,
+        StatusCode.INTERNAL_SERVER_ERROR,
+      ));
+    }
+  },
+
+  getABankAccount: async (req, res, next) => {
+    try {
+      const { user, params } = req;
+      const { bankId } = params;
+      const { id } = user;
+
+      const bankData = await commonService.findOneByFields(Bank, { _id: bankId, userId: id });
+      if (!bankData) return respondSuccess(res, req.__(localeKeys.user.BANK_NOT_FOUND), StatusCode.NOT_FOUND);
+      return respondSuccess(
+        res,
+        req.__(localeKeys.global.REQUEST_WAS_SUCCESSFUL),
+        StatusCode.OK,
+        bankData,
+      );
+    } catch (error) {
+      return next(respondError(
+        error,
+        StatusCode.INTERNAL_SERVER_ERROR,
+      ));
     }
   },
 };

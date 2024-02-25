@@ -8,6 +8,7 @@ const Winner = require('./Winner');
 const Booking = require('./Booking');
 const Cart = require('./Cart');
 const Country = require('./Country');
+const Bank = require('./Bank');
 
 module.exports = {
   User,
@@ -20,4 +21,5 @@ module.exports = {
   Booking,
   Cart,
   Country,
+  Bank,
 };

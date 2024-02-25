@@ -42,7 +42,7 @@ module.exports = {
           'string.max': 'Mobile number must be less than 16 digits long',
         }),
       building: Joi.string().allow('').trim().optional(),
-      country: Joi.string().required(),
+      country: Joi.string().valid('United Arab Emirates', 'India', 'Philippines', 'Qatar', 'Saudi Arabia', 'Oman', 'Kuwait').required(),
       state: Joi.string().required(),
       district: Joi.string().allow('').optional(),
       email: Joi.string().email({ minDomainSegments: 2 }).allow('').trim()
