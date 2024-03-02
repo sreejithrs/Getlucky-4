@@ -1,9 +1,8 @@
 const Joi = require('joi');
 
-const mobileValidationMessage = 'You have entered an invalid phone number';
-const emailOrMobile = 'email or phoneNumber is required';
-
 module.exports = {
+  mobileValidationMessage: 'You have entered an invalid phone number',
+  emailOrMobile: 'email or phoneNumber is required',
 
   validateSignIn: (input) => {
     const schema = Joi.object().keys({
@@ -28,7 +27,11 @@ module.exports = {
 
   validateRegister: (input) => {
     const schema = Joi.object().keys({
-      name: Joi.string().trim().required(),
+      name: Joi.string().pattern(/^[a-zA-Z\s]+$/).required().trim()
+        .required()
+        .messages({
+          'string.pattern.base': 'Name should contain only alphabets',
+        }),
       phoneNumber: Joi.string()
         .pattern(/^[+]?[0-9]+$/)
         .min(10)
@@ -36,8 +39,8 @@ module.exports = {
         .trim()
         .required()
         .messages({
-          'any.required': mobileValidationMessage,
-          'string.pattern.base': mobileValidationMessage,
+          'any.required': module.exports.mobileValidationMessage,
+          'string.pattern.base': module.exports.mobileValidationMessage,
           'string.min': 'Mobile number must be at least 10 digits long',
           'string.max': 'Mobile number must be less than 16 digits long',
         }),
@@ -74,8 +77,8 @@ module.exports = {
         then: Joi.forbidden(),
         otherwise: Joi.required(),
       }).messages({
-        'any.required': emailOrMobile,
-        'string.pattern.base': emailOrMobile,
+        'any.required': module.exports.emailOrMobile,
+        'string.pattern.base': module.exports.emailOrMobile,
       }),
     });
     return schema.validate(input);

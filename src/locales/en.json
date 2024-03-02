@@ -79,6 +79,8 @@
 	"INVALID_EMAIL_OR_PHONE": "Incorrect email or phone number, try again",
 	"CANNOT_CHANGE_TICKET": "Cannot change won ticket",
 	"BANK_ADDED_SUCCESSFULLY": "Bank added successfully",
+	"BANK_UPDATED_SUCCESSFULLY": "Bank updated successfully",
 	"BANK_NOT_FOUND": "Bank not found",
-	"MAXIMUM_BANKS_ADDED": "Cannot add more than three banks"
+	"MAXIMUM_BANKS_ADDED": "Cannot add more than three banks",
+	"BANK_ALREADY_ADDED": "Sorry this bank is already added"
 }
