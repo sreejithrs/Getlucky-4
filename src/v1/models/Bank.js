@@ -10,15 +10,15 @@ const bankSchema = new Schema(
     accountHolder: { type: String, default: '' },
     country: { type: String, default: '' },
     bankName: { type: String, default: '' },
-    iBan: { type: String },
+    iBan: { type: String, unique: true },
     bic: { type: String },
-    accountNumber: { type: String },
-    ifsc: { type: String },
   },
   {
     timestamps: true,
   },
 );
+
+bankSchema.index({ userId: 1 });
 
 // Set up encryption configuration
 const encryptionKey = process.env.ENCRYPTION_KEY;
@@ -27,25 +27,7 @@ const signingKey = process.env.ENCRYPTION_SIGN;
 bankSchema.plugin((encryption), {
   encryptionKey: encryptionKey,
   signingKey: signingKey,
-  encryptedFields: ['accountNumber', 'ifsc', 'iBan', 'bic'],
-});
-
-function maskAccountNumber(accountNumber) {
-  // Mask all but the last four digits
-  return 'x'.repeat(Math.max(0, accountNumber.length - 4)) + accountNumber.slice(-4);
-}
-
-bankSchema.post(['find', 'findOne'], (doc, next) => {
-  if (doc.length) {
-    const array = doc.forEach((elem) => {
-      elem.accountNumber = maskAccountNumber(elem.accountNumber);
-    });
-    doc.accountNumber = array;
-  }
-  if (!Array.isArray(doc)) {
-    doc.accountNumber = maskAccountNumber(doc.accountNumber);
-  }
-  next();
+  encryptedFields: ['iBan', 'bic'],
 });
 
 module.exports = mongoose.model('BankAccount', bankSchema);

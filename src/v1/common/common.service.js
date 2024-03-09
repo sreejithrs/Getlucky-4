@@ -152,11 +152,13 @@ module.exports = {
                 userId: '$userId',
                 matchOrder: '$matchOrder',
               },
+              wonId: { $first: '$_id' },
               name: { $first: '$userData.name' },
               nationality: { $first: '$userData.country' },
               state: { $first: '$userData.state' },
               matchOrder: { $first: '$matchOrder' },
               wonPrice: { $first: '$priceAmount' },
+              isAddedToWallet: { $first: { $ifNull: ['$isAddedToWallet', false] } },
             },
           },
           {
@@ -165,8 +167,13 @@ module.exports = {
             },
           },
           {
+            $set: {
+              _id: '$wonId',
+            },
+          },
+          {
             $project: {
-              _id: 0,
+              wonId: 0,
             },
           },
         ],

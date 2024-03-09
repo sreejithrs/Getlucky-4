@@ -12,7 +12,9 @@ router.patch('/user/email/change-email', userController.updateEmail);
 router.get('/user/transactions', userController.userTransactions);
 router.get('/user/my-tickets', userController.userTickets);
 router.post('/user/banks', userController.addBankAccount);
+router.put('/user/banks', userController.updateBankAccount);
 router.get('/user/banks', userController.getBankAccounts);
 router.get('/user/banks/:bankId', userController.getABankAccount);
+router.post('/user/western-union', userController.addWesternUnion);
 
 module.exports = router;

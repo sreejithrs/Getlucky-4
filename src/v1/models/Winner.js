@@ -13,6 +13,7 @@ const winnerSchema = new Schema(
     ticketNumbers: [{ type: String, default: '' }],
     matchOrder: { type: String, enum: ['straight', 'rumble', 'chance'] },
     priceAmount: { type: Number },
+    isAddedToWallet: { type: Boolean, default: false },
   },
   {
     timestamps: true,

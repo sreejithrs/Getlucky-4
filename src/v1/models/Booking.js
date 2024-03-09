@@ -19,7 +19,7 @@ const bookingSchema = new Schema(
     date: { type: Date, default: new Date() },
     paymentStatus: { type: Number, default: 2 }, // 2- Pending, 1 - Success, 0 - Failed
     paymentIntent: { type: String, default: '' },
-    type: { type: String, enum: ['ORDER'], default: 'ORDER' },
+    type: { type: String, enum: ['ORDER', 'WALLET'], default: 'ORDER' },
   },
   {
     timestamps: true,

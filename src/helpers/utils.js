@@ -153,6 +153,8 @@ const getPermutations = (value) => {
   return permutations.filter((item) => item !== value);
 };
 
+const maskAccountNumber = (accountNumber) => 'x'.repeat(Math.max(0, accountNumber.length - 4)) + accountNumber.slice(-4);
+
 const monthDiffFn = (fromDate, toDate) => {
   let months;
   months = (toDate.getFullYear() - fromDate.getFullYear()) * 12;
@@ -231,6 +233,7 @@ module.exports = {
   generate6DigitId,
   uploadPDF,
   monthDiffFn,
+  maskAccountNumber,
   makeRequest,
   getNetworkAccessToken,
   createNetworkOrder,

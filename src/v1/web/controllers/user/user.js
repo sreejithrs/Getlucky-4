@@ -10,6 +10,7 @@ const {
 // helpers
 const {
   validateUpdateProfile, validateUpdatePassword, validateChangeEmail, validateUpdateEmail, validateAddBank,
+  validateUpdateBank, validateAddWesternUnion,
 } = require('./user.validator');
 const { respondSuccess, respondError, respondFailure } = require('../../../../helpers/response');
 const commonService = require('../../../services/common.service');
@@ -312,13 +313,17 @@ module.exports = {
   addBankAccount: async (req, res, next) => {
     try {
       const { body, user } = req;
+      const { iBan } = body;
       const { id } = user;
 
       const { error } = validateAddBank(body);
       if (error) return next(respondError(getMessageFromValidationError(error)));
 
-      const getBanks = await commonService.findAllByFields(Bank, { userId: id });
-      if (getBanks.length === 3) return respondSuccess(res, req.__(localeKeys.user.MAXIMUM_BANKS_ADDED), StatusCode.NOT_FOUND);
+      const bankData = await commonService.findAllByFields(Bank, { userId: id });
+      if (bankData.length === 3) return respondFailure(res, req.__(localeKeys.user.MAXIMUM_BANKS_ADDED), StatusCode.NOT_FOUND);
+
+      const bankFilter = bankData.filter((elem) => elem.iBan === iBan.trim());
+      if (bankFilter.length) return respondFailure(res, req.__(localeKeys.user.BANK_ALREADY_ADDED), StatusCode.BAD_REQUEST);
 
       body.userId = id;
       await commonService.save(Bank, body);
@@ -335,17 +340,54 @@ module.exports = {
     }
   },
 
+  updateBankAccount: async (req, res, next) => {
+    try {
+      const { body, user } = req;
+      const { bankId, ...dataToSet } = body;
+      const { id } = user;
+
+      const { error } = validateUpdateBank(body);
+      if (error) return next(respondError(getMessageFromValidationError(error)));
+
+      const bankData = await commonService.findOneByFields(Bank, { _id: bankId, userId: id });
+      if (!bankData) return respondFailure(res, req.__(localeKeys.user.BANK_NOT_FOUND), StatusCode.NOT_FOUND);
+
+      const checkExists = await commonService.findOneByFields(Bank, { userId: id, iBan: body.iBan });
+      if (checkExists) return respondFailure(res, req.__(localeKeys.user.BANK_ALREADY_ADDED), StatusCode.BAD_REQUEST);
+
+      await commonService.deleteOneByFields(Bank, { _id: bankId });
+      dataToSet._id = bankId;
+      dataToSet.userId = id;
+      await commonService.save(Bank, dataToSet);
+      return respondSuccess(
+        res,
+        req.__(localeKeys.user.BANK_UPDATED_SUCCESSFULLY),
+        StatusCode.OK,
+      );
+    } catch (error) {
+      return next(respondError(
+        error,
+        StatusCode.INTERNAL_SERVER_ERROR,
+      ));
+    }
+  },
+
   getBankAccounts: async (req, res, next) => {
     try {
       const { user } = req;
-      const { id } = user;
+      const { id, westernUnion } = user;
 
+      const unionBank = { fullName: '', phoneNumber: '' };
       const banks = await commonService.findAllByFields(Bank, { userId: id });
+      const dataToSend = {
+        banks,
+        westernUnion: westernUnion || unionBank,
+      };
       return respondSuccess(
         res,
         req.__(localeKeys.global.REQUEST_WAS_SUCCESSFUL),
         StatusCode.OK,
-        banks,
+        dataToSend,
       );
     } catch (error) {
       return next(respondError(
@@ -362,12 +404,35 @@ module.exports = {
       const { id } = user;
 
       const bankData = await commonService.findOneByFields(Bank, { _id: bankId, userId: id });
-      if (!bankData) return respondSuccess(res, req.__(localeKeys.user.BANK_NOT_FOUND), StatusCode.NOT_FOUND);
+      if (!bankData) return respondFailure(res, req.__(localeKeys.user.BANK_NOT_FOUND), StatusCode.NOT_FOUND);
+
       return respondSuccess(
         res,
         req.__(localeKeys.global.REQUEST_WAS_SUCCESSFUL),
         StatusCode.OK,
         bankData,
+      );
+    } catch (error) {
+      return next(respondError(
+        error,
+        StatusCode.INTERNAL_SERVER_ERROR,
+      ));
+    }
+  },
+
+  addWesternUnion: async (req, res, next) => {
+    try {
+      const { user, body } = req;
+      const { id } = user;
+
+      const { error } = validateAddWesternUnion(body);
+      if (error) return next(respondError(getMessageFromValidationError(error)));
+
+      await commonService.updateById(User, id, { $set: { westernUnion: body } });
+      return respondSuccess(
+        res,
+        req.__(localeKeys.global.UPDATED_SUCCESSFULLY),
+        StatusCode.OK,
       );
     } catch (error) {
       return next(respondError(
