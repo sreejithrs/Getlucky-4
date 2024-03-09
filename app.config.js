@@ -4,6 +4,7 @@ const morgan = require('morgan');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
 const passport = require('passport');
+const tooBusy = require('toobusy-js');
 const mongoSanitize = require('express-mongo-sanitize');
 const hpp = require('hpp');
 const rateLimit = require('express-rate-limit');
@@ -39,6 +40,17 @@ const limiter = rateLimit({
 
 // express instance
 const expressApp = express();
+
+// eslint-disable-next-line consistent-return
+expressApp.use((req, res, next) => {
+  if (tooBusy()) {
+    return res.status(503).json({
+      success: false,
+      message: 'Server is too busy, please try again',
+    });
+  }
+  next();
+});
 
 // middlewares
 expressApp.use(

@@ -10,13 +10,15 @@ const bankSchema = new Schema(
     accountHolder: { type: String, default: '' },
     country: { type: String, default: '' },
     bankName: { type: String, default: '' },
-    iBan: { type: String },
+    iBan: { type: String, unique: true },
     bic: { type: String },
   },
   {
     timestamps: true,
   },
 );
+
+bankSchema.index({ userId: 1 });
 
 // Set up encryption configuration
 const encryptionKey = process.env.ENCRYPTION_KEY;

@@ -2,7 +2,7 @@
 const _ = require('lodash');
 const moment = require('moment');
 // model
-const { Draw } = require('../../../models');
+const { Draw, Winner, User } = require('../../../models');
 
 // helpers
 const { respondSuccess, respondError, respondFailure } = require('../../../../helpers/response');
@@ -96,8 +96,8 @@ module.exports = {
 
       const getDraw = await commonService.findOneById(Draw, drawId);
       if (!getDraw) return respondFailure(res, req.__(localeKeys.product.INVALID_DRAW_ID), StatusCode.NOT_FOUND);
-      if (getDraw.wonTicket !== '' && ticketNumber) return respondFailure(res, req.__(localeKeys.product.CANNOT_CHANGE_TICKET), StatusCode.BAD_REQUEST);
-      if (getDraw.isCompleted) return respondFailure(res, req.__(localeKeys.product.DRAW_COMPLETED), StatusCode.FORBIDDEN);
+      if (ticketNumber && getDraw.wonTicket !== ticketNumber) return respondFailure(res, req.__(localeKeys.product.CANNOT_CHANGE_TICKET), StatusCode.BAD_REQUEST);
+      if (getDraw.isCompleted) return respondFailure(res, req.__(localeKeys.product.DRAW_COMPLETED), StatusCode.BAD_REQUEST);
 
       const dataToSet = {
         status,
@@ -145,9 +145,9 @@ module.exports = {
 
       const drawData = await commonService.findOneById(Draw, drawId);
       if (!drawData) return respondFailure(res, req.__(localeKeys.product.INVALID_DRAW_ID), StatusCode.NOT_FOUND);
-      if (!drawData.status) return respondFailure(res, req.__(localeKeys.product.DRAW_INACTIVE), StatusCode.FORBIDDEN);
-      if (!drawData.isTicketAdded) return respondFailure(res, req.__(localeKeys.product.WINNER_NOT_ANNOUNCED), StatusCode.FORBIDDEN);
-      if (drawData.isCompleted || drawData.isPublished) return respondFailure(res, req.__(localeKeys.product.DRAW_COMPLETED), StatusCode.FORBIDDEN);
+      if (!drawData.status) return respondFailure(res, req.__(localeKeys.product.DRAW_INACTIVE), StatusCode.BAD_REQUEST);
+      if (!drawData.isTicketAdded) return respondFailure(res, req.__(localeKeys.product.WINNER_NOT_ANNOUNCED), StatusCode.BAD_REQUEST);
+      if (drawData.isCompleted || drawData.isPublished) return respondFailure(res, req.__(localeKeys.product.DRAW_COMPLETED), StatusCode.BAD_REQUEST);
 
       const drawDetails = await drawResult(drawId);
       const { totalWinners, totalWonPrice, result } = drawDetails;
@@ -182,4 +182,26 @@ module.exports = {
     }
   },
 
+  transferMoneyToWallet: async (req, res, next) => {
+    try {
+      const { params } = req;
+      const { winnerId } = params;
+
+      const winnerData = await commonService.findOneById(Winner, winnerId);
+      if (!winnerData) return respondFailure(res, req.__(localeKeys.global.NOT_FOUND), StatusCode.NOT_FOUND);
+      if (winnerData.isAddedToWallet) return respondFailure(res, req.__(localeKeys.user.ALREADY_TRANSFERRED), StatusCode.BAD_REQUEST);
+
+      const { userId, priceAmount } = winnerData;
+      const userData = await commonService.findOneAndUpdateFields(User, { _id: userId }, { $inc: { wallet: priceAmount } });
+      if (!userData) return respondFailure(res, req.__(localeKeys.auth.USER_NOT_FOUND), StatusCode.NOT_FOUND);
+
+      await commonService.updateById(Winner, winnerId, { $set: { isAddedToWallet: constValues.status.ACTIVE } });
+      return respondSuccess(res, req.__(localeKeys.user.TRANSFERRED_SUCCESSFULLY), StatusCode.OK);
+    } catch (error) {
+      return next(respondError(
+        error,
+        StatusCode.INTERNAL_SERVER_ERROR,
+      ));
+    }
+  },
 };

@@ -17,7 +17,7 @@ const commonService = require('../../../services/common.service');
 const localeKeys = require('../../../../locales/keys.json');
 const StatusCode = require('../../../../helpers/statusCodes.json');
 const constValues = require('../../../../helpers/constants');
-const { getMessageFromValidationError, generate4DigitOTP, maskAccountNumber } = require('../../../../helpers/utils');
+const { getMessageFromValidationError, generate4DigitOTP } = require('../../../../helpers/utils');
 const { sendMail } = require('../../../../helpers/notification');
 const { changeEmail } = require('../../../../templates/emailTemplate');
 const {
@@ -375,16 +375,14 @@ module.exports = {
   getBankAccounts: async (req, res, next) => {
     try {
       const { user } = req;
-      const { id } = user;
+      const { id, westernUnion } = user;
 
+      const unionBank = { fullName: '', phoneNumber: '' };
       const banks = await commonService.findAllByFields(Bank, { userId: id });
-      const dataToSend = banks.map((bank) => {
-        const obj = bank.toObject();
-        return {
-          ...obj,
-          iBan: maskAccountNumber(bank.iBan),
-        };
-      });
+      const dataToSend = {
+        banks,
+        westernUnion: westernUnion || unionBank,
+      };
       return respondSuccess(
         res,
         req.__(localeKeys.global.REQUEST_WAS_SUCCESSFUL),
@@ -408,7 +406,6 @@ module.exports = {
       const bankData = await commonService.findOneByFields(Bank, { _id: bankId, userId: id });
       if (!bankData) return respondFailure(res, req.__(localeKeys.user.BANK_NOT_FOUND), StatusCode.NOT_FOUND);
 
-      bankData.iBan = maskAccountNumber(bankData.iBan);
       return respondSuccess(
         res,
         req.__(localeKeys.global.REQUEST_WAS_SUCCESSFUL),

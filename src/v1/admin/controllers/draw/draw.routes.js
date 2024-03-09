@@ -10,5 +10,6 @@ router.put('/draws', drawController.updateDraw);
 router.post('/draws/:drawId/publish', drawController.publishDraw);
 router.get('/draws/:drawId/result', drawController.getDrawResult);
 router.get('/draws/:drawId/winners', drawController.getWinners);
+router.get('/draws/transfer-money/:winnerId', drawController.transferMoneyToWallet);
 
 module.exports = router;

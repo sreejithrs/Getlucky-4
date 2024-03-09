@@ -37,9 +37,10 @@ const userSchema = new Schema(
     phoneOtpTimeLimit: { type: Date },
     emailOtp: { type: Number },
     emailOtpMax: { type: Number, default: 0 },
+    wallet: { type: Number, default: 0 },
     westernUnion: {
-      fullName: { type: String },
-      phoneNumber: { type: String },
+      fullName: { type: String, default: '' },
+      phoneNumber: { type: String, default: '' },
     },
     emailOtpTimeLimit: { type: Date },
   },
