@@ -9,6 +9,7 @@ const Booking = require('./Booking');
 const Cart = require('./Cart');
 const Country = require('./Country');
 const Bank = require('./Bank');
+const WalletHistory = require('./WalletHistory');
 
 module.exports = {
   User,
@@ -22,4 +23,5 @@ module.exports = {
   Cart,
   Country,
   Bank,
+  WalletHistory,
 };

@@ -61,6 +61,19 @@ const commonService = {
     }
   },
   /**
+   * @Method updateManyData
+   * @Description Method for update many data
+   *
+   */
+  updateManyData: async (model, query, data) => {
+    try {
+      await model.updateMany(query, data);
+      return true;
+    } catch (err) {
+      return err;
+    }
+  },
+  /**
    * @Method insertIfExistsElseUpdate
    * @Description Method for render reset password page
    *

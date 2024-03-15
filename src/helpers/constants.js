@@ -14,6 +14,22 @@ module.exports = {
     drawName: 'Getlucky Draw',
   },
 
+  paymentCategory: {
+    ORDER: 'Purchase',
+    WALLET_WITHDRAW: 'Wallet Withdraw',
+    WINNING_AMOUNT: 'Won Amount',
+    WALLET_CREDIT: 'Top Up',
+    WALLET_ORDER: 'Wallet Purchase',
+  },
+
+  paymentCategoryCode: {
+    ORDER: 'ORDER',
+    WALLET_WITHDRAW: 'WALLET_WITHDRAW',
+    WINNING_AMOUNT: 'WINNING_AMOUNT',
+    WALLET_CREDIT: 'WALLET_CREDIT',
+    WALLET_ORDER: 'WALLET_ORDER',
+  },
+
   priceAmount: {
     straight: 10000,
     rumble: 2500,
