@@ -20,6 +20,8 @@ const mongooseConnect = () => {
     process.exit(-1);
   }
 
+  mongoose.set('strictQuery', false);
+
   mongoose.connect(process.env.DB_URL, {
     keepAlive: true,
     useNewUrlParser: true,

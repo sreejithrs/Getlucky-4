@@ -1,9 +1,9 @@
 // model
-const { User } = require('../../../models');
+const { User, WalletHistory } = require('../../../models');
 
 // helpers
 const { respondSuccess, respondFailure, respondError } = require('../../../../helpers/response');
-const { validateAccount } = require('./auth.validator');
+const { validateAccount, validateWalletRecharge } = require('./auth.validator');
 const { getMessageFromValidationError } = require('../../../../helpers/utils');
 const { getAuthTokens } = require('../../../../helpers/token');
 const commonService = require('../../../services/common.service');
@@ -138,6 +138,35 @@ module.exports = {
         StatusCode.OK,
         { totalUsers, usersList },
       );
+    } catch (error) {
+      return next(respondError(
+        error,
+        StatusCode.INTERNAL_SERVER_ERROR,
+      ));
+    }
+  },
+
+  addMoneyToWallet: async (req, res, next) => {
+    try {
+      const { body } = req;
+      const { amount, userId } = body;
+
+      const { error } = validateWalletRecharge(body);
+      if (error) return next(respondError(getMessageFromValidationError(error)));
+
+      const userData = await commonService.findOneAndUpdateFields(User, { _id: userId }, { $inc: { wallet: amount } });
+      if (!userData) return respondFailure(res, req.__(localeKeys.auth.USER_NOT_FOUND), StatusCode.NOT_FOUND);
+
+      const bookingData = {
+        userId: userId,
+        amount,
+        balance: userData.wallet,
+        date: new Date(),
+        paymentStatus: constValues.paymentStatus.SUCCESS,
+        type: constValues.paymentCategoryCode.WALLET_CREDIT,
+      };
+      await new WalletHistory(bookingData).save();
+      return respondSuccess(res, req.__(localeKeys.user.TRANSFERRED_SUCCESSFULLY), StatusCode.OK);
     } catch (error) {
       return next(respondError(
         error,

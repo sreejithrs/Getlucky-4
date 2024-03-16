@@ -83,6 +83,7 @@
 	"BANK_NOT_FOUND": "Bank not found",
 	"MAXIMUM_BANKS_ADDED": "Cannot add more than three banks",
 	"BANK_ALREADY_ADDED": "Sorry this bank is already added",
-	"ALREADY_TRANSFERRED": "This amount is already transferred to wallet",
-	"TRANSFERRED_SUCCESSFULLY": "Successfully transferred amount to wallet"
+	"ALREADY_TRANSFERRED": "Amount already transferred to wallet",
+	"TRANSFERRED_SUCCESSFULLY": "Successfully transferred amount to wallet",
+	"INSUFFICIENT_BALANCE": "Insufficient funds in your wallet to complete the withdrawal"
 }

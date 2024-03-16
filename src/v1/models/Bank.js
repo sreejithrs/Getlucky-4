@@ -10,7 +10,7 @@ const bankSchema = new Schema(
     accountHolder: { type: String, default: '' },
     country: { type: String, default: '' },
     bankName: { type: String, default: '' },
-    iBan: { type: String, unique: true },
+    iBan: { type: String },
     bic: { type: String },
   },
   {

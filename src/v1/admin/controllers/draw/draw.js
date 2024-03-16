@@ -2,7 +2,9 @@
 const _ = require('lodash');
 const moment = require('moment');
 // model
-const { Draw, Winner, User } = require('../../../models');
+const {
+  Draw, Winner, User, WalletHistory,
+} = require('../../../models');
 
 // helpers
 const { respondSuccess, respondError, respondFailure } = require('../../../../helpers/response');
@@ -196,6 +198,15 @@ module.exports = {
       if (!userData) return respondFailure(res, req.__(localeKeys.auth.USER_NOT_FOUND), StatusCode.NOT_FOUND);
 
       await commonService.updateById(Winner, winnerId, { $set: { isAddedToWallet: constValues.status.ACTIVE } });
+      const bookingData = {
+        userId: userId,
+        amount: priceAmount,
+        balance: userData.wallet,
+        date: new Date(),
+        paymentStatus: constValues.paymentStatus.SUCCESS,
+        type: constValues.paymentCategoryCode.WINNING_AMOUNT,
+      };
+      await new WalletHistory(bookingData).save();
       return respondSuccess(res, req.__(localeKeys.user.TRANSFERRED_SUCCESSFULLY), StatusCode.OK);
     } catch (error) {
       return next(respondError(
