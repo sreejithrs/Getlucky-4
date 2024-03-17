@@ -1,9 +1,9 @@
 // models
-const { User, Bank, WalletHistory } = require('../../../models');
+const { User, Bank } = require('../../../models');
 
 // helpers
 const {
-  validateAddBank, validateUpdateBank, validateAddWesternUnion, validateSendWithdrawRequest, validateUpdateSendWithdrawRequest,
+  validateAddBank, validateUpdateBank, validateAddWesternUnion,
 } = require('./bank.validator');
 const { respondSuccess, respondError, respondFailure } = require('../../../../helpers/response');
 const commonService = require('../../../services/common.service');
@@ -82,12 +82,8 @@ module.exports = {
       const { user } = req;
       const { id, westernUnion } = user;
 
-      const unionBank = { fullName: '', phoneNumber: '' };
       const banks = await commonService.findAllByFields(Bank, { userId: id });
-      const dataToSend = {
-        banks,
-        westernUnion: westernUnion || unionBank,
-      };
+      const dataToSend = { banks, westernUnion };
       return respondSuccess(
         res,
         req.__(localeKeys.global.REQUEST_WAS_SUCCESSFUL),
@@ -133,7 +129,7 @@ module.exports = {
       const { error } = validateAddWesternUnion(body);
       if (error) return next(respondError(getMessageFromValidationError(error)));
 
-      await commonService.updateById(User, id, { $set: { westernUnion: body } });
+      await commonService.updateById(User, id, { $set: { westernUnion: body, isWesternUnionAdded: constValues.status.ACTIVE } });
       return respondSuccess(
         res,
         req.__(localeKeys.global.UPDATED_SUCCESSFULLY),
@@ -147,79 +143,4 @@ module.exports = {
     }
   },
 
-  sendWithdrawRequest: async (req, res, next) => {
-    try {
-      const { user, body } = req;
-      const { amount, paymentMethod, bankId } = body;
-      const { id, wallet } = user;
-
-      const { error } = validateSendWithdrawRequest(body);
-      if (error) return next(respondError(getMessageFromValidationError(error)));
-
-      if (wallet < amount) return respondFailure(res, req.__(localeKeys.user.INSUFFICIENT_BALANCE), StatusCode.PAYMENT_REQUIRED);
-      const withdrawData = {
-        userId: id,
-        amount,
-        paymentMethod,
-        date: new Date(),
-        paymentStatus: constValues.paymentStatus.PENDING,
-        type: constValues.paymentCategoryCode.WALLET_WITHDRAW,
-      };
-
-      if (bankId) withdrawData.bankId = bankId;
-      await new WalletHistory(withdrawData).save();
-      await commonService.updateById(User, id, { $inc: { wallet: -amount, amountOnHold: amount } });
-      return respondSuccess(
-        res,
-        req.__(localeKeys.global.REQUEST_WAS_SUCCESSFUL),
-        StatusCode.OK,
-      );
-    } catch (error) {
-      return next(respondError(
-        error,
-        StatusCode.INTERNAL_SERVER_ERROR,
-      ));
-    }
-  },
-
-  updateWalletRequest: async (req, res, next) => {
-    try {
-      const { user, body } = req;
-      const {
-        updateId, amount, paymentMethod, bankId,
-      } = body;
-      const { id, wallet } = user;
-      let dataToSet = {};
-
-      const { error } = validateUpdateSendWithdrawRequest(body);
-      if (error) return next(respondError(getMessageFromValidationError(error)));
-
-      const walletData = await commonService.findOneById(WalletHistory, { _id: updateId, userId: id });
-      if (!walletData) return respondFailure(res, req.__(localeKeys.global.NOT_FOUND), StatusCode.NOT_FOUND);
-
-      const amountCheck = walletData.amount + wallet;
-      if (amountCheck < amount) return respondFailure(res, req.__(localeKeys.user.INSUFFICIENT_BALANCE), StatusCode.PAYMENT_REQUIRED);
-
-      dataToSet = {
-        paymentMethod,
-        amount,
-      };
-      if (bankId) dataToSet.bankId = bankId;
-      await commonService.updateById(WalletHistory, updateId, { $set: dataToSet });
-      if (walletData.amount === amount) return respondSuccess(res, req.__(localeKeys.global.UPDATED_SUCCESSFULLY), StatusCode.OK);
-
-      const setAmount = amount - walletData.amount;
-      await commonService.updateById(User, id, { $inc: { wallet: -setAmount, amountOnHold: setAmount } });
-      return respondSuccess(
-        res,
-        req.__(localeKeys.global.UPDATED_SUCCESSFULLY),
-        StatusCode.OK,
-      );
-    } catch (error) {
-      return next(respondError(
-        error,
-        StatusCode.INTERNAL_SERVER_ERROR,
-      ));
-    }
-  },
 };
