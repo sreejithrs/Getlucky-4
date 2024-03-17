@@ -6,7 +6,7 @@ module.exports = {
 
   drawCategoryArray,
 
-  networkEvents: ['THREE_DS_NOT_AUTHENTICATED' , 'DECLINED', 'PURCHASE_DECLINED', 'PURCHASE_FAILED',
+  networkEvents: ['THREE_DS_NOT_AUTHENTICATED', 'DECLINED', 'PURCHASE_DECLINED', 'PURCHASE_FAILED',
     'CAPTURE_FAILED', 'CAPTURE_VOID_FAILED', 'CANCELLED', 'GATEWAY_RISK_PRE_AUTH_REJECTED',
     'PRE_AUTH_FRAUD_CHECK_REJECTED', 'POST_AUTH_FRAUD_CHECK_REJECTED'],
 
@@ -46,6 +46,12 @@ module.exports = {
     FAILED: 0,
     SUCCESS: 1,
     PENDING: 2,
+  },
+
+  withdrawRequest: {
+    0: 'Rejected',
+    1: 'Approved',
+    2: 'Pending',
   },
 
   months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],

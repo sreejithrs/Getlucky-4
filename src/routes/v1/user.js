@@ -9,6 +9,7 @@ const homeRoutes = require('../../v1/web/controllers/home/home.routes');
 const userRoutes = require('../../v1/web/controllers/user/user.routes');
 const drawRoutes = require('../../v1/web/controllers/draws/draw.routes');
 const bankRoutes = require('../../v1/web/controllers/bank/bank.routes');
+const walletRoutes = require('../../v1/web/controllers/wallet/wallet.routes');
 
 const requireAuth = passport.authenticate('accessTokenAuth', { session: false });
 
@@ -26,5 +27,6 @@ router.use(userAllowed);
 
 router.use(userRoutes);
 router.use(bankRoutes);
+router.use(walletRoutes);
 
 module.exports = router;
