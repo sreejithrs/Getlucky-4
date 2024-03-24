@@ -50,7 +50,7 @@ module.exports = {
       if (error) return next(respondError(getMessageFromValidationError(error)));
 
       const withdrawData = await commonService.findOneById(WalletHistory, id);
-      if (!withdrawData) return respondFailure(res, req.__(localeKeys.global.NOT_FOUND), StatusCode.NOT_FOUND);
+      if (!withdrawData || withdrawData.type !== constValues.paymentCategoryCode.WALLET_WITHDRAW) return respondFailure(res, req.__(localeKeys.global.NOT_FOUND), StatusCode.NOT_FOUND);
       const { paymentStatus, userId, amount } = withdrawData;
 
       const alreadyResponse = {
@@ -75,7 +75,13 @@ module.exports = {
       const amountToSet = walletAmountQuery[status];
 
       const userData = await commonService.findOneAndUpdateFields(User, { _id: userId }, { $inc: amountToSet });
-      await commonService.updateById(WalletHistory, { _id: id }, { $set: { paymentStatus: status, balance: userData.wallet } });
+      const updateWalletQuery = {
+        1: {},
+        0: { balance: userData.wallet, date: new Date() },
+      };
+      const walletDataToSet = updateWalletQuery[status];
+
+      await commonService.updateById(WalletHistory, id, { $set: { paymentStatus: status, ...walletDataToSet } });
       return respondSuccess(res, req.__(dataToSend), StatusCode.OK);
     } catch (error) {
       return next(respondError(

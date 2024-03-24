@@ -19,7 +19,7 @@ module.exports = {
     WALLET_WITHDRAW: 'Wallet Withdraw',
     WINNING_AMOUNT: 'Won Amount',
     WALLET_CREDIT: 'Top Up',
-    WALLET_ORDER: 'Wallet Purchase',
+    WALLET_PURCHASE: 'Wallet Purchase',
   },
 
   paymentCategoryCode: {
@@ -27,7 +27,7 @@ module.exports = {
     WALLET_WITHDRAW: 'WALLET_WITHDRAW',
     WINNING_AMOUNT: 'WINNING_AMOUNT',
     WALLET_CREDIT: 'WALLET_CREDIT',
-    WALLET_ORDER: 'WALLET_ORDER',
+    WALLET_PURCHASE: 'WALLET_PURCHASE',
   },
 
   priceAmount: {

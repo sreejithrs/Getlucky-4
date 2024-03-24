@@ -32,4 +32,13 @@ module.exports = {
     return schema.validate(input);
   },
 
+  validateWalletTransactions: (input) => {
+    const schema = Joi.object().keys({
+      skip: Joi.number().required(),
+      limit: Joi.number().required(),
+      type: Joi.number().valid('', 1, 2, 3, 4).optional(),
+    });
+    return schema.validate(input);
+  },
+
 };
