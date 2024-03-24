@@ -111,6 +111,7 @@ module.exports = {
       {
         $match: {
           userId: ObjectId(id),
+          type: constValues.paymentCategoryCode.ORDER,
         },
       },
       commonFormatDate,

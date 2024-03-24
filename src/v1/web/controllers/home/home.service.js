@@ -167,8 +167,25 @@ module.exports = {
       $unwind: { path: '$productData', preserveNullAndEmptyArrays: true },
     },
     {
+      $lookup: {
+        from: 'users',
+        pipeline: [
+          {
+            $match: {
+              _id: ObjectId(id),
+            },
+          },
+        ],
+        as: 'userData',
+      },
+    },
+    {
+      $unwind: { path: '$userData', preserveNullAndEmptyArrays: true },
+    },
+    {
       $group: {
         _id: null,
+        wallet: { $first: '$userData.wallet' },
         totalCost: { $first: '$totalCost' },
         products: {
           $push: {

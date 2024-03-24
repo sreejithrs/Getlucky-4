@@ -82,7 +82,7 @@
 	"ALREADY_TRANSFERRED": "Amount already transferred to wallet",
 	"TRANSFERRED_SUCCESSFULLY": "Successfully transferred amount to wallet",
 	"INSUFFICIENT_BALANCE": "Insufficient funds in your wallet to complete the withdrawal",
-	"WESTERN_UNION_NOT_ADDED": "Western union is not added",
+	"WESTERN_UNION_NOT_ADDED": "Western Union is not added",
 	"ALREADY_REJECTED": "Withdrawal request has already been rejected",
 	"REQUEST_APPROVED": "Withdrawal request has been approved",
 	"REQUEST_REJECTED": "Withdrawal request has been rejected",

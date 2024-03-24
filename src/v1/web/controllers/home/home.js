@@ -146,6 +146,7 @@ module.exports = {
       const {
         totalCost, totalActualCost, discount, _id, drawId,
       } = getUserCart;
+      return respondFailure(res, 'Currently not accepting payments', StatusCode.INTERNAL_SERVER_ERROR);
 
       const currentDate = new Date();
       const getDraw = await commonService.findOneById(Draw, drawId);

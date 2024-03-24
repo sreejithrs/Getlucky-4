@@ -15,6 +15,7 @@ const routes = require('./src/routes');
 const i18n = require('./src/config/i18n.config');
 const userController = require('./src/v1/web/controllers/user/user');
 const homeController = require('./src/v1/web/controllers/home/home');
+const { urlNotFound } = require('./src/helpers/response');
 
 // cors options
 const whitelist = ['http://localhost:7000', 'http://localhost:3000', 'http://localhost:5173', 'https://getlucky4.com', 'https://admin.getlucky4.com'];
@@ -83,6 +84,8 @@ expressApp.use(passport.initialize());
 
 // routes
 expressApp.use('/api/v1', routes);
+
+expressApp.use((_req, _res, next) => next(urlNotFound()));
 
 expressApp.use((err, req, res, _next) => {
   const error = err;

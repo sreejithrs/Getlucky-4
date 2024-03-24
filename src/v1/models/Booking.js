@@ -16,10 +16,11 @@ const bookingSchema = new Schema(
     discount: { type: Number, default: 0 },
     taxAmount: { type: Number, default: 0 },
     userPaid: { type: Number, default: 0 },
+    balance: { type: Number },
     date: { type: Date, default: new Date() },
     paymentStatus: { type: Number, default: 2 }, // 2- Pending, 1 - Success, 0 - Failed
     paymentIntent: { type: String, default: '' },
-    type: { type: String, enum: ['ORDER', 'WALLET_ORDER'], default: 'ORDER' },
+    type: { type: String, enum: ['ORDER', 'WALLET_PURCHASE'], default: 'ORDER' },
   },
   {
     timestamps: true,
@@ -29,7 +30,7 @@ const bookingSchema = new Schema(
 bookingSchema.pre('save', async function () {
   const booking = this;
   const uniqueId = crypto.randomUUID();
-  booking.transactionId = generate6DigitId('TS_', uniqueId);
+  booking.transactionId = booking.type === 'WALLET_PURCHASE' ? generate6DigitId('WL_', uniqueId) : generate6DigitId('TS_', uniqueId);
   const currentDate = moment().format('DDMMYYYY');
   booking.invoiceId = `OD${currentDate}${Date.now()}`;
 });

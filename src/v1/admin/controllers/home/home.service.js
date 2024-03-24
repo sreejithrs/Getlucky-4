@@ -69,6 +69,7 @@ module.exports = {
             },
             {
               $match: {
+                type: constValues.paymentCategoryCode.ORDER,
                 paymentStatus: { $eq: constValues.paymentStatus.SUCCESS },
                 convertedDate: {
                   $gte: todayStart,
@@ -110,6 +111,7 @@ module.exports = {
       {
         $match: {
           paymentStatus: { $eq: constValues.paymentStatus.SUCCESS },
+          type: { $eq: constValues.paymentCategoryCode.ORDER },
           date: {
             $gte: startDate,
             $lte: endDate,
