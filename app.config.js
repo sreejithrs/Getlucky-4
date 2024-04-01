@@ -18,7 +18,7 @@ const homeController = require('./src/v1/web/controllers/home/home');
 const { urlNotFound } = require('./src/helpers/response');
 
 // cors options
-const whitelist = ['http://localhost:7000', 'http://localhost:3000', 'http://localhost:5173', 'https://getlucky4.com', 'https://admin.getlucky4.com'];
+const whitelist = ['http://157.175.186.128', 'http://localhost:7000', 'http://localhost:3000', 'http://localhost:5173', 'https://getlucky4.com', 'https://admin.getlucky4.com'];
 const corsOptions = {
   origin: function (origin, callback) {
     if (whitelist.indexOf(origin) !== -1 || !origin) {
