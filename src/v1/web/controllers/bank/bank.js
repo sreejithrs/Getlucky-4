@@ -1,5 +1,5 @@
 // models
-const { User, Bank } = require('../../../models');
+const { User, Bank, WalletHistory } = require('../../../models');
 
 // helpers
 const {
@@ -112,6 +112,30 @@ module.exports = {
         req.__(localeKeys.global.REQUEST_WAS_SUCCESSFUL),
         StatusCode.OK,
         bankData,
+      );
+    } catch (error) {
+      return next(respondError(
+        error,
+        StatusCode.INTERNAL_SERVER_ERROR,
+      ));
+    }
+  },
+
+  deleteABankAccount: async (req, res, next) => {
+    try {
+      const { user, params } = req;
+      const { bankId } = params;
+      const { id } = user;
+
+      const bankData = await commonService.findOneByFields(Bank, { _id: bankId, userId: id });
+      if (!bankData) return respondFailure(res, req.__(localeKeys.user.BANK_NOT_FOUND), StatusCode.NOT_FOUND);
+
+      await commonService.deleteOneByFields(Bank, { _id: bankId });
+      await commonService.delete(WalletHistory, { userId: id, bankId });
+      return respondSuccess(
+        res,
+        req.__(localeKeys.global.DELETED_SUCCESSFULLY),
+        StatusCode.OK,
       );
     } catch (error) {
       return next(respondError(

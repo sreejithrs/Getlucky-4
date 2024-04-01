@@ -95,6 +95,7 @@ module.exports = {
 
       const walletData = await commonService.findOneById(WalletHistory, { _id: updateId, userId: id });
       if (!walletData) return respondFailure(res, req.__(localeKeys.global.NOT_FOUND), StatusCode.NOT_FOUND);
+      if (walletData.paymentStatus !== constValues.paymentStatus.PENDING) return respondFailure(res, req.__(localeKeys.global.UPDATE_FAILED), StatusCode.BAD_REQUEST);
 
       const amountCheck = walletData.amount + wallet;
       if (amountCheck < amount) return respondFailure(res, req.__(localeKeys.user.INSUFFICIENT_BALANCE), StatusCode.PAYMENT_REQUIRED);
@@ -112,6 +113,32 @@ module.exports = {
       return respondSuccess(
         res,
         req.__(localeKeys.global.UPDATED_SUCCESSFULLY),
+        StatusCode.OK,
+      );
+    } catch (error) {
+      return next(respondError(
+        error,
+        StatusCode.INTERNAL_SERVER_ERROR,
+      ));
+    }
+  },
+
+  deleteWalletRequest: async (req, res, next) => {
+    try {
+      const { user, params } = req;
+      const { deleteId } = params;
+      const { id } = user;
+
+      const walletData = await commonService.findOneById(WalletHistory, { _id: deleteId, userId: id });
+      if (!walletData) return respondFailure(res, req.__(localeKeys.global.NOT_FOUND), StatusCode.NOT_FOUND);
+      if (walletData.paymentStatus !== constValues.paymentStatus.PENDING) return respondFailure(res, req.__(localeKeys.global.UPDATE_FAILED), StatusCode.BAD_REQUEST);
+
+      const setAmount = walletData.amount;
+      await commonService.updateById(User, id, { $inc: { wallet: setAmount, amountOnHold: -setAmount } });
+      await commonService.deleteOneByFields(WalletHistory, { _id: deleteId });
+      return respondSuccess(
+        res,
+        req.__(localeKeys.global.DELETED_SUCCESSFULLY),
         StatusCode.OK,
       );
     } catch (error) {

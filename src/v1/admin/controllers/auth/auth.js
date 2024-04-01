@@ -53,7 +53,7 @@ module.exports = {
       const { error } = validateAccount(body);
       if (error) return next(respondError(getMessageFromValidationError(error)));
 
-      const userExist = await commonService.includePasswordByEmail(User, email, constValues.userType.ADMIN);
+      const userExist = await commonService.includePasswordByEmail(User, { email, userType: constValues.userType.ADMIN });
       if (!userExist) return respondFailure(res, req.__(localeKeys.admin.INCORRECT_EMAIL), StatusCode.NOT_FOUND);
 
       const comparePassword = await userExist.comparePassword(password);

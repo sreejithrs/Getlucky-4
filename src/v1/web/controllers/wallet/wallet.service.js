@@ -55,7 +55,7 @@ module.exports = {
                 $project: {
                   _id: 1,
                   date: 1,
-                  amount: 1,
+                  amount: '$userPaid',
                   ticketId: '$orderData.ticketId',
                   balance: 1,
                   paymentStatus: 1,
