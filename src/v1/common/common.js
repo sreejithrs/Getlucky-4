@@ -29,4 +29,21 @@ module.exports = {
     }
   },
 
+  getCountries: async (req, res, next) => {
+    try {
+      const data = await commonService.findAllByFields(Country, {}, { _id: 0, name: 1, iso2: 1 });
+      return respondSuccess(
+        res,
+        req.__(localeKeys.global.REQUEST_WAS_SUCCESSFUL),
+        StatusCode.OK,
+        data,
+      );
+    } catch (error) {
+      return next(respondError(
+        error,
+        StatusCode.INTERNAL_SERVER_ERROR,
+      ));
+    }
+  },
+
 };

@@ -32,7 +32,7 @@
 	"UPDATED_SUCCESSFULLY": "Updated successfully",
 	"DELETED_SUCCESSFULLY": "Deleted successfully",
 	"NOT_FOUND": "Not Found",
-	"UPDATE_FAILED": "Update failed",
+	"UPDATE_FAILED": "Failed to update",
 	"REQUEST_WAS_SUCCESSFUL": "Request Was Successful",
 	"TRY_AGAIN": "Server is busy, Please try again",
 	"PLEASE_UPLOAD_FILE": "Please upload file",
