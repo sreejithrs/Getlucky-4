@@ -20,10 +20,42 @@ module.exports = {
           },
         },
         {
+          $lookup: {
+            from: 'bankaccounts',
+            localField: 'bankId',
+            foreignField: '_id',
+            as: 'bankInfo',
+          },
+        },
+        {
+          $set: {
+            paymentMethod: {
+              $cond: {
+                if: {
+                  $and: [
+                    { $eq: ['$type', 'WALLET_WITHDRAW'] }, // Condition for $type "WALLET_WITHDRAW"
+                    { $eq: ['$paymentMethod', 'bank'] }, // Condition for paymentMethod "bank"
+                  ],
+                },
+                then: { $arrayElemAt: ['$bankInfo.bankName', 0] }, // Assuming "name" is the field in Bank collection you want to display
+                else: {
+                  $cond: {
+                    if: { $eq: ['$paymentMethod', 'westernUnion'] }, // Condition for paymentMethod "westerUnion"
+                    then: 'Western Union',
+                    else: '',
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
           $project: {
             _id: 1,
             date: 1,
+            approvedDate: 1,
             amount: 1,
+            paymentMethod: 1,
             balance: 1,
             paymentStatus: 1,
             type: 1,

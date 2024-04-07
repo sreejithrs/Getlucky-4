@@ -15,7 +15,7 @@ module.exports = {
     try {
       const { skip, limit, status } = query;
       let payStatus = [Number(status)];
-      if (!status || status === '') payStatus = [0, 1, 2];
+      if (!status || status === '') payStatus = [0, 1, 2, 3];
 
       const requests = await WalletHistory.aggregate([
         {
@@ -67,6 +67,7 @@ module.exports = {
             phoneNumber: { $first: '$userData.phoneNumber' },
             amount: { $first: '$amount' },
             date: { $first: '$date' },
+            approvedDate: { $first: { $ifNull: ['$approvedDate', ''] } },
           },
         },
         {

@@ -7,7 +7,7 @@ module.exports = {
     const schema = Joi.object().keys({
       skip: Joi.number().required(),
       limit: Joi.number().required(),
-      status: Joi.number().valid('', 0, 1, 2).optional(),
+      status: Joi.number().valid('', 0, 1, 2, 3).optional(),
     });
     return schema.validate(input);
   },
@@ -15,7 +15,7 @@ module.exports = {
   validateUpdateRequest: (input) => {
     const schema = Joi.object().keys({
       id: Joi.objectId().required(),
-      status: Joi.number().valid(0, 1).optional(),
+      status: Joi.number().valid(0, 1, 3).optional(),
     });
     return schema.validate(input);
   },

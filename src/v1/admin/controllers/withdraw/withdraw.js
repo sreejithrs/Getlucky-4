@@ -45,6 +45,9 @@ module.exports = {
     try {
       const { body } = req;
       const { id, status } = body;
+      let userData = {
+        wallet: 0,
+      };
 
       const { error } = validateUpdateRequest(body);
       if (error) return next(respondError(getMessageFromValidationError(error)));
@@ -52,17 +55,20 @@ module.exports = {
       const withdrawData = await commonService.findOneById(WalletHistory, id);
       if (!withdrawData || withdrawData.type !== constValues.paymentCategoryCode.WALLET_WITHDRAW) return respondFailure(res, req.__(localeKeys.global.NOT_FOUND), StatusCode.NOT_FOUND);
       const { paymentStatus, userId, amount } = withdrawData;
+      if (paymentStatus === constValues.paymentStatus.PENDING && ![0, 1].includes(Number(status))) return respondFailure(res, req.__(localeKeys.global.UPDATE_FAILED), StatusCode.BAD_REQUEST);
 
       const alreadyResponse = {
-        1: localeKeys.user.ALREADY_APPROVED,
         0: localeKeys.user.ALREADY_REJECTED,
+        1: localeKeys.user.ALREADY_APPROVED,
+        3: localeKeys.user.ALREADY_COMPLETED,
       };
-      if (paymentStatus !== constValues.paymentStatus.PENDING) {
+      if (paymentStatus === Number(status)) {
         const responseType = alreadyResponse[withdrawData.paymentStatus];
         return respondFailure(res, req.__(responseType), StatusCode.BAD_REQUEST);
       }
 
       const responseObj = {
+        3: localeKeys.user.REQUEST_COMPLETED,
         1: localeKeys.user.REQUEST_APPROVED,
         0: localeKeys.user.REQUEST_REJECTED,
       };
@@ -73,10 +79,11 @@ module.exports = {
         0: { wallet: amount, amountOnHold: -amount },
       };
       const amountToSet = walletAmountQuery[status];
+      if (amountToSet) userData = await commonService.findOneAndUpdateFields(User, { _id: userId }, { $inc: amountToSet });
 
-      const userData = await commonService.findOneAndUpdateFields(User, { _id: userId }, { $inc: amountToSet });
       const updateWalletQuery = {
         1: {},
+        3: { approvedDate: new Date() },
         0: { balance: userData.wallet, date: new Date() },
       };
       const walletDataToSet = updateWalletQuery[status];

@@ -33,6 +33,8 @@
 	"DELETED_SUCCESSFULLY": "Deleted successfully",
 	"NOT_FOUND": "Not Found",
 	"UPDATE_FAILED": "Failed to update",
+	"ALREADY_COMPLETED": "This transaction is already completed",
+	"REQUEST_COMPLETED": "Transaction completed successfully",
 	"REQUEST_WAS_SUCCESSFUL": "Request Was Successful",
 	"TRY_AGAIN": "Server is busy, Please try again",
 	"PLEASE_UPLOAD_FILE": "Please upload file",
