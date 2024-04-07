@@ -14,7 +14,8 @@ const walletHistorySchema = new Schema(
     amount: { type: Number, default: 0 },
     balance: { type: Number, default: 0 },
     date: { type: Date, default: new Date() },
-    paymentStatus: { type: Number, default: 2 }, // 2- Pending, 1 - Success, 0 - Rejected
+    approvedDate: { type: Date },
+    paymentStatus: { type: Number, default: 2, enum: [0, 1, 2, 3] }, // 3- Approved, 2- Pending, 1 - Success, 0 - Rejected
     type: { type: String, enum: ['WALLET_WITHDRAW', 'WINNING_AMOUNT', 'WALLET_CREDIT'] },
   },
   {
