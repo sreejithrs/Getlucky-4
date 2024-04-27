@@ -136,7 +136,7 @@ module.exports = {
                 branches: [
                   {
                     case: { $eq: ['$paymentStatus', constValues.paymentStatus.SUCCESS] },
-                    then: 'Complete',
+                    then: 'Completed',
                   },
                   {
                     case: { $eq: ['$paymentStatus', constValues.paymentStatus.PENDING] },
