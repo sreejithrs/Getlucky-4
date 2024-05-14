@@ -97,8 +97,8 @@ module.exports = {
       if (!walletData) return respondFailure(res, req.__(localeKeys.global.NOT_FOUND), StatusCode.NOT_FOUND);
       if (walletData.paymentStatus !== constValues.paymentStatus.PENDING) return respondFailure(res, req.__(localeKeys.global.UPDATE_FAILED), StatusCode.BAD_REQUEST);
 
-      const amountCheck = walletData.amount + wallet;
-      if (amountCheck < amount) return respondFailure(res, req.__(localeKeys.user.INSUFFICIENT_BALANCE), StatusCode.PAYMENT_REQUIRED);
+      const availableBalance = wallet + walletData.amount;
+      if (amount > availableBalance) return respondFailure(res, req.__(localeKeys.user.INSUFFICIENT_BALANCE), StatusCode.PAYMENT_REQUIRED);
 
       dataToSet = {
         paymentMethod,
