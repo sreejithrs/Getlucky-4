@@ -70,8 +70,9 @@ module.exports = {
         limit = 0;
       }
 
-      const showsList = await commonService.findAllBySkipLimit(Draw, { isCompleted: constValues.status.ACTIVE }, { date: -1 }, Number(skip), Number(limit), { _id: 0, name: { $concat: ['$drawName', ' ', '$drawNo'] }, link: 1 });
-      return respondSuccess(res, req.__(localeKeys.global.REQUEST_WAS_SUCCESSFUL), StatusCode.OK, showsList);
+      const totalCount = await commonService.count(Draw, { isCompleted: constValues.status.ACTIVE });
+      const videos = await commonService.findAllBySkipLimit(Draw, { isCompleted: constValues.status.ACTIVE }, { date: -1 }, Number(skip), Number(limit), { _id: 0, name: { $concat: ['$drawName', ' ', '$drawNo'] }, link: 1 });
+      return respondSuccess(res, req.__(localeKeys.global.REQUEST_WAS_SUCCESSFUL), StatusCode.OK, { totalCount, videos });
     } catch (error) {
       return next(respondError(
         error,
